@@ -52,7 +52,8 @@ public class VideoModelImpl implements VideoModel {
 		videos.removeIf(v -> !Files.exists(v.getPath()));
 		// Remove non existing categories
 		for(Video video : videos) {
-			video.getCategories().removeIf(sc -> !categories.contains(sc));
+		    if(!video.getCategories().isEmpty())
+			    video.getCategories().removeIf(sc -> !categories.contains(sc));
 		}
 	}
 

@@ -29,7 +29,7 @@ public class Video implements Comparable<Video>, CsvEntity {
 	private int height;
 	@CsvField(index = 5)
 	private long duration;
-	@CsvField(index = 6)
+	@CsvField(index = 6, subElemType = Category.class)
 	private Set<Category> categories;
 	@CsvField(index = 7)
 	private int playTimes;

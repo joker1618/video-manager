@@ -46,4 +46,9 @@ public class Category implements Comparable<Category>, CsvEntity {
     public String getPrimaryKey() {
         return name != null ? name.toLowerCase() : "";
     }
+
+    @Override
+    public String toString() {
+	    return getPrimaryKey();
+    }
 }
