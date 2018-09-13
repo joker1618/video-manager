@@ -1,0 +1,39 @@
+.choosePane {
+    -fx-padding: 20;
+    -fx-spacing: 10;
+    -fx-min-width: 300;
+    -fx-background-color: #c0c0c0;
+    -fx-border-color: #99ccff;
+    -fx-border-width: 0 0 0 1;
+}
+
+
+.boxButtons .button {
+    -fx-min-width: 80;
+    -fx-min-height: 30;
+}
+.boxButtons {
+    -fx-alignment: CENTER;
+    -fx-spacing: 15;
+}
+
+.boxCategories {
+    -fx-spacing: 5;
+    -fx-background-color: #c0c0c0;
+}
+
+.boxCategories .subBox { -fx-spacing: 3; }
+
+.scrollPaneCategories {
+    -fx-border-color: BLACK;
+    -fx-border-width: 1;
+}
+.scrollPaneCategories .viewport {
+    -fx-background-color: #c0c0c0;
+}
+
+.label.boldText { -fx-font-weight: BOLD; }
+
+.check-box:selected {
+    -fx-font-weight: BOLD;
+}
