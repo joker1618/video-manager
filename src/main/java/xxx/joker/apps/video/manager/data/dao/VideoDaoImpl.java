@@ -3,9 +3,8 @@ package xxx.joker.apps.video.manager.data.dao;
 import xxx.joker.apps.video.manager.config.Config;
 import xxx.joker.apps.video.manager.data.beans.Category;
 import xxx.joker.apps.video.manager.data.beans.Video;
-import xxx.joker.libs.javalibs.dao.csv.JkCsvDao;
+import xxx.joker.libs.javalibs.repository.JkRepository;
 
-import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,39 +12,31 @@ import java.util.List;
 
 public class VideoDaoImpl implements VideoDao {
 
-	private final JkCsvDao<Video> daoVideo;
-	private final JkCsvDao<Category> daoCategory;
-
-	public VideoDaoImpl() {
-		this.daoVideo = new JkCsvDao<>(Config.CSV_VIDEOS, Video.class);
-		this.daoCategory = new JkCsvDao<>(Config.CSV_CATEGORIES, Category.class);
-	}
-
 	@Override
-	public List<Category> getCategories() throws IOException {
+	public List<Category> getCategories() throws Exception {
 		try {
-			return daoCategory.readAll();
+			return JkRepository.load(Config.CSV_CATEGORIES);
 		} catch(NoSuchFileException ex) {
 			return new ArrayList<>();
 		}
 	}
 
 	@Override
-	public List<Video> getVideos() throws IOException {
+	public List<Video> getVideos() throws Exception {
 		try {
-			return daoVideo.readAll();
+			return JkRepository.load(Config.CSV_VIDEOS);
 		} catch(NoSuchFileException ex) {
 			return new ArrayList<>();
 		}
 	}
 
 	@Override
-	public void persistCategories(Collection<Category> categories) throws IOException {
-		daoCategory.persist(categories);
+	public void persistCategories(Collection<Category> categories) throws Exception {
+		JkRepository.save(Config.CSV_CATEGORIES, categories);
 	}
 
 	@Override
-	public void persistVideos(Collection<Video> videos) throws IOException {
-		daoVideo.persist(videos);
+	public void persistVideos(Collection<Video> videos) throws Exception {
+        JkRepository.save(Config.CSV_VIDEOS, videos);
 	}
 }

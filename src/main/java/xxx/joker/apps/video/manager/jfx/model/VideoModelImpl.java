@@ -11,7 +11,6 @@ import xxx.joker.apps.video.manager.data.dao.VideoDao;
 import xxx.joker.apps.video.manager.data.dao.VideoDaoImpl;
 import xxx.joker.apps.video.manager.jfx.model.beans.PlayOptions;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Collections;
 
@@ -41,7 +40,7 @@ public class VideoModelImpl implements VideoModel {
 			this.playOptions = new PlayOptions();
 			performInitVideoChecks();
 
-		} catch (IOException e) {
+		} catch (Exception e) {
 			logger.error("Unable to create dao instance: {}", e);
 			throw new RuntimeException(e);
 		}
