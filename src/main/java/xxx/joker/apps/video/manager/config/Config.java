@@ -13,7 +13,7 @@ public class Config {
 	public static final Path CSV_VIDEOS = DATA_FOLDER.resolve("videos.csv");
 
 //	public static final Path VIDEOS_FOLDER = Paths.get("C:\\Users\\f.barbano\\Desktop\\VMtemp\\vman");
-	public static final Path VIDEOS_FOLDER = Paths.get("..", "videos");
+	public static final Path VIDEOS_FOLDER = Paths.get("videos");
 
 	public static final Path CSV_STAGE_POSITIONS = DATA_FOLDER.resolve("MultiStagePositions.csv");
 }
