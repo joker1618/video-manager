@@ -12,8 +12,11 @@ public class Config {
 	public static final Path CSV_CATEGORIES = DATA_FOLDER.resolve("categories.csv");
 	public static final Path CSV_VIDEOS = DATA_FOLDER.resolve("videos.csv");
 
-//	public static final Path VIDEOS_FOLDER = Paths.get("C:\\Users\\f.barbano\\Desktop\\VMtemp\\vman");
-	public static final Path VIDEOS_FOLDER = Paths.get("videos");
+	public static final Path DB_FOLDER = DATA_FOLDER.resolve("db");
+	public static final String DB_NAME = "dbvideomanager";
+
+	public static final Path VIDEOS_FOLDER = BASE_FOLDER.resolve("videos");
+//	public static final Path VIDEOS_FOLDER = Paths.get("videos");
 
 	public static final Path CSV_STAGE_POSITIONS = DATA_FOLDER.resolve("MultiStagePositions.csv");
 }

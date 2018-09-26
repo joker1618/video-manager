@@ -8,7 +8,11 @@
         </encoder>
     </appender>
 
-    <logger name="xxx.joker.apps.video.manager" level="info" additivity="false">
+    <logger name="xxx.joker.apps.video.manager" level="debug" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+
+    <logger name="xxx.joker" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
 

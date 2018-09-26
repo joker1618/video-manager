@@ -1,11 +1,13 @@
 package xxx.joker.apps.video.manager.data.beans;
 
+import xxx.joker.libs.javalibs.datamodel.entity.JkComparableEntity;
+import xxx.joker.libs.javalibs.datamodel.entity.JkEntityField;
 import xxx.joker.libs.javalibs.datetime.JkTime;
 import xxx.joker.libs.javalibs.media.analysis.JkMediaAnalyzer;
 import xxx.joker.libs.javalibs.media.analysis.JkVideoInfo;
 import xxx.joker.libs.javalibs.repository.JkDefaultRepoTable;
-import xxx.joker.libs.javalibs.repository.JkRepoField;
 import xxx.joker.libs.javalibs.utils.JkBytes;
+import xxx.joker.libs.javalibs.utils.JkConverter;
 import xxx.joker.libs.javalibs.utils.JkEncryption;
 import xxx.joker.libs.javalibs.utils.JkFiles;
 
@@ -15,27 +17,27 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class Video extends JkDefaultRepoTable {
+public class Video extends JkComparableEntity {
 
-    @JkRepoField(index = 0)
+    @JkEntityField(index = 0)
     private Path path;
-    @JkRepoField(index = 1)
+    @JkEntityField(index = 1)
     private String md5;
-    @JkRepoField(index = 2)
+    @JkEntityField(index = 2)
     private long size;
-    @JkRepoField(index = 3)
+    @JkEntityField(index = 3)
     private int width;
-    @JkRepoField(index = 4)
+    @JkEntityField(index = 4)
     private int height;
-    @JkRepoField(index = 5)
+    @JkEntityField(index = 5)
     private long duration;
-    @JkRepoField(index = 6, collectionType = Category.class)
+    @JkEntityField(index = 6, collectionType = Category.class)
     private Set<Category> categories;
-    @JkRepoField(index = 7)
+    @JkEntityField(index = 7)
     private int playTimes;
-    @JkRepoField(index = 8)
+    @JkEntityField(index = 8)
     private boolean toBeSplit;
-    @JkRepoField(index = 9)
+    @JkEntityField(index = 9)
     private boolean cataloged;
 
 
@@ -150,7 +152,7 @@ public class Video extends JkDefaultRepoTable {
 
     @Override
     public String getPrimaryKey() {
-        return getMd5();
+        return getPath().toString().toLowerCase();
     }
 
 }

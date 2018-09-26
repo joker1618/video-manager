@@ -14,29 +14,31 @@ public class VideoDaoImpl implements VideoDao {
 
 	@Override
 	public List<Category> getCategories() throws Exception {
-		try {
-			return JkRepository.load(Config.CSV_CATEGORIES);
-		} catch(NoSuchFileException ex) {
-			return new ArrayList<>();
-		}
+//		try {
+//			return JkRepository.load(Config.CSV_CATEGORIES);
+//		} catch(NoSuchFileException ex) {
+//			return new ArrayList<>();
+//		}
+		return null;
 	}
 
 	@Override
 	public List<Video> getVideos() throws Exception {
-		try {
-			return JkRepository.load(Config.CSV_VIDEOS);
-		} catch(NoSuchFileException ex) {
-			return new ArrayList<>();
-		}
+//		try {
+//			return JkRepository.load(Config.CSV_VIDEOS);
+//		} catch(NoSuchFileException ex) {
+//			return new ArrayList<>();
+//		}
+		return null;
 	}
 
 	@Override
 	public void persistCategories(Collection<Category> categories) throws Exception {
-		JkRepository.save(Config.CSV_CATEGORIES, categories);
+//		JkRepository.save(Config.CSV_CATEGORIES, categories);
 	}
 
 	@Override
 	public void persistVideos(Collection<Video> videos) throws Exception {
-        JkRepository.save(Config.CSV_VIDEOS, videos);
+//        JkRepository.save(Config.CSV_VIDEOS, videos);
 	}
 }

@@ -5,39 +5,39 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xxx.joker.apps.video.manager.config.Config;
 import xxx.joker.apps.video.manager.data.beans.Category;
 import xxx.joker.apps.video.manager.data.beans.Video;
-import xxx.joker.apps.video.manager.data.dao.VideoDao;
 import xxx.joker.apps.video.manager.data.dao.VideoDaoImpl;
+import xxx.joker.apps.video.manager.jfx.model.VideoModel;
 import xxx.joker.apps.video.manager.jfx.model.beans.PlayOptions;
+import xxx.joker.libs.javalibs.datamodel.JkDataModel;
+import xxx.joker.libs.javalibs.datamodel.entity.JkEntity;
 
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class VideoModelImpl implements VideoModel {
+public class VideoModelImpl extends JkDataModel implements VideoModel {
 
-	private static final Logger logger = LoggerFactory.getLogger(VideoDaoImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(VideoModelImpl.class);
 
 	private static final VideoModelImpl instance = new VideoModelImpl();
+	private final Map<Class<?>, ObservableList<? extends JkEntity>> dataMap = new HashMap<>();
+	private final ObservableList<Video> selectedVideos = FXCollections.observableArrayList();
+	private final PlayOptions playOptions = new PlayOptions();
 
-	private final VideoDao videoDao;
-	private final ObservableList<Category> categories;
-	private final ObservableList<Video> videos;
-
-	private final ObservableList<Video> selectedVideos;
-
-	private final PlayOptions playOptions;
 
 	private VideoModelImpl() {
+		super(Config.DB_FOLDER, Config.DB_NAME, "xxx.joker.apps.video.manager.data.beans");
 		try {
-			this.videoDao = new VideoDaoImpl();
-			this.categories = FXCollections.observableArrayList(videoDao.getCategories());
-			Collections.sort(categories);
-			this.videos = FXCollections.observableArrayList(videoDao.getVideos());
-			Collections.sort(this.videos);
-			this.selectedVideos = FXCollections.observableArrayList();
-			this.videos.addListener((ListChangeListener<? super Video>) c -> selectedVideos.removeIf(v -> !videos.contains(v)));
-			this.playOptions = new PlayOptions();
+			dataMap.put(Category.class, FXCollections.observableArrayList(super.getData(Category.class)));
+			ObservableList<Video> videos = FXCollections.observableArrayList(super.getData(Video.class));
+			dataMap.put(Video.class, videos);
+			videos.addListener((ListChangeListener<? super Video>) c -> selectedVideos.removeIf(v -> !videos.contains(v)));
 			performInitVideoChecks();
 
 		} catch (Exception e) {
@@ -48,11 +48,11 @@ public class VideoModelImpl implements VideoModel {
 	}
 	private void performInitVideoChecks() {
 		// Remove non existing videos
-		videos.removeIf(v -> !Files.exists(v.getPath()));
+		getVideos().removeIf(v -> !Files.exists(v.getPath()));
 		// Remove non existing categories
-		for(Video video : videos) {
-		    if(!video.getCategories().isEmpty())
-			    video.getCategories().removeIf(sc -> !categories.contains(sc));
+		for(Video video : getVideos()) {
+			if(!video.getCategories().isEmpty())
+				video.getCategories().removeIf(sc -> !getCategories().contains(sc));
 		}
 	}
 
@@ -62,12 +62,12 @@ public class VideoModelImpl implements VideoModel {
 
 	@Override
 	public ObservableList<Category> getCategories() {
-		return categories;
+		return (ObservableList<Category>)dataMap.get(Category.class);
 	}
 
 	@Override
 	public ObservableList<Video> getVideos() {
-		return videos;
+		return (ObservableList<Video>)dataMap.get(Video.class);
 	}
 
 	@Override
@@ -81,12 +81,17 @@ public class VideoModelImpl implements VideoModel {
 	}
 
 	@Override
-	public void persistData() throws Exception {
-		videoDao.persistCategories(categories);
-		logger.info("Categories CSV saved");
+	public void persistData() {
+		List<Category> categories = super.getData(Category.class);
+		categories.clear();
+		categories.addAll(getCategories());
+		Collections.sort(categories);
 
-		videoDao.persistVideos(videos);
-		logger.info("Videos CSV saved");
+		List<Video> videos = super.getData(Video.class);
+		videos.clear();
+		videos.addAll(getVideos());
+		Collections.sort(videos);
 
+		super.commit();
 	}
 }
