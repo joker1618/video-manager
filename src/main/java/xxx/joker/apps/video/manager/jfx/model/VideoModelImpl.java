@@ -16,10 +16,7 @@ import xxx.joker.libs.javalibs.datamodel.entity.JkEntity;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class VideoModelImpl extends JkDataModel implements VideoModel {
 
@@ -82,15 +79,13 @@ public class VideoModelImpl extends JkDataModel implements VideoModel {
 
 	@Override
 	public void persistData() {
-		List<Category> categories = super.getData(Category.class);
+		TreeSet<Category> categories = super.getData(Category.class);
 		categories.clear();
 		categories.addAll(getCategories());
-		Collections.sort(categories);
 
-		List<Video> videos = super.getData(Video.class);
+		TreeSet<Video> videos = super.getData(Video.class);
 		videos.clear();
 		videos.addAll(getVideos());
-		Collections.sort(videos);
 
 		super.commit();
 	}
