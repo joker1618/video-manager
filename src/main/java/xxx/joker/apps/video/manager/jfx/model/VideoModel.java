@@ -1,8 +1,8 @@
 package xxx.joker.apps.video.manager.jfx.model;
 
 import javafx.collections.ObservableList;
-import xxx.joker.apps.video.manager.data.beans.Category;
-import xxx.joker.apps.video.manager.data.beans.Video;
+import xxx.joker.apps.video.manager.model.entity.Category;
+import xxx.joker.apps.video.manager.model.entity.Video;
 import xxx.joker.apps.video.manager.jfx.model.beans.PlayOptions;
 
 public interface VideoModel {

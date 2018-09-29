@@ -1,13 +1,11 @@
-package xxx.joker.apps.video.manager.data.beans;
+package xxx.joker.apps.video.manager.model.entity;
 
 import xxx.joker.libs.javalibs.datamodel.entity.JkComparableEntity;
 import xxx.joker.libs.javalibs.datamodel.entity.JkEntityField;
 import xxx.joker.libs.javalibs.datetime.JkTime;
 import xxx.joker.libs.javalibs.media.analysis.JkMediaAnalyzer;
 import xxx.joker.libs.javalibs.media.analysis.JkVideoInfo;
-import xxx.joker.libs.javalibs.repository.JkDefaultRepoTable;
 import xxx.joker.libs.javalibs.utils.JkBytes;
-import xxx.joker.libs.javalibs.utils.JkConverter;
 import xxx.joker.libs.javalibs.utils.JkEncryption;
 import xxx.joker.libs.javalibs.utils.JkFiles;
 

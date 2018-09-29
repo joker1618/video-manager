@@ -6,16 +6,13 @@ import javafx.collections.ObservableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.config.Config;
-import xxx.joker.apps.video.manager.data.beans.Category;
-import xxx.joker.apps.video.manager.data.beans.Video;
-import xxx.joker.apps.video.manager.data.dao.VideoDaoImpl;
-import xxx.joker.apps.video.manager.jfx.model.VideoModel;
+import xxx.joker.apps.video.manager.model.entity.Category;
+import xxx.joker.apps.video.manager.model.entity.Video;
 import xxx.joker.apps.video.manager.jfx.model.beans.PlayOptions;
 import xxx.joker.libs.javalibs.datamodel.JkDataModel;
 import xxx.joker.libs.javalibs.datamodel.entity.JkEntity;
 
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 
 public class VideoModelImpl extends JkDataModel implements VideoModel {
@@ -29,7 +26,7 @@ public class VideoModelImpl extends JkDataModel implements VideoModel {
 
 
 	private VideoModelImpl() {
-		super(Config.DB_FOLDER, Config.DB_NAME, "xxx.joker.apps.video.manager.data.beans");
+		super(Config.DB_FOLDER, Config.DB_NAME, "xxx.joker.apps.video.manager.model.entity");
 		try {
 			dataMap.put(Category.class, FXCollections.observableArrayList(super.getData(Category.class)));
 			ObservableList<Video> videos = FXCollections.observableArrayList(super.getData(Video.class));

@@ -6,7 +6,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.StageStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xxx.joker.apps.video.manager.data.beans.Video;
+import xxx.joker.apps.video.manager.model.entity.Video;
 import xxx.joker.apps.video.manager.jfx.controller.videoplayer.JkVideoPlayer.PlayerConfig;
 import xxx.joker.libs.javalibs.javafx.JkFxUtil;
 

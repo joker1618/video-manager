@@ -2,8 +2,8 @@ package xxx.joker.apps.video.manager.jfx.model.beans;
 
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.SimpleObjectProperty;
-import xxx.joker.apps.video.manager.data.beans.Category;
-import xxx.joker.apps.video.manager.data.beans.Video;
+import xxx.joker.apps.video.manager.model.entity.Category;
+import xxx.joker.apps.video.manager.model.entity.Video;
 import xxx.joker.apps.video.manager.jfx.model.VideoModelImpl;
 
 import java.util.HashMap;

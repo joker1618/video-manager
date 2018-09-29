@@ -17,7 +17,7 @@ import javafx.scene.media.MediaView;
 import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xxx.joker.apps.video.manager.data.beans.Video;
+import xxx.joker.apps.video.manager.model.entity.Video;
 import xxx.joker.libs.javalibs.datetime.JkTime;
 import xxx.joker.libs.javalibs.utils.JkFiles;
 

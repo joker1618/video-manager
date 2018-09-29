@@ -1,4 +1,4 @@
-package xxx.joker.apps.video.manager.data.beans;
+package xxx.joker.apps.video.manager.model.entity;
 
 import xxx.joker.libs.javalibs.datamodel.entity.JkComparableEntity;
 import xxx.joker.libs.javalibs.datamodel.entity.JkEntityField;
