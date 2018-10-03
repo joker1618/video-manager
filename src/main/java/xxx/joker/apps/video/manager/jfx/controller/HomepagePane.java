@@ -329,14 +329,15 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 				Video v = Video.createFromPath(p);
 				Path orig = v.getPath();
 				Path outPath = Config.VIDEOS_FOLDER.resolve(p.getFileName().toString().replace(";", ""));
-				if(!model.getVideos().contains(v)) {
+				boolean addVideo = JkStreams.filter(model.getVideos(), vi -> vi.getMd5().equals(v.getMd5())).isEmpty();
+				if(addVideo) {
 					if(!JkFiles.areEquals(orig, outPath)) {
 						Path vpath = JkFiles.moveFileSafely(orig, outPath);
 						v.setPath(vpath);
 					}
 					model.getVideos().add(v);
 					logger.info("New video added {}", p);
-				} else if(!JkFiles.areEquals(orig, outPath)){
+				} else {
 					logger.info("Skip add for video {}: already exists", p);
 				}
 			} catch (Exception e) {

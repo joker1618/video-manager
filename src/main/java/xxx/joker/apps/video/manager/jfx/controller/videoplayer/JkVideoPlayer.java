@@ -317,17 +317,19 @@ public class JkVideoPlayer extends BorderPane {
 		Platform.runLater(
 			() -> {
 				MediaPlayer mediaPlayer = mediaView.getMediaPlayer();
-				Duration currentTime = mediaPlayer.getCurrentTime();
-				JkTime of = JkTime.of((long) currentTime.toMillis());
-				lblActualTime.setText(of.toStringElapsed(false, ChronoUnit.MINUTES));
-				if (!sliderTime.isValueChanging()) {
-					Duration divided = currentTime.divide(video.getDuration().getTotalMillis());
-					sliderTime.setValue(divided.toMillis() * 100.0);
-				}
-				if (!sliderVolume.isValueChanging()) {
-					sliderVolume.setValue((int) Math.round(mediaPlayer.getVolume() * 100.0));
-					lblVolume.setText(((int) sliderVolume.getValue()) + "%");
-				}
+				if(mediaPlayer != null) {
+                    Duration currentTime = mediaPlayer.getCurrentTime();
+                    JkTime of = JkTime.of((long) currentTime.toMillis());
+                    lblActualTime.setText(of.toStringElapsed(false, ChronoUnit.MINUTES));
+                    if (!sliderTime.isValueChanging()) {
+                        Duration divided = currentTime.divide(video.getDuration().getTotalMillis());
+                        sliderTime.setValue(divided.toMillis() * 100.0);
+                    }
+                    if (!sliderVolume.isValueChanging()) {
+                        sliderVolume.setValue((int) Math.round(mediaPlayer.getVolume() * 100.0));
+                        lblVolume.setText(((int) sliderVolume.getValue()) + "%");
+                    }
+                }
 			}
 		);
 	}
