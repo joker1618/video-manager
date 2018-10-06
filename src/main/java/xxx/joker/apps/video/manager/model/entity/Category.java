@@ -2,9 +2,6 @@ package xxx.joker.apps.video.manager.model.entity;
 
 import xxx.joker.libs.javalibs.datamodel.entity.JkComparableEntity;
 import xxx.joker.libs.javalibs.datamodel.entity.JkEntityField;
-import xxx.joker.libs.javalibs.datamodel.entity.JkComparableEntity;
-import xxx.joker.libs.javalibs.repository.JkDefaultRepoTable;
-import xxx.joker.libs.javalibs.repository.JkRepoField;
 
 public class Category extends JkComparableEntity {
 
