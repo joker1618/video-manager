@@ -14,26 +14,10 @@ public class TempTest {
 
 	@Test
 	public void test() throws IOException {
+        String str = "^^fe^$de$$";
+        display(str.replace("^", "").replace("$", ""));
+        display(str.replaceAll("^\\^", "").replaceAll("\\$$", ""));
 
-
-		List<String> slist = new ArrayList<>();
-		slist.add("fede");
-		ObservableList<String> obslist = FXCollections.observableArrayList(slist);
-		display(slist.toString());
-		display(obslist.toString());
-		display("");
-
-		slist.add("ciccio");
-		slist.set(0,  "can");
-		display(slist.toString());
-		display(obslist.toString());
-		display("");
-
-		obslist.add("natale");
-		obslist.set(0, "giorgio");
-		display(slist.toString());
-		display(obslist.toString());
-		display("");
 	}
 
 }

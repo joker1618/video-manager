@@ -14,6 +14,6 @@ public interface VideoModel {
 
 	PlayOptions getPlayOptions();
 
-	void persistData() throws Exception;
+	void persistData();
 
 }

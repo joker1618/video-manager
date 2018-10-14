@@ -86,6 +86,12 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 		boxCaption.getStyleClass().add("boxCaption");
 		box.getChildren().add(boxCaption);
 
+		TextField nameFilter = new TextField("");
+		sortFilter.videoNameProperty().bind(nameFilter.textProperty());
+        HBox boxNameFilter = new HBox(nameFilter);
+        boxNameFilter.getStyleClass().addAll("centeredBox");
+        box.getChildren().add(boxNameFilter);
+
 		GridPane gridPane = new GridPane();
 		gridPane.getStyleClass().add("gridPane");
 		addRadioLine(gridPane, "Cataloged:", 0, sortFilter::setCataloged);
@@ -262,6 +268,10 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 	private Pane createRightPane() {
 		VBox box = new VBox();
 		box.getStyleClass().add("rightBox");
+
+		Button btnCommit = new Button("COMMIT DATA");
+        btnCommit.setOnAction(e -> model.persistData());
+		box.getChildren().add(btnCommit);
 
 		Button btnManageCategories = new Button("MANAGE CATEGORIES");
 		btnManageCategories.setOnAction(e -> SceneManager.displayCategoryManagement());
