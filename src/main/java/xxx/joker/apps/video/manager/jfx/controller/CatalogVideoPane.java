@@ -75,7 +75,7 @@ public class CatalogVideoPane extends BorderPane implements CloseablePane {
 
 		// delete button
 		Button btnExit = new Button("EXIT");
-		btnExit.setOnAction(e -> SceneManager.displayHomepage());
+		btnExit.setOnAction(e -> { showingPlayer.getValue().closePlayer(); SceneManager.displayHomepage(); });
 		HBox hb = new HBox(btnExit);
 		hb.getStyleClass().add("boxButtons");
 		container.getChildren().add(hb);
@@ -163,18 +163,18 @@ public class CatalogVideoPane extends BorderPane implements CloseablePane {
 	}
 
 	private void actionDeleteVideo() {
-		Video showingVideo = showingPlayer.getValue().getVideo();
+		Video videoToDel = showingPlayer.getValue().getVideo();
 
 		try {
 			showingPlayer.getValue().closePlayer();
-			Files.delete(showingVideo.getPath());
-			model.getVideos().remove(showingVideo);
-			videoList.remove(showingVideo);
+			videoList.remove(videoToDel);
+			model.getVideos().remove(videoToDel);
 			updateShowingVideo(videoIndex.getValue(), false);
-			logger.info("Deleted video {}", showingVideo.getPath());
+			Files.delete(videoToDel.getPath());
+			logger.info("Deleted video {}", videoToDel.getPath());
 
 		} catch(Exception ex) {
-			logger.error("Unable to delete video {}\n{}", showingVideo.getPath(), ex);
+			logger.error("Unable to delete video {}\n{}", videoToDel.getPath(), ex);
 		}
 	}
 
@@ -199,12 +199,12 @@ public class CatalogVideoPane extends BorderPane implements CloseablePane {
 		if(idx < 0)	return;
 
 		JkVideoPlayer videoPlayer = showingPlayer.getValue();
-		if(setCataloged && videoPlayer != null) {
+		if(videoPlayer != null) {
 			videoPlayer.closePlayer();
-			videoPlayer.getVideo().setCataloged(true);
-		}
+            videoPlayer.getVideo().setCataloged(setCataloged);
+        }
 
-		if(idx < videoList.size()) {
+        if(idx < videoList.size()) {
 			Video v = videoList.get(idx);
 			logger.info("Set new video {}", v);
 			videoIndex.setValue(idx);

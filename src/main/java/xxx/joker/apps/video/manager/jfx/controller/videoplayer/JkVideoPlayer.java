@@ -78,7 +78,7 @@ public class JkVideoPlayer extends BorderPane {
 	public void closePlayer() {
 		MediaPlayer mediaPlayer = mediaView.getMediaPlayer();
 		if(mediaPlayer.getStatus() != MediaPlayer.Status.DISPOSED) {
-			logger.trace("close video player");
+			logger.debug("close video player");
 			mediaPlayer.stop();
 			mediaPlayer.dispose();
 		}
