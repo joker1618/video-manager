@@ -26,6 +26,8 @@ public class JkVideoBuilder {
 		playerConfig = new PlayerConfig();
 
 		// Set defaults
+        playerConfig.setVisibleHeading(true);
+        playerConfig.setVisiblePlayerBar(true);
 		playerConfig.setMiddleMouseClickEvent(
 			e -> JkFxUtil.getStage(e).setFullScreen(!JkFxUtil.getStage(e).isFullScreen())
 		);
