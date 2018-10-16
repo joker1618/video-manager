@@ -5,6 +5,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD})
+
 /**
  * ALLOWED FIELD TYPES:
  *
@@ -37,14 +40,11 @@ import java.lang.annotation.Target;
  *
  */
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD})
-
 public @interface JkEntityField {
 
     int index();
 
     // Must be specified only for Collections (List, Set)
-    Class<?> collectionType() default Object.class;
+	Class<?> collectionType() default Object.class;
 
 }
