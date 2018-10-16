@@ -83,11 +83,15 @@ public class SortFilter extends ObjectBinding<Predicate<Video>> {
 		}
 		for(Category cat : categoryMap.keySet()) {
 			Boolean value = categoryMap.get(cat).getValue();
-			if(value != null && value != video.getCategories().contains(cat)) {
-				return false;
+//			if(value != null && value != video.getCategories().contains(cat)) {
+//				return false;
+//			}
+			if(value != null && value == video.getCategories().contains(cat)) {
+				return true;
 			}
 		}
-		return true;
+
+		return categoryMap.isEmpty();
 	}
 
 	@Override
