@@ -1,5 +1,7 @@
 package xxx.joker.apps.video.manager.repository.entity;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.time.LocalDateTime;
 
 public interface JkEntity extends Comparable<JkEntity> {
@@ -11,5 +13,11 @@ public interface JkEntity extends Comparable<JkEntity> {
 
     LocalDateTime getInsertTstamp();
     void setInsertTstamp(LocalDateTime insertTstamp);
+
+    @Override
+    default int compareTo(JkEntity o) {
+        return StringUtils.compare(getPrimaryKey(), o.getPrimaryKey());
+    }
+
 
 }

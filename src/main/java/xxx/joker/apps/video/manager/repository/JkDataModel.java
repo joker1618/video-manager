@@ -34,8 +34,8 @@ public abstract class JkDataModel {
         return entityManager.parseData(elinesMap);
     }
 
-    protected void commit() {
-        Map<Class<?>, EntityLines> map = entityManager.formatData(dataMap);
+    public void commit() {
+        Map<Class<?>, EntityLines> map = entityManager.formatEntities(dataMap);
         persistenceManager.saveData(map);
         logger.info("Committed model data");
     }

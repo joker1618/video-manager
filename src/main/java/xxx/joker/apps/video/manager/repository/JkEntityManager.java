@@ -125,13 +125,13 @@ class JkEntityManager {
         try {
             for (Class<?> fromClazz : dataMap.keySet()) {
                 List<ForeignKey> fkOfClass = JkStreams.map(dataMap.get(fromClazz).getForeignKeyLines(), ForeignKey::new);
-                Map<Long, List<ForeignKey>> fromPKmap = JkStreams.toMap(fkOfClass, ForeignKey::getFromID);
-                for (Long fromPK : fromPKmap.keySet()) {
+                Map<String, List<ForeignKey>> fromPKmap = JkStreams.toMap(fkOfClass, ForeignKey::getFromPK);
+                for (String fromPK : fromPKmap.keySet()) {
                     JkEntity fromObj = entityMap.get(fromClazz).get(fromPK);
                     Map<Integer, List<ForeignKey>> fkIndexMap = JkStreams.toMap(fromPKmap.get(fromPK), ForeignKey::getFromFieldIndex);
                     for (int index : fkIndexMap.keySet()) {
                         List<ForeignKey> fklist = fkIndexMap.get(index);
-                        List<JkEntity> elist = JkStreams.mapAndFilter(fklist, fk -> entityMap.get(fk.getDepClazz()).get(fk.getDepID()), Objects::nonNull);
+                        List<JkEntity> elist = JkStreams.mapAndFilter(fklist, fk -> entityMap.get(fk.getTargetClazz()).get(fk.getTargetPK()), Objects::nonNull);
                         if(!elist.isEmpty()) {
                             AnnField annField = entityFields.get(fromClazz).get(index);
                             Object objValue = annField.isCollection() ? listToSafeObject(elist, annField) : elist.get(0);
@@ -151,15 +151,6 @@ class JkEntityManager {
         } catch(IllegalAccessException ex) {
             throw new JkRuntimeException(ex, "Error parsing data");
         }
-    }
-
-    public Map<Class<?>, EntityLines> formatData(Map<Class<?>, TreeSet<JkEntity>> dataMap) {
-        Map<Class<?>, EntityLines> toRet = new HashMap<>();
-        for (Class<?> clazz : dataMap.keySet()) {
-            EntityLines el = formatEntityClass(clazz, dataMap.get(clazz));
-            toRet.put(clazz, el);
-        }
-        return toRet;
     }
 
     public Map<Class<?>, Set<JkEntity>> getDependencies(JkEntity obj) {
@@ -283,35 +274,32 @@ class JkEntityManager {
         return o;
     }
 
-    private EntityLines formatEntityClass(Class<?> clazz, TreeSet<JkEntity> dataSet) {
+    public Map<Class<?>, EntityLines> formatEntities(Map<Class<?>, TreeSet<JkEntity>> dataMap) {
         try {
-            EntityLines toRet = new EntityLines(clazz);
-            Map<Integer, AnnField> clazzFields = entityFields.get(clazz);
-            int numFields = clazzFields.keySet().stream().mapToInt(i->i).max().orElse(-1) + 1;
+            Map<Class<?>, EntityLines> toRet = new HashMap<>();
+            List<ForeignKey> allDeps = new ArrayList<>();
+            Map<Class<?>, Map<String, Long>> mapPkId = new HashMap<>();
 
-            for(JkEntity elem : dataSet) {
-                Long elemID = retrieveID(elem);
-                List<String> row = Stream.generate(() -> "").limit(numFields).collect(Collectors.toList());
-                for (Integer index : clazzFields.keySet()) {
-                    AnnField annField = clazzFields.get(index);
-                    Object value = annField.getValue(elem);
-                    Pair<String, Set<Long>> formattedPair = formatValue(value, annField);
-                    row.set(index, formattedPair.getKey());
-                    Set<Long> depIDs = formattedPair.getValue();
-                    if(!depIDs.isEmpty()) {
-                        Class<?> fkClazz = annField.isCollection() ? annField.getCollectionType() : annField.getFieldType();
-                        List<String> fkLines = depIDs.stream()
-                                .sorted()
-                                .map(fkID -> new ForeignKey(clazz, elemID, index, fkClazz, fkID))
-                                .map(ForeignKey::toRepoLine)
-                                .collect(Collectors.toList());
-                        toRet.getForeignKeyLines().addAll(fkLines);
-                    }
+            for (Class<?> clazz : dataMap.keySet()) {
+                toRet.put(clazz, new EntityLines(clazz));
+                mapPkId.put(clazz, new HashMap<>());
+                for (JkEntity elem : dataMap.get(clazz)) {
+                    setIDIfMissing(elem);
+                    mapPkId.get(clazz).put(elem.getPrimaryKey(), elem.getEntityID());
+                    Pair<String, List<ForeignKey>> pair = formatEntity(elem);
+                    toRet.get(clazz).getEntityLines().add(pair.getKey());
+                    allDeps.addAll(pair.getValue());
                 }
+            }
 
-
-                String entityLine = strf("%s%s%s%s%s", elemID, DATA_FIELD_SEP, elem.getInsertTstamp(), DATA_FIELD_SEP, JkStreams.join(row, DATA_FIELD_SEP));
-                toRet.getEntityLines().add(entityLine);
+            for(ForeignKey fk : allDeps) {
+                Long depID = mapPkId.get(fk.getTargetClazz()).get(fk.getTargetPK());
+                if(depID != null) {
+                    Long fromID = mapPkId.get(fk.getFromClazz()).get(fk.getFromPK());
+                    fk.setFromID(fromID);
+                    fk.setTargetID(depID);
+                    toRet.get(fk.getFromClazz()).getForeignKeyLines().add(fk.toRepoLine());
+                }
             }
 
             return toRet;
@@ -321,15 +309,49 @@ class JkEntityManager {
         }
     }
 
-    private Long retrieveID(Object o) {
-        JkEntity entity = (JkEntity) o;
-        Long entityID = entity.getEntityID();
-        if(entityID == null) {
-            entityID = nextEntityID();
-            entity.setEntityID(entityID);
+    private Pair<String, List<ForeignKey>> formatEntity(JkEntity entity) {
+        try {
+            Map<Integer, AnnField> clazzFields = entityFields.get(entity.getClass());
+            List<ForeignKey> depList = new ArrayList<>();
+
+            TreeMap<Integer, String> rowMap = new TreeMap<>();
+            for (Integer index : clazzFields.keySet()) {
+                AnnField annField = clazzFields.get(index);
+                Object value = annField.getValue(entity);
+                Pair<String, Set<String>> formattedPair = formatValue(value, annField);
+                rowMap.put(index, formattedPair.getKey());
+                Set<String> elemFKs = formattedPair.getValue();
+                if(!elemFKs.isEmpty()) {
+                    Class<?> fkClazz = annField.isCollection() ? annField.getCollectionType() : annField.getFieldType();
+                    depList.addAll(JkStreams.map(elemFKs, fk -> new ForeignKey(entity.getClass(), entity.getPrimaryKey(), index, fkClazz, fk)));
+                }
+            }
+
+            List<String> row = new ArrayList<>();
+            row.add(entity.getEntityID()+"");
+            row.add(entity.getInsertTstamp().format(DateTimeFormatter.ISO_DATE_TIME));
+
+            int counter = 0;
+            for(Integer col : rowMap.keySet()) {
+                while (counter < col) {
+                    row.add("");
+                    counter++;
+                }
+                row.add(rowMap.get(counter++));
+            }
+
+            return Pair.of(JkStreams.join(row, DATA_FIELD_SEP), depList);
+
+        } catch (Exception e) {
+            throw new JkRuntimeException(e);
+        }
+    }
+
+    private void setIDIfMissing(JkEntity entity) {
+        if(entity.getEntityID() == null) {
+            entity.setEntityID(nextEntityID());
             entity.setInsertTstamp(LocalDateTime.now());
         }
-        return entityID;
     }
 
     private long nextEntityID() {
@@ -337,12 +359,12 @@ class JkEntityManager {
         return 0;
     }
 
-    // return <toStringOfEntity, Set<foreignKeys(ID)>> (key or value)
-    private Pair<String, Set<Long>> formatValue(Object value, AnnField annField) {
+    // return <toStringOfEntity, Set<foreignKeys(PK)>> (key or value)
+    private Pair<String, Set<String>> formatValue(Object value, AnnField annField) {
         Class<?> fclazz = annField.getFieldType();
 
         String strValue = "";
-        Set<Long> foreignKeys = new HashSet<>();
+        Set<String> foreignKeys = new HashSet<>();
 
         if(value != null) {
             if (annField.isCollection()) {
@@ -350,8 +372,8 @@ class JkEntityManager {
                 List<?> list = annField.isSet() ? JkConverter.toArrayList((Set<?>) value) : (List<?>) value;
                 if (!list.isEmpty()) {
                     if (JkReflection.isOfType(elemClazz, JkEntity.class)) {
-                        List<Long> fkList = JkStreams.map(list, this::retrieveID);
-                        foreignKeys.addAll(fkList);
+                        List<String> fklist = JkStreams.map(list, el -> ((JkEntity) el).getPrimaryKey());
+                        foreignKeys.addAll(fklist);
                     } else {
                         strValue = JkStreams.join(list, DATA_LIST_SEP, e -> toStringSingleValue(e, elemClazz));
                     }
@@ -359,7 +381,7 @@ class JkEntityManager {
 
             } else {
                 if (JkReflection.isOfType(fclazz, JkEntity.class)) {
-                    foreignKeys.add(retrieveID(value));
+                    foreignKeys.add(((JkEntity) value).getPrimaryKey());
                 } else {
                     strValue = toStringSingleValue(value, fclazz);
                 }
@@ -470,17 +492,19 @@ class JkEntityManager {
 
     private class ForeignKey {
         private Class<?> fromClazz;
-        private long fromID;
+        private Long fromID;
+        private String fromPK;
         private int fromFieldIndex;
-        private Class<?> depClazz;
-        private long depID;
+        private Class<?> targetClazz;
+        private Long targetID;
+        private String targetPK;
 
-        public ForeignKey(Class<?> fromClazz, long fromID, int fromFieldIndex, Class<?> depClazz, long depID) {
+        public ForeignKey(Class<?> fromClazz, String fromPK, int fromFieldIndex, Class<?> targetClazz, String targetPK) {
             this.fromClazz = fromClazz;
-            this.fromID = fromID;
+            this.fromPK = fromPK;
             this.fromFieldIndex = fromFieldIndex;
-            this.depClazz = depClazz;
-            this.depID = depID;
+            this.targetClazz = targetClazz;
+            this.targetPK = targetPK;
         }
 
         public ForeignKey(String repoLine) {
@@ -489,8 +513,8 @@ class JkEntityManager {
                 fromClazz = Class.forName(arr[0]);
                 fromID = JkConverter.stringToLong(arr[1]);
                 fromFieldIndex = JkConverter.stringToInteger(arr[2]);
-                depClazz = Class.forName(arr[3]);
-                depID = JkConverter.stringToLong(arr[4]);
+                targetClazz = Class.forName(arr[3]);
+                targetID = JkConverter.stringToLong(arr[4]);
             } catch (Exception e) {
                 throw new JkRuntimeException(e);
             }
@@ -499,13 +523,13 @@ class JkEntityManager {
         public String toRepoLine() {
             return fromClazz.getName()
                     + DATA_FIELD_SEP
-                    + fromID
+                    + fromPK
                     + DATA_FIELD_SEP
                     + fromFieldIndex
                     + DATA_FIELD_SEP
-                    + depClazz.getName()
+                    + targetClazz.getName()
                     + DATA_FIELD_SEP
-                    + depID;
+                    + targetPK;
         }
 
         public Class<?> getFromClazz() {
@@ -516,12 +540,28 @@ class JkEntityManager {
             this.fromClazz = fromClazz;
         }
 
-        public long getFromID() {
+        public String getFromPK() {
+            return fromPK;
+        }
+
+        public Long getFromID() {
             return fromID;
         }
 
-        public void setFromID(long fromID) {
+        public void setFromID(Long fromID) {
             this.fromID = fromID;
+        }
+
+        public Long getTargetID() {
+            return targetID;
+        }
+
+        public void setTargetID(Long targetID) {
+            this.targetID = targetID;
+        }
+
+        public void setFromPK(String fromPK) {
+            this.fromPK = fromPK;
         }
 
         public int getFromFieldIndex() {
@@ -532,20 +572,20 @@ class JkEntityManager {
             this.fromFieldIndex = fromFieldIndex;
         }
 
-        public Class<?> getDepClazz() {
-            return depClazz;
+        public Class<?> getTargetClazz() {
+            return targetClazz;
         }
 
-        public void setDepClazz(Class<?> depClazz) {
-            this.depClazz = depClazz;
+        public void setTargetClazz(Class<?> targetClazz) {
+            this.targetClazz = targetClazz;
         }
 
-        public long getDepID() {
-            return depID;
+        public String getTargetPK() {
+            return targetPK;
         }
 
-        public void setDepID(long depID) {
-            this.depID = depID;
+        public void setTargetPK(String targetPK) {
+            this.targetPK = targetPK;
         }
     }
 

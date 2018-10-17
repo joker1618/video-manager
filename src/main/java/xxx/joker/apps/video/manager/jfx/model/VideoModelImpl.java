@@ -85,5 +85,6 @@ public class VideoModelImpl extends JkDataModel implements VideoModel {
 		videos.addAll(getVideos());
 
 		super.commit();
+		super.commitNewFormat();
 	}
 }
