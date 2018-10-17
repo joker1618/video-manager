@@ -113,27 +113,27 @@ class JkEntityManager {
     }
     
     public Map<Class<?>, TreeSet<JkEntity>> parseData(Map<Class<?>, EntityLines> dataMap) {
-        Map<Class<?>, Map<String, JkEntity>> entityMap = new HashMap<>();
+        Map<Class<?>, Map<Long, JkEntity>> entityMap = new HashMap<>();
 
         // Parse entities
         for(Class<?> clazz : dataMap.keySet()) {
             List<JkEntity> elist = JkStreams.map(dataMap.get(clazz).getEntityLines(), l -> parseLine(clazz, l));
-            entityMap.put(clazz, JkStreams.toMapSingle(elist, JkEntity::getPrimaryKey));
+            entityMap.put(clazz, JkStreams.toMapSingle(elist, JkEntity::getEntityID));
         }
 
         // Resolve dependencies and fill entities objects
         try {
             for (Class<?> fromClazz : dataMap.keySet()) {
                 List<ForeignKey> fkOfClass = JkStreams.map(dataMap.get(fromClazz).getForeignKeyLines(), ForeignKey::new);
-                Map<String, List<ForeignKey>> fromPKmap = JkStreams.toMap(fkOfClass, ForeignKey::getFromPK);
-                for (String fromPK : fromPKmap.keySet()) {
-                    JkEntity fromObj = entityMap.get(fromClazz).get(fromPK);
-                    Map<Integer, List<ForeignKey>> fkIndexMap = JkStreams.toMap(fromPKmap.get(fromPK), ForeignKey::getFromFieldIndex);
-                    for (int index : fkIndexMap.keySet()) {
-                        List<ForeignKey> fklist = fkIndexMap.get(index);
-                        List<JkEntity> elist = JkStreams.mapAndFilter(fklist, fk -> entityMap.get(fk.getTargetClazz()).get(fk.getTargetPK()), Objects::nonNull);
+                Map<Long, List<ForeignKey>> fromPKmap = JkStreams.toMap(fkOfClass, ForeignKey::getFromID);
+                for (Long fromID : fromPKmap.keySet()) {
+                    JkEntity fromObj = entityMap.get(fromClazz).get(fromID);
+                    Map<Integer, List<ForeignKey>> fkIndexMap = JkStreams.toMap(fromPKmap.get(fromID), ForeignKey::getFromFieldIndex);
+                    for (int fieldIndex : fkIndexMap.keySet()) {
+                        List<ForeignKey> fklist = fkIndexMap.get(fieldIndex);
+                        List<JkEntity> elist = JkStreams.mapAndFilter(fklist, fk -> entityMap.get(fk.getTargetClazz()).get(fk.getTargetID()), Objects::nonNull);
                         if(!elist.isEmpty()) {
-                            AnnField annField = entityFields.get(fromClazz).get(index);
+                            AnnField annField = entityFields.get(fromClazz).get(fieldIndex);
                             Object objValue = annField.isCollection() ? listToSafeObject(elist, annField) : elist.get(0);
                             annField.setValue(fromObj, objValue);
                         }
