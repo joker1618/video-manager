@@ -1,7 +1,7 @@
 package xxx.joker.apps.video.manager.model.entity;
 
-import xxx.joker.libs.javalibs.datamodel.entity.JkComparableEntity;
-import xxx.joker.libs.javalibs.datamodel.entity.JkEntityField;
+import org.apache.commons.lang3.StringUtils;
+import xxx.joker.libs.javalibs.repository.entity.*;
 import xxx.joker.libs.javalibs.datetime.JkTime;
 import xxx.joker.libs.javalibs.media.analysis.JkMediaAnalyzer;
 import xxx.joker.libs.javalibs.media.analysis.JkVideoInfo;
@@ -15,10 +15,12 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class Video extends JkComparableEntity {
+public class Video extends JkDefaultEntity {
 
     @JkEntityField(index = 0)
     private Path path;
+    @JkEntityField(index = 10)
+    private String videoTitle;
     @JkEntityField(index = 1)
     private String md5;
     @JkEntityField(index = 2)
@@ -47,6 +49,7 @@ public class Video extends JkComparableEntity {
         Video video = new Video();
         video.md5 = JkEncryption.getMD5(JkBytes.getBytes(path));
         video.path = path;
+        video.videoTitle = JkFiles.getFileName(path);
         video.size = Files.size(path);
         JkVideoInfo vinfo = JkMediaAnalyzer.analyzeVideo(path);
         video.width = vinfo.getWidth();
@@ -62,6 +65,14 @@ public class Video extends JkComparableEntity {
 
     public void setPath(Path path) {
         this.path = path;
+    }
+
+    public String getVideoTitle() {
+        return videoTitle;
+    }
+
+    public void setVideoTitle(String videoTitle) {
+        this.videoTitle = videoTitle;
     }
 
     public String getURL() {

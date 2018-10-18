@@ -175,10 +175,10 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 		tview = new TableView<>();
 		tview.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-		TableColumn<Video,Path> tcolPath = new TableColumn<>("VIDEO NAME");
-		JkFxUtil.setTableCellFactory(tcolPath, "path", JkFiles::getFileName, Paths::get);
-		tcolPath.setPrefWidth(350);
-		tview.getColumns().add(tcolPath);
+		TableColumn<Video,String> tcolTitle = new TableColumn<>("VIDEO NAME");
+		JkFxUtil.setTableCellFactoryString(tcolTitle, "videoTitle");
+		tcolTitle.setPrefWidth(350);
+		tview.getColumns().add(tcolTitle);
 
 		TableColumn<Video,Long> tcolSize = new TableColumn<>("SIZE");
 		JkFxUtil.setTableCellFactory(tcolSize, "size", l -> JkOutputFmt.humanSize(l, JkSizeUnit.MB, false), Long::new);

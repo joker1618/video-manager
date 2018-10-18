@@ -6,14 +6,17 @@ import javafx.collections.ObservableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.config.Config;
+import xxx.joker.apps.video.manager.jfx.model.beans.PlayOptions;
 import xxx.joker.apps.video.manager.model.entity.Category;
 import xxx.joker.apps.video.manager.model.entity.Video;
-import xxx.joker.apps.video.manager.jfx.model.beans.PlayOptions;
-import xxx.joker.libs.javalibs.datamodel.JkDataModel;
-import xxx.joker.libs.javalibs.datamodel.entity.JkEntity;
+import xxx.joker.libs.javalibs.repository.JkDataModel;
+import xxx.joker.libs.javalibs.repository.entity.JkEntity;
+import xxx.joker.libs.javalibs.utils.JkFiles;
 
 import java.nio.file.Files;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeSet;
 
 public class VideoModelImpl extends JkDataModel implements VideoModel {
 
@@ -85,6 +88,5 @@ public class VideoModelImpl extends JkDataModel implements VideoModel {
 		videos.addAll(getVideos());
 
 		super.commit();
-		super.commitNewFormat();
 	}
 }
