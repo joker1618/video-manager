@@ -1,7 +1,7 @@
 package xxx.joker.apps.video.manager.model.entity;
 
 
-import xxx.joker.libs.javalibs.repository.entity.*;
+import xxx.joker.libs.core.repository.entity.*;
 
 public class Category extends JkDefaultEntity {
 

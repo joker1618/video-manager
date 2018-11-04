@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.model.entity.Video;
 import xxx.joker.apps.video.manager.jfx.controller.videoplayer.JkVideoPlayer.PlayerConfig;
-import xxx.joker.libs.javalibs.javafx.JkFxUtil;
+import xxx.joker.libs.javafx.JkFxUtil;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;

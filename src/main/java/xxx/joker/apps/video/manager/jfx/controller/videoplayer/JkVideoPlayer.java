@@ -18,8 +18,8 @@ import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.model.entity.Video;
-import xxx.joker.libs.javalibs.datetime.JkTime;
-import xxx.joker.libs.javalibs.utils.JkFiles;
+import xxx.joker.libs.core.datetime.JkTime;
+import xxx.joker.libs.core.utils.JkFiles;
 
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;

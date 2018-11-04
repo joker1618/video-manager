@@ -1,13 +1,13 @@
 package xxx.joker.apps.video.manager.model.entity;
 
 import org.apache.commons.lang3.StringUtils;
-import xxx.joker.libs.javalibs.repository.entity.*;
-import xxx.joker.libs.javalibs.datetime.JkTime;
-import xxx.joker.libs.javalibs.media.analysis.JkMediaAnalyzer;
-import xxx.joker.libs.javalibs.media.analysis.JkVideoInfo;
-import xxx.joker.libs.javalibs.utils.JkBytes;
-import xxx.joker.libs.javalibs.utils.JkEncryption;
-import xxx.joker.libs.javalibs.utils.JkFiles;
+import xxx.joker.libs.core.repository.entity.*;
+import xxx.joker.libs.core.datetime.JkTime;
+import xxx.joker.libs.media.JkMediaAnalyzer;
+import xxx.joker.libs.media.JkVideoInfo;
+import xxx.joker.libs.core.utils.JkBytes;
+import xxx.joker.libs.core.utils.JkEncryption;
+import xxx.joker.libs.core.utils.JkFiles;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

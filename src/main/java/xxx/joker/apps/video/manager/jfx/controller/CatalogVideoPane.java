@@ -21,15 +21,15 @@ import xxx.joker.apps.video.manager.jfx.controller.videoplayer.JkVideoPlayer;
 import xxx.joker.apps.video.manager.jfx.model.VideoModel;
 import xxx.joker.apps.video.manager.jfx.model.VideoModelImpl;
 import xxx.joker.apps.video.manager.main.SceneManager;
-import xxx.joker.libs.javalibs.javafx.JkFxUtil;
-import xxx.joker.libs.javalibs.utils.JkStreams;
+import xxx.joker.libs.javafx.JkFxUtil;
+import xxx.joker.libs.core.utils.JkStreams;
 
 import java.nio.file.Files;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
-import static xxx.joker.libs.javalibs.utils.JkStrings.strf;
+import static xxx.joker.libs.core.utils.JkStrings.strf;
 
 public class CatalogVideoPane extends BorderPane implements CloseablePane {
 

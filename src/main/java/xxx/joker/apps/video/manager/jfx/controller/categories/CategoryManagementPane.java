@@ -13,11 +13,11 @@ import xxx.joker.apps.video.manager.model.entity.Video;
 import xxx.joker.apps.video.manager.jfx.controller.CloseablePane;
 import xxx.joker.apps.video.manager.jfx.model.VideoModel;
 import xxx.joker.apps.video.manager.jfx.model.VideoModelImpl;
-import xxx.joker.libs.javalibs.datetime.JkTime;
-import xxx.joker.libs.javalibs.format.JkOutputFmt;
-import xxx.joker.libs.javalibs.format.JkSizeUnit;
-import xxx.joker.libs.javalibs.javafx.JkFxUtil;
-import xxx.joker.libs.javalibs.utils.JkStreams;
+import xxx.joker.libs.core.datetime.JkTime;
+import xxx.joker.libs.core.format.JkOutputFmt;
+import xxx.joker.libs.core.format.JkSizeUnit;
+import xxx.joker.libs.javafx.JkFxUtil;
+import xxx.joker.libs.core.utils.JkStreams;
 
 import java.util.ArrayList;
 import java.util.List;

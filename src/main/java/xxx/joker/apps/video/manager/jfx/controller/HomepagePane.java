@@ -21,12 +21,12 @@ import xxx.joker.apps.video.manager.jfx.model.VideoModelImpl;
 import xxx.joker.apps.video.manager.jfx.model.beans.SortFilter;
 import xxx.joker.apps.video.manager.main.SceneManager;
 import xxx.joker.apps.video.manager.provider.StagePosProvider;
-import xxx.joker.libs.javalibs.datetime.JkTime;
-import xxx.joker.libs.javalibs.format.JkOutputFmt;
-import xxx.joker.libs.javalibs.format.JkSizeUnit;
-import xxx.joker.libs.javalibs.javafx.JkFxUtil;
-import xxx.joker.libs.javalibs.utils.JkFiles;
-import xxx.joker.libs.javalibs.utils.JkStreams;
+import xxx.joker.libs.core.datetime.JkTime;
+import xxx.joker.libs.core.format.JkOutputFmt;
+import xxx.joker.libs.core.format.JkSizeUnit;
+import xxx.joker.libs.javafx.JkFxUtil;
+import xxx.joker.libs.core.utils.JkFiles;
+import xxx.joker.libs.core.utils.JkStreams;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -38,7 +38,7 @@ import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static xxx.joker.libs.javalibs.utils.JkStrings.strf;
+import static xxx.joker.libs.core.utils.JkStrings.strf;
 
 public class HomepagePane extends BorderPane implements CloseablePane {
 

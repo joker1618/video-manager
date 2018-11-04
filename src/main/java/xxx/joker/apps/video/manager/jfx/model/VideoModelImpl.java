@@ -9,9 +9,9 @@ import xxx.joker.apps.video.manager.config.Config;
 import xxx.joker.apps.video.manager.jfx.model.beans.PlayOptions;
 import xxx.joker.apps.video.manager.model.entity.Category;
 import xxx.joker.apps.video.manager.model.entity.Video;
-import xxx.joker.libs.javalibs.repository.JkDataModel;
-import xxx.joker.libs.javalibs.repository.entity.JkEntity;
-import xxx.joker.libs.javalibs.utils.JkFiles;
+import xxx.joker.libs.core.repository.JkDataModel;
+import xxx.joker.libs.core.repository.entity.JkEntity;
+import xxx.joker.libs.core.utils.JkFiles;
 
 import java.nio.file.Files;
 import java.util.HashMap;
