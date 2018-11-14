@@ -5,12 +5,10 @@ import java.nio.file.Paths;
 
 public class Config {
 
-	public static final Path BASE_FOLDER = Paths.get("files");
+	public static final Path HOME = Paths.get(System.getProperty("user.home"));
+	public static final Path BASE_FOLDER = HOME.resolve("IdeaProjects\\APPS\\video-manager\\files");
 
 	public static final Path DATA_FOLDER = BASE_FOLDER.resolve("data");
-
-	public static final Path CSV_CATEGORIES = DATA_FOLDER.resolve("categories.csv");
-	public static final Path CSV_VIDEOS = DATA_FOLDER.resolve("videos.csv");
 
 	public static final Path DB_FOLDER = BASE_FOLDER.resolve("db");
 	public static final String DB_NAME = "dbvideomanager";
