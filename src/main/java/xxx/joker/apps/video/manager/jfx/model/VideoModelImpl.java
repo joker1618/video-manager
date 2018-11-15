@@ -16,6 +16,7 @@ import xxx.joker.libs.core.utils.JkFiles;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 public class VideoModelImpl extends JkDataModel implements VideoModel {
@@ -79,11 +80,11 @@ public class VideoModelImpl extends JkDataModel implements VideoModel {
 
 	@Override
 	public void persistData() {
-		TreeSet<Category> categories = super.getData(Category.class);
+		Set<Category> categories = super.getData(Category.class);
 		categories.clear();
 		categories.addAll(getCategories());
 
-		TreeSet<Video> videos = super.getData(Video.class);
+		Set<Video> videos = super.getData(Video.class);
 		videos.clear();
 		videos.addAll(getVideos());
 
