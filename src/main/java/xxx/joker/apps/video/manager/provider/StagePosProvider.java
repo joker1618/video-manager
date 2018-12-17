@@ -4,7 +4,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.config.Config;
+import xxx.joker.libs.core.exception.JkRuntimeException;
 import xxx.joker.libs.core.utils.JkConverter;
+import xxx.joker.libs.core.utils.JkFiles;
 import xxx.joker.libs.core.utils.JkStreams;
 import xxx.joker.libs.core.utils.JkStrings;
 
@@ -23,7 +25,7 @@ public class StagePosProvider {
 
 	private static List<VideoStagesPosition> readPosFile() {
 		try {
-			List<String> lines = Files.readAllLines(Config.CSV_STAGE_POSITIONS);
+			List<String> lines = JkFiles.readLines(StagePosProvider.class.getResourceAsStream(Config.CSV_STAGE_FILEPATH));
 
 			String strLines = JkStreams.join(lines, "\n", l -> l.replaceAll("#.*", ""));
 			List<String> elems = JkStrings.splitFieldsList(strLines, "}", true, false);
@@ -46,8 +48,8 @@ public class StagePosProvider {
 
 			return videoStagesPositionList;
 
-		} catch (IOException ex) {
-			logger.error("Unable to read video stage positions from file {}", Config.CSV_STAGE_POSITIONS);
+		} catch (JkRuntimeException ex) {
+			logger.error("Unable to read video stage positions from file {}", Config.CSV_STAGE_FILEPATH);
 			return null;
 		}
 	}
