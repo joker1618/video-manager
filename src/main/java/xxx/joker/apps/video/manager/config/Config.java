@@ -14,5 +14,5 @@ public class Config {
 	public static final Path VIDEOS_FOLDER = BASE_FOLDER.resolve("videos");
 //	public static final Path VIDEOS_FOLDER = Paths.get("videos");
 
-	public static final String CSV_STAGE_FILEPATH = "/data/MultiStagePositions.csv";
+	public static final String CSV_STAGE_FILEPATH = "/data/MultiStagePositions.txt";
 }
