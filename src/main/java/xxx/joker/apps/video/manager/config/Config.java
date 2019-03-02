@@ -6,7 +6,7 @@ import java.nio.file.Paths;
 public class Config {
 
 	public static final Path HOME = Paths.get(System.getProperty("user.home"));
-	public static final Path BASE_FOLDER = HOME.resolve(".tempApps/video_manager");
+	public static final Path BASE_FOLDER = HOME.resolve(".appsFolder/video_manager");
 
 	public static final Path DB_FOLDER = BASE_FOLDER.resolve("db");
 	public static final String DB_NAME = "dbvideomanager";
