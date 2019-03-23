@@ -59,8 +59,8 @@
 }
 
 .mediaBarPane .label {
-    -fx-min-width: 32.0;
-    -fx-max-width: 32.0;
+    -fx-min-width: 40.0;
+    -fx-max-width: 40.0;
 }
 
 /* sliders style */

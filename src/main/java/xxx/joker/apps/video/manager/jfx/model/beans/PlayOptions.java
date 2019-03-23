@@ -8,6 +8,10 @@ public class PlayOptions {
 
 	}
 
+	public PlayOptions(String multiVideoName) {
+		this.multiVideoName = multiVideoName;
+	}
+
 	public String getMultiVideoName() {
 		return multiVideoName;
 	}

@@ -5,6 +5,7 @@ import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.StringUtils;
 import org.scenicview.ScenicView;
 import xxx.joker.apps.video.manager.jfx.model.VideoModelImpl;
 
@@ -54,7 +55,7 @@ public class OnlyLauncherL extends Application {
 	}
 
 	public static void main(String[] args) {
-		scenicView = args.length > 0 && args[0].equals("-scenicView");
+		scenicView = args.length > 0 && StringUtils.equalsAnyIgnoreCase(args[0], "-sv", "-scenicView");
 //		scenicView = true;
 		launch(args);
 	}
