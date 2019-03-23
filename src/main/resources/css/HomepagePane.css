@@ -11,7 +11,7 @@
     -fx-spacing: 10;
     -fx-padding: 10;
     -fx-background-color: -container-bg-color;
-    -fx-pref-width: 250;
+    -fx-pref-width: 350;
 }
 .leftBox .boxCaption {
     -fx-alignment: CENTER;
@@ -49,6 +49,7 @@
     -fx-background-color: -container-bg-color;
     -fx-border-width: 0 1 0 1;
     -fx-border-color: -container-border-color;
+    -fx-max-width: 1500;
 }
 .centerBox .table-view {
     -fx-border-color: -container-border-color-2;
@@ -66,13 +67,14 @@
     -fx-spacing: 15;
     -fx-padding: 15;
     -fx-background-color: -container-bg-color;
+    -fx-pref-width: 250;
 }
 .rightBox .button {
     -fx-font-weight: BOLD;
-    -fx-min-width: 100;
-    -fx-max-width: 100;
-    -fx-min-height: 50;
-    -fx-max-height: 50;
+    -fx-min-width: 130;
+    -fx-max-width: 130;
+    -fx-min-height: 60;
+    -fx-max-height: 60;
     -fx-wrap-text: true;
     -fx-text-alignment: CENTER;
 }

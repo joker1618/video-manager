@@ -14,6 +14,7 @@ import javafx.scene.layout.VBox;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xxx.joker.apps.video.manager.main.OnlyLauncherL;
 import xxx.joker.apps.video.manager.model.entity.Category;
 import xxx.joker.apps.video.manager.model.entity.Video;
 import xxx.joker.apps.video.manager.jfx.controller.videoplayer.JkVideoBuilder;
@@ -25,9 +26,7 @@ import xxx.joker.libs.javafx.JkFxUtil;
 import xxx.joker.libs.core.utils.JkStreams;
 
 import java.nio.file.Files;
-import java.util.Map;
-import java.util.Optional;
-import java.util.TreeMap;
+import java.util.*;
 
 import static xxx.joker.libs.core.utils.JkStrings.strf;
 
@@ -199,13 +198,18 @@ public class CatalogVideoPane extends BorderPane implements CloseablePane {
 		if(idx < 0)	return;
 
 		JkVideoPlayer videoPlayer = showingPlayer.getValue();
+		List<Category> toCopy = new ArrayList<>();
 		if(videoPlayer != null) {
 			videoPlayer.closePlayer();
             videoPlayer.getVideo().setCataloged(setCataloged);
+			if(OnlyLauncherL.copyCategories) {
+				toCopy.addAll(videoPlayer.getVideo().getCategories());
+			}
         }
 
         if(idx < videoList.size()) {
 			Video v = videoList.get(idx);
+			v.addCategories(toCopy);
 			logger.info("Set new video {}", v);
 			videoIndex.setValue(idx);
 			JkVideoPlayer vp = videoPlayerBuilder.createPane(v);

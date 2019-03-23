@@ -3,3 +3,4 @@ target
 *.iml
 files/db
 files/videos
+scenicView.properties

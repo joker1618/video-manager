@@ -173,6 +173,7 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 
 	private Pane createCenterPane() {
 		tview = new TableView<>();
+		tview.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		tview.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
 		TableColumn<Video,String> tcolTitle = new TableColumn<>("VIDEO NAME");
@@ -223,6 +224,8 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 		tview.getSelectionModel().getSelectedItems().addListener((ListChangeListener<? super Video>) c -> selEvent.accept(c));
 		tableItems.addListener((ListChangeListener<? super Video>) c -> selEvent.accept(c));
 		vbox.getChildren().add(createDetailsSection());
+
+		tcolTitle.minWidthProperty().bind(tview.widthProperty().multiply(0.6));
 
 		model.getSelectedVideos().setAll(tableItems);
 
