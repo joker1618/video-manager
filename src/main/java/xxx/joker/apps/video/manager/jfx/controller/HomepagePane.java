@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -271,9 +272,35 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 		VBox box = new VBox();
 		box.getStyleClass().add("rightBox");
 
-		Button btnCommit = new Button("COMMIT DATA");
-        btnCommit.setOnAction(e -> model.persistData());
-		box.getChildren().add(btnCommit);
+		Button btnMark = new Button("MARK VIDEOS");
+		Category cat = new Category("MARKED");
+		List<Category> res = JkStreams.filter(model.getCategories(), cat::equals);
+		if(res.isEmpty()) {
+			model.getCategories().add(cat);
+		} else {
+			cat = res.get(0);
+		}
+		Category markCat = cat;
+		btnMark.setOnAction(e -> {
+			AtomicBoolean b = new AtomicBoolean(false);
+			model.getSelectedVideos().forEach(v -> {
+				boolean added = v.getCategories().add(markCat);
+				b.set(b.get() || added);
+			});
+			if(b.get())		fillGridPaneCategFilter();
+		});
+		box.getChildren().add(btnMark);
+
+		Button btnUnmark = new Button("UNMARK VIDEOS");
+		btnUnmark.setOnAction(e -> {
+			AtomicBoolean b = new AtomicBoolean(false);
+			model.getSelectedVideos().forEach(v -> {
+				boolean removed = v.getCategories().remove(markCat);
+				b.set(b.get() || removed);
+			});
+			if(b.get())		fillGridPaneCategFilter();
+		});
+		box.getChildren().add(btnUnmark);
 
 		Button btnManageCategories = new Button("MANAGE CATEGORIES");
 		btnManageCategories.setOnAction(e -> SceneManager.displayCategoryManagement());
