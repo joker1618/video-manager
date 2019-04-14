@@ -12,7 +12,6 @@ import xxx.joker.apps.video.manager.jfx.model.VideoModelImpl;
 public class OnlyLauncherL extends Application {
 
 	private static boolean scenicView;
-	public static boolean copyCategories;
 
 	private Stage primaryStage;
 
@@ -57,7 +56,6 @@ public class OnlyLauncherL extends Application {
 
 	public static void main(String[] args) {
 		scenicView = args.length > 0 && StringUtils.equalsAnyIgnoreCase(args[0], "-sv", "-scenicView");
-		copyCategories = args.length > 1 && StringUtils.equalsAnyIgnoreCase(args[1], "-cc");
 //		scenicView = true;
 		launch(args);
 	}

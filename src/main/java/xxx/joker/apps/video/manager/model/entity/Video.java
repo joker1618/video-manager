@@ -35,10 +35,6 @@ public class Video extends JkDefaultEntity {
     private Set<Category> categories;
     @JkEntityField(index = 7)
     private int playTimes;
-    @JkEntityField(index = 8)
-    private boolean toBeSplit;
-    @JkEntityField(index = 9)
-    private boolean cataloged;
 
 
     public Video() {
@@ -88,15 +84,7 @@ public class Video extends JkDefaultEntity {
     }
 
     public boolean isCataloged() {
-        return cataloged;
-    }
-
-    public void setCataloged(boolean cataloged) {
-        this.cataloged = cataloged;
-    }
-
-    public void setToBeSplit(boolean toBeSplit) {
-        this.toBeSplit = toBeSplit;
+        return !categories.isEmpty();
     }
 
     public int getWidth() {
@@ -121,10 +109,6 @@ public class Video extends JkDefaultEntity {
 
     public int getPlayTimes() {
         return playTimes;
-    }
-
-    public boolean isToBeSplit() {
-        return toBeSplit;
     }
 
     public void setWidth(int width) {

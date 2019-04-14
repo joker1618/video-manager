@@ -95,7 +95,6 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 		GridPane gridPane = new GridPane();
 		gridPane.getStyleClass().add("gridPane");
 		addRadioLine(gridPane, "Cataloged:", 0, sortFilter::setCataloged);
-		addRadioLine(gridPane, "To split:", 1, sortFilter::setToBeSplit);
 		box.getChildren().add(gridPane);
 
 		gridPaneFilterCat = new GridPane();

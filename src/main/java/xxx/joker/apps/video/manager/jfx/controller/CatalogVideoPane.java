@@ -3,6 +3,7 @@ package xxx.joker.apps.video.manager.jfx.controller;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -14,7 +15,6 @@ import javafx.scene.layout.VBox;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xxx.joker.apps.video.manager.main.OnlyLauncherL;
 import xxx.joker.apps.video.manager.model.entity.Category;
 import xxx.joker.apps.video.manager.model.entity.Video;
 import xxx.joker.apps.video.manager.jfx.controller.videoplayer.JkVideoBuilder;
@@ -40,10 +40,12 @@ public class CatalogVideoPane extends BorderPane implements CloseablePane {
 	private SimpleIntegerProperty videoIndex;
 	private SimpleObjectProperty<JkVideoPlayer> showingPlayer;
 
-	private CheckBox checkBoxSplit;
 	private HBox categoryBox;
 	private Map<Category,CheckBox> checkBoxCategoryMap;
 	private final JkVideoBuilder videoPlayerBuilder;
+
+	private Set<Category> defaultCategories = new HashSet<>();
+	private SimpleStringProperty defaultCatsAction = new SimpleStringProperty();
 
 	public CatalogVideoPane() {
 		this.videoList = FXCollections.observableArrayList(model.getSelectedVideos());
@@ -101,16 +103,6 @@ public class CatalogVideoPane extends BorderPane implements CloseablePane {
 		btnBox.getStyleClass().add("boxButtons");
 		container.getChildren().add(btnBox);
 
-		// split check box
-		checkBoxSplit = new CheckBox("SPLIT VIDEO");
-		checkBoxSplit.setOnAction(e -> {
-			if(videoList != null) {
-				Video actualVideo = showingPlayer.getValue().getVideo();
-				actualVideo.setToBeSplit(checkBoxSplit.isSelected());
-			}
-		});
-		container.getChildren().add(checkBoxSplit);
-
 		// Categories check box
 		categoryBox = new HBox(new VBox(), new VBox());
 		categoryBox.getChildren().forEach(ch -> ch.getStyleClass().add("subBox"));
@@ -128,6 +120,33 @@ public class CatalogVideoPane extends BorderPane implements CloseablePane {
 		btnBox = new HBox(btnAddCategory);
 		btnBox.getStyleClass().add("boxButtons");
 		container.getChildren().add(btnBox);
+
+		// Box defaults
+		VBox defaultBox = new VBox();
+		defaultBox.getStyleClass().addAll("boxButtons", "simpleBorder");
+		container.getChildren().add(defaultBox);
+
+		defaultBox.getChildren().add(new Label("DEFAULT CATEGORIES"));
+
+		ComboBox<String> comboDefault = new ComboBox<>();
+		comboDefault.getItems().setAll("NO", "ADD", "SET");
+		comboDefault.getSelectionModel().select(0);
+		defaultCatsAction.bind(comboDefault.getSelectionModel().selectedItemProperty());
+		defaultBox.getChildren().add(comboDefault);
+
+		Button btnSetDefault = new Button("SET DEFAULT CATEGORIES");
+		defaultBox.getChildren().add(btnSetDefault);
+
+		VBox labelBox = new VBox();
+		labelBox.getStyleClass().add("boxButtons");
+		defaultBox.getChildren().add(labelBox);
+
+		btnSetDefault.setOnAction(e -> {
+			defaultCategories.clear();
+			defaultCategories.addAll(showingPlayer.get().getVideo().getCategories());
+			labelBox.getChildren().clear();
+			defaultCategories.forEach(cat -> labelBox.getChildren().add(new Label(cat.getName())));
+		});
 
 		return container;
 	}
@@ -155,7 +174,6 @@ public class CatalogVideoPane extends BorderPane implements CloseablePane {
 
 	private void updateCheckableFields() {
 		Video video = showingPlayer.getValue().getVideo();
-		checkBoxSplit.setSelected(video.isToBeSplit());
 		for(Category cat : model.getCategories()) {
 			checkBoxCategoryMap.get(cat).setSelected(video.getCategories().contains(cat));
 		}
@@ -198,18 +216,18 @@ public class CatalogVideoPane extends BorderPane implements CloseablePane {
 		if(idx < 0)	return;
 
 		JkVideoPlayer videoPlayer = showingPlayer.getValue();
-		List<Category> toCopy = new ArrayList<>();
 		if(videoPlayer != null) {
 			videoPlayer.closePlayer();
-            videoPlayer.getVideo().setCataloged(setCataloged);
-			if(OnlyLauncherL.copyCategories) {
-				toCopy.addAll(videoPlayer.getVideo().getCategories());
-			}
         }
 
         if(idx < videoList.size()) {
 			Video v = videoList.get(idx);
-			v.addCategories(toCopy);
+			if(!"NO".equals(defaultCatsAction.get())) {
+				if("SET".equals(defaultCatsAction.get())) {
+					v.getCategories().clear();
+				}
+				v.getCategories().addAll(defaultCategories);
+			}
 			logger.info("Set new video {}", v);
 			videoIndex.setValue(idx);
 			JkVideoPlayer vp = videoPlayerBuilder.createPane(v);

@@ -19,12 +19,11 @@ public class SortFilter extends ObjectBinding<Predicate<Video>> {
 	private SimpleStringProperty videoName = new SimpleStringProperty("");
 	private SimpleObjectProperty<Boolean> trigger = new SimpleObjectProperty<>(false);
 	private SimpleObjectProperty<Boolean> cataloged = new SimpleObjectProperty<>();
-	private SimpleObjectProperty<Boolean> toBeSplit = new SimpleObjectProperty<>();
 
 	private Map<Category,SimpleObjectProperty<Boolean>> categoryMap = new HashMap<>();
 
 	public SortFilter() {
-		bind(videoName, cataloged, toBeSplit, trigger);
+		bind(videoName, cataloged, trigger);
 		VideoModelImpl.getInstance().getCategories().forEach(cat -> setCategory(cat, null));
 	}
 
@@ -34,10 +33,6 @@ public class SortFilter extends ObjectBinding<Predicate<Video>> {
 
 	public void setCataloged(Boolean cataloged) {
 		this.cataloged.setValue(cataloged);
-	}
-
-	public void setToBeSplit(Boolean toBeSplit) {
-		this.toBeSplit.setValue(toBeSplit);
 	}
 
 	public void setCategory(Category category, Boolean radioValue) {
@@ -76,9 +71,6 @@ public class SortFilter extends ObjectBinding<Predicate<Video>> {
         }
 
         if(cataloged.getValue() != null && cataloged.get() != video.isCataloged()) {
-			return false;
-		}
-		if(toBeSplit.getValue() != null && toBeSplit.get() != video.isToBeSplit()) {
 			return false;
 		}
 		for(Category cat : categoryMap.keySet()) {

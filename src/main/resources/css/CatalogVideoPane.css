@@ -24,7 +24,7 @@
 
 .boxCategories .subBox { -fx-spacing: 3; }
 
-.scrollPaneCategories {
+.scrollPaneCategories, .simpleBorder {
     -fx-border-color: BLACK;
     -fx-border-width: 1;
 }
