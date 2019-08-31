@@ -24,6 +24,7 @@ public class OnlyLauncherL extends Application {
 		// Create scene
 		Group root = new Group();
 		Scene scene = new Scene(root);
+		scene.getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
 
 		SceneManager.setScene(scene);
 		SceneManager.displayHomepage();

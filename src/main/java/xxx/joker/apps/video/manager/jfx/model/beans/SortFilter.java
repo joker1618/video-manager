@@ -11,6 +11,7 @@ import xxx.joker.libs.core.utils.JkFiles;
 import xxx.joker.libs.core.utils.JkStrings;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -49,28 +50,35 @@ public class SortFilter extends ObjectBinding<Predicate<Video>> {
     }
 
     public boolean testFilter(Video video) {
-        String nameFilter = videoName.get();
-        boolean begin = nameFilter.startsWith("^");
-        boolean end = nameFilter.startsWith("$");
-        nameFilter = nameFilter.replaceAll("^\\^", "").replaceAll("\\$$", "").trim();
-        if(!nameFilter.isEmpty()) {
-            String vtitle = JkFiles.getFileName(video.getPath());
-            if (!begin && !end) {
-                // only contains
-                if (!StringUtils.containsIgnoreCase(vtitle, nameFilter)) {
-                    return false;
-                }
-            } else {
-                if (begin && !StringUtils.startsWithIgnoreCase(vtitle, nameFilter)) {
-                    return false;
-                }
-                if (end && !StringUtils.endsWithIgnoreCase(vtitle, nameFilter)) {
-                    return false;
-                }
-            }
-        }
+		List<String> filters = JkStrings.splitFieldsList(videoName.get(), "|");
+		boolean resNameFilter = false;
+		for (int i = 0; i < filters.size() && !resNameFilter; i++) {
+			String filter = filters.get(i);
+			boolean begin = filter.startsWith("^");
+			boolean end = filter.endsWith("$");
+			filter = filter.replaceAll("^\\^", "").replaceAll("\\$$", "").trim();
+			if(!filter.isEmpty()) {
+				String vtitle = JkFiles.getFileName(video.getPath());
+				if (!begin && !end) {
+					// only contains
+					if (StringUtils.containsIgnoreCase(vtitle, filter)) {
+						resNameFilter = true;
+					}
+				} else {
+					if (begin && StringUtils.startsWithIgnoreCase(vtitle, filter)) {
+						resNameFilter = true;
+					}
+					if (end && StringUtils.endsWithIgnoreCase(vtitle, filter)) {
+						resNameFilter = true;
+					}
+				}
+			}
+		}
+		if(StringUtils.isNotBlank(videoName.get()) && !resNameFilter) {
+			return false;
+		}
 
-        if(cataloged.getValue() != null && cataloged.get() != video.isCataloged()) {
+		if(cataloged.getValue() != null && ((cataloged.get() && video.getCategories().isEmpty()) || (!cataloged.get() && !video.getCategories().isEmpty()))) {
 			return false;
 		}
 		for(Category cat : categoryMap.keySet()) {

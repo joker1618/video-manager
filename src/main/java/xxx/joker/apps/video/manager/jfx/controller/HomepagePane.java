@@ -31,6 +31,8 @@ import xxx.joker.libs.core.utils.JkStreams;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -60,8 +62,6 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 	public void refreshView() {
 		fillGridPaneCategFilter();
 		tview.refresh();
-		sortFilter.triggerSort();
-
 	}
 
 	private void createPane() {
@@ -95,7 +95,7 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 
 		GridPane gridPane = new GridPane();
 		gridPane.getStyleClass().add("gridPane");
-		addRadioLine(gridPane, "Cataloged:", 0, sortFilter::setCataloged);
+		addRadioLine(gridPane, "Cataloged:", 0, sortFilter::setCataloged, false);
 		box.getChildren().add(gridPane);
 
 		gridPaneFilterCat = new GridPane();
@@ -115,14 +115,18 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 	}
 	private void fillGridPaneCategFilter() {
 		gridPaneFilterCat.getChildren().clear();
-		List<Category> existingCatList = model.getVideos().stream()
-										   .flatMap(v -> v.getCategories().stream())
-										   .sorted()
-										   .distinct()
-										   .collect(Collectors.toList());
-		for(int i = 0; i < existingCatList.size(); i++) {
-			Category cat = existingCatList.get(i);
-			addRadioLine(gridPaneFilterCat, cat, i);
+//		List<Category> existingCatList = model.getVideos().stream()
+//										   .flatMap(v -> v.getCategories().stream())
+//										   .sorted()
+//										   .distinct()
+//										   .collect(Collectors.toList());
+//		for(int i = 0; i < existingCatList.size(); i++) {
+//			Category cat = existingCatList.get(i);
+//			addRadioLine(gridPaneFilterCat, cat, i);
+//		}
+		ObservableList<Category> cats = model.getCategories();
+		for(int i = 0; i < cats.size(); i++) {
+			addRadioLine(gridPaneFilterCat, cats.get(i), i);
 		}
 	}
 
@@ -133,9 +137,9 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 	}
 
 	private void addRadioLine(GridPane gridPane, Category cat, int row) {
-		addRadioLine(gridPane, cat.getName(), row, b -> sortFilter.setCategory(cat, b));
+		addRadioLine(gridPane, cat.getName(), row, b -> sortFilter.setCategory(cat, b), true);
 	}
-	private void addRadioLine(GridPane gridPane, String catName, int row, Consumer<Boolean> setter) {
+	private void addRadioLine(GridPane gridPane, String catName, int row, Consumer<Boolean> setter, boolean showDelBtn) {
 		Pair<Label, ToggleGroup> pair = toggleMap.get(catName);
 
 		if(pair == null) {
@@ -165,46 +169,68 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 			toggleMap.put(catName, pair);
 		}
 
-		gridPane.add(pair.getKey(), 0, row);
-		for(int i = 0; i < pair.getValue().getToggles().size(); i++) {
-			gridPane.add(((RadioButton)pair.getValue().getToggles().get(i)), i+1, row);
+		int col = 0;
+		gridPane.add(pair.getKey(), col++, row);
+		for (Toggle toggle : pair.getValue().getToggles()) {
+			gridPane.add((RadioButton)toggle, col++, row);
+		}
+		if(showDelBtn) {
+			Button btnDelCat = new Button("delete");
+			gridPane.add(btnDelCat, col++, row);
+			btnDelCat.setOnAction(e -> {
+				model.getVideos().forEach(v -> v.getCategories().removeIf(c -> c.getName().equals(catName)));
+				model.getCategories().removeIf(c -> c.getName().equals(catName));
+				model.persistData();
+				refreshView();
+			});
 		}
 	}
 
 	private Pane createCenterPane() {
 		tview = new TableView<>();
-		tview.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+		tview.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
 		tview.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
 		TableColumn<Video,String> tcolTitle = new TableColumn<>("VIDEO NAME");
 		JkFxUtil.setTableCellFactoryString(tcolTitle, "videoTitle");
-		tcolTitle.setPrefWidth(350);
 		tview.getColumns().add(tcolTitle);
+		tcolTitle.setMinWidth(500);
 
 		TableColumn<Video,Long> tcolSize = new TableColumn<>("SIZE");
 		JkFxUtil.setTableCellFactory(tcolSize, "size", l -> JkOutputFmt.humanSize(l, JkSizeUnit.MB, false), Long::new);
 		tview.getColumns().add(tcolSize);
+		tcolSize.setMinWidth(100);
 
 		TableColumn<Video,Integer> tcolWidth = new TableColumn<>("W");
 		JkFxUtil.setTableCellFactoryInteger(tcolWidth, "width");
 		tview.getColumns().add(tcolWidth);
+		tcolWidth.setMinWidth(80);
 
 		TableColumn<Video,Integer> tcolHeight = new TableColumn<>("H");
 		JkFxUtil.setTableCellFactoryInteger(tcolHeight, "height");
 		tview.getColumns().add(tcolHeight);
+		tcolHeight.setMinWidth(80);
 
 		TableColumn<Video,Double> tcolResolution = new TableColumn<>("W/H");
 		tcolResolution.setCellValueFactory(param -> new SimpleObjectProperty<>((double) param.getValue().getWidth() / param.getValue().getHeight()));
 		JkFxUtil.setTableCellFactory(tcolResolution, "", d -> strf("%.2f", d), Double::new);
 		tview.getColumns().add(tcolResolution);
+		tcolResolution.setMinWidth(80);
 
 		TableColumn<Video,JkTime> tcolLength = new TableColumn<>("LENGTH");
 		JkFxUtil.setTableCellFactory(tcolLength, "duration", d -> d.toStringElapsed(false), JkTime::fromElapsedString);
 		tview.getColumns().add(tcolLength);
+		tcolLength.setMinWidth(80);
 
 		TableColumn<Video,Integer> tcolPlayTimes = new TableColumn<>("NPLAY");
 		JkFxUtil.setTableCellFactoryInteger(tcolPlayTimes, "playTimes");
 		tview.getColumns().add(tcolPlayTimes);
+		tcolPlayTimes.setMinWidth(80);
+
+		TableColumn<Video, LocalDateTime> tcolCreationTm = new TableColumn<>("CREATION");
+		JkFxUtil.setTableCellFactoryLocalDateTime(tcolCreationTm, "insertTstamp", DateTimeFormatter.ofPattern("yyyy-MM-dd  HH24:mm:ss"));
+		tview.getColumns().add(tcolCreationTm);
+		tcolCreationTm.setMinWidth(200);
 
 		FilteredList<Video> filteredList = new FilteredList<>(model.getVideos());
 		filteredList.predicateProperty().bind(sortFilter);
@@ -223,9 +249,10 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 		};
 		tview.getSelectionModel().getSelectedItems().addListener((ListChangeListener<? super Video>) c -> selEvent.accept(c));
 		tableItems.addListener((ListChangeListener<? super Video>) c -> selEvent.accept(c));
+
 		vbox.getChildren().add(createDetailsSection());
 
-		tcolTitle.minWidthProperty().bind(tview.widthProperty().multiply(0.6));
+//		tcolTitle.minWidthProperty().bind(tview.widthProperty().multiply(0.6));
 
 		model.getSelectedVideos().setAll(tableItems);
 
@@ -302,10 +329,6 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 		});
 		box.getChildren().add(btnUnmark);
 
-		Button btnManageCategories = new Button("MANAGE CATEGORIES");
-		btnManageCategories.setOnAction(e -> SceneManager.displayCategoryManagement());
-		box.getChildren().add(btnManageCategories);
-
 		Button btnAddVideos = new Button("ADD VIDEOS");
 		btnAddVideos.setOnAction(this::actionAddVideos);
 		box.getChildren().add(btnAddVideos);
@@ -314,6 +337,10 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 		btnGoToCategorizeVideo.disableProperty().bind(Bindings.createBooleanBinding(model.getSelectedVideos()::isEmpty, model.getSelectedVideos()));
 		btnGoToCategorizeVideo.setOnAction(e -> SceneManager.displayCatalogVideo());
 		box.getChildren().add(btnGoToCategorizeVideo);
+
+		Button btnGoToCategorizeVideo2 = new Button("CATEGORIZE VIDEOS2");
+		btnGoToCategorizeVideo2.setOnAction(e -> SceneManager.displayCatalogVideo());
+		box.getChildren().add(btnGoToCategorizeVideo2);
 
 		VBox vbox = new VBox();
 		vbox.getStyleClass().add("boxPlayVideos");

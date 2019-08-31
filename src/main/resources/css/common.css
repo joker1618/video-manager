@@ -1,0 +1,51 @@
+* {
+    -darkBlue: #000033;
+    -lightBlue: #ccf2ff;
+    -container-bg-color: #ffe0b3;
+}
+
+.cell:empty { -fx-opacity: 0 }
+
+.centered   { -fx-alignment: CENTER }
+.topCenter  { -fx-alignment: TOP-CENTER }
+
+.no-width  { -fx-min-width: -1; -fx-pref-width: -1; -fx-max-width: -1; }
+.no-height { -fx-min-height: -1; -fx-pref-height: -1; -fx-max-height: -1; }
+
+.pad5   { -fx-padding: 5 }
+.pad10  { -fx-padding: 10 }
+.pad20  { -fx-padding: 20 }
+
+.spacing3  { -fx-spacing: 3 }
+.spacing5  { -fx-spacing: 5 }
+.spacing10 { -fx-spacing: 10 }
+.spacing20 { -fx-spacing: 20 }
+
+.hgap5  { -fx-hgap: 5 }
+.hgap10 { -fx-hgap: 10 }
+
+.vgap5  { -fx-vgap: 5 }
+.vgap10 { -fx-vgap: 10 }
+
+.bold { -fx-font-weight: BOLD; }
+
+.bgWhite    { -fx-background-color: WHITE }
+.bgPurple   { -fx-background-color: PURPLE }
+.bgRed      { -fx-background-color: RED }
+.bgGrey     { -fx-background-color: GREY }
+.bgCyan     { -fx-background-color: CYAN }
+.bgGreen    { -fx-background-color: GREEN }
+.bgYellow   { -fx-background-color: YELLOW }
+.bgOrange   { -fx-background-color: ORANGE }
+.bgBlue     { -fx-background-color: BLUE }
+.bgBlack    { -fx-background-color: BLACK }
+
+.txtRed    { -fx-text-fill: RED }
+
+.borderBlack1   { -fx-border-width: 1; -fx-border-color: BLACK }
+.borderBlack    { -fx-border-width: 2; -fx-border-color: BLACK }
+.borderRed      { -fx-border-width: 2; -fx-border-color: RED }
+.borderBlue     { -fx-border-width: 2; -fx-border-color: BLUE }
+.borderCyan     { -fx-border-width: 2; -fx-border-color: CYAN }
+.borderGreen    { -fx-border-width: 2; -fx-border-color: GREEN }
+.borderWhite    { -fx-border-width: 2; -fx-border-color: WHITE }

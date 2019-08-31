@@ -83,10 +83,6 @@ public class Video extends JkDefaultEntity {
         this.size = size;
     }
 
-    public boolean isCataloged() {
-        return !categories.isEmpty();
-    }
-
     public int getWidth() {
         return width;
     }

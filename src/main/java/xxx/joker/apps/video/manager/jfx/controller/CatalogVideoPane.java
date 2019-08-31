@@ -3,26 +3,22 @@ package xxx.joker.apps.video.manager.jfx.controller;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.input.MouseButton;
+import javafx.scene.layout.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xxx.joker.apps.video.manager.model.entity.Category;
-import xxx.joker.apps.video.manager.model.entity.Video;
 import xxx.joker.apps.video.manager.jfx.controller.videoplayer.JkVideoBuilder;
 import xxx.joker.apps.video.manager.jfx.controller.videoplayer.JkVideoPlayer;
 import xxx.joker.apps.video.manager.jfx.model.VideoModel;
 import xxx.joker.apps.video.manager.jfx.model.VideoModelImpl;
-import xxx.joker.apps.video.manager.main.SceneManager;
-import xxx.joker.libs.javafx.JkFxUtil;
+import xxx.joker.apps.video.manager.model.entity.Category;
+import xxx.joker.apps.video.manager.model.entity.Video;
 import xxx.joker.libs.core.utils.JkStreams;
 
 import java.nio.file.Files;
@@ -36,146 +32,178 @@ public class CatalogVideoPane extends BorderPane implements CloseablePane {
 
 	private final VideoModel model = VideoModelImpl.getInstance();
 
-	private ObservableList<Video> videoList;
+	private ListView<Video> videoListView;
+	private ObservableList<Video> videos;
 	private SimpleIntegerProperty videoIndex;
 	private SimpleObjectProperty<JkVideoPlayer> showingPlayer;
 
-	private HBox categoryBox;
-	private Map<Category,CheckBox> checkBoxCategoryMap;
+	private VBox categoryBox;
+	private VBox categoryBoxMulti;
+	private Map<Category, CheckBox> checkBoxCategoryMap;
+	private Map<Category, CheckBox> checkBoxCategoryMapMulti;
 	private final JkVideoBuilder videoPlayerBuilder;
 
-	private Set<Category> defaultCategories = new HashSet<>();
-	private SimpleStringProperty defaultCatsAction = new SimpleStringProperty();
-
 	public CatalogVideoPane() {
-		this.videoList = FXCollections.observableArrayList(model.getSelectedVideos());
+		this.videos = FXCollections.observableArrayList(model.getSelectedVideos());
 		this.videoIndex = new SimpleIntegerProperty(-1);
 		this.showingPlayer = new SimpleObjectProperty<>();
 
 		this.videoPlayerBuilder = new JkVideoBuilder().setShowBorder(true);
 
+		setLeft(createVideoListViewPane());
+
 		// CENTER
 		showingPlayer.addListener((observable, oldValue, newValue) -> {
 			setCenter(newValue);
 			if(newValue != null) {
-				updateCheckableFields();
+				updateSelectedCheckBoxes();
+				updateSelectedCheckBoxesMulti();
 			}
 		});
 
-		// RIGHT
-		setRight(createOptionFieldsPane());
-
 		getStylesheets().add(getClass().getResource("/css/CatalogVideoPane.css").toExternalForm());
 
-		updateShowingVideo(0, false);
+	}
+
+	private Pane createVideoListViewPane() {
+		Button btnPrev = new Button("PREV");
+		btnPrev.setOnAction(e -> updateShowingVideo(videoIndex.get() - 1));
+		Button btnNext = new Button("NEXT");
+		btnNext.setOnAction(e -> updateShowingVideo(videoIndex.get() + 1));
+		Button btnDelete = new Button("DELETE");
+		btnDelete.disableProperty().bind(showingPlayer.isNull());
+		btnDelete.setOnAction(e -> actionDeleteVideo());
+		HBox hboxBtns = new HBox(btnPrev, btnDelete, btnNext);
+		hboxBtns.getStyleClass().addAll("pad10", "spacing20", "centered", "bgYellow");
+
+		this.videoListView = new ListView<>();
+		videoListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+		videoListView.setCellFactory(param -> new ListCell<Video>() {
+			@Override
+			protected void updateItem(Video item, boolean empty) {
+				super.updateItem(item, empty);
+				setText(item == null ? null : item.getVideoTitle());
+				showingPlayer.addListener((obs,o,n) -> {
+					if(n == null || !n.getVideo().equals(item)) {
+						getStyleClass().remove("bold");
+					} else {
+						getStyleClass().add("bold");
+					}
+				});
+				if(item == null || item.getCategories().isEmpty()) {
+					getStyleClass().add("txtRed");
+				} else {
+					getStyleClass().removeIf("txtRed"::equals);
+				}
+			}
+		});
+
+		videoListView.setOnMouseClicked(event -> {
+			if(event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
+				int rowIdx = videoListView.getSelectionModel().getSelectedIndex();
+				logger.info("double click rowIdx {}", rowIdx);
+				updateShowingVideo(rowIdx);
+			}
+		});
+
+		videoListView.setItems(videos);
+
+		Pane optionFieldsPane = createOptionFieldsPane();
+
+		VBox vbox = new VBox(hboxBtns, videoListView, optionFieldsPane);
+		vbox.getStyleClass().addAll("leftBox", "pad10", "spacing20", "bgRed", "borderBlue");
+
+		return vbox;
 	}
 
 	private Pane createOptionFieldsPane() {
 		VBox container = new VBox();
 		container.getStyleClass().add("choosePane");
 
-		// delete button
-		Button btnExit = new Button("EXIT");
-		btnExit.setOnAction(e -> { showingPlayer.getValue().closePlayer(); SceneManager.displayHomepage(); });
-		HBox hb = new HBox(btnExit);
-		hb.getStyleClass().add("boxButtons");
-		container.getChildren().add(hb);
-
-		// previous and next button
-		Button btnPrev = new Button("PREVIOUS");
-		btnPrev.setOnAction(e -> updateShowingVideo(videoIndex.getValue() - 1, false));
-		Label lblCounter = new Label("");
-		lblCounter.getStyleClass().add("boldText");
-		lblCounter.textProperty().bind(Bindings.createStringBinding(
-			() ->  strf("%d/%d", videoIndex.getValue()+1, videoList.size()),
-			videoIndex, videoList
-		));
-		Button btnNext = new Button("DONE");
-		btnNext.setOnAction(e -> updateShowingVideo(videoIndex.getValue() + 1, true));
-		HBox btnBox = new HBox(btnPrev, lblCounter, btnNext);
-		btnBox.getStyleClass().add("boxButtons");
-		container.getChildren().add(btnBox);
-
-		// delete button
-		Button btnDelete = new Button("DELETE");
-		btnDelete.setOnAction(e -> actionDeleteVideo());
-		btnBox = new HBox(btnDelete);
-		btnBox.getStyleClass().add("boxButtons");
-		container.getChildren().add(btnBox);
-
 		// Categories check box
-		categoryBox = new HBox(new VBox(), new VBox());
-		categoryBox.getChildren().forEach(ch -> ch.getStyleClass().add("subBox"));
+		categoryBox = new VBox();
+		categoryBoxMulti = new VBox();
 		checkBoxCategoryMap = new TreeMap<>();
-		categoryBox.getStyleClass().add("boxCategories");
-		updateCategoriesCheckBoxPane();
+		checkBoxCategoryMapMulti = new TreeMap<>();
+		categoryBox.getStyleClass().addAll("boxCategories", "borderRed");
+		categoryBoxMulti.getStyleClass().addAll("boxCategories", "borderBlue");
+		updateCategoriesCheckBoxes();
+		updateCategoriesCheckBoxesMulti();
 
-		ScrollPane scrollPane = new ScrollPane(categoryBox);
+		Label lblSingle = new Label("SINGLE");
+		lblSingle.getStyleClass().add("lblTitle");
+		BorderPane bp1 = new BorderPane(categoryBox, lblSingle, null, null, null);
+		Label lblMultiNumSel = new Label("MULTI (0)");
+		lblMultiNumSel.getStyleClass().add("lblTitle");
+		videoListView.getSelectionModel().getSelectedItems().addListener(
+				(ListChangeListener<? super Video>) c -> {
+						lblMultiNumSel.setText(strf("MULTI ({})", videoListView.getSelectionModel().getSelectedItems().size()));
+						updateSelectedCheckBoxesMulti();
+		});
+		BorderPane bp2 = new BorderPane(categoryBoxMulti, lblMultiNumSel, null, null, null);
+		HBox hb = new HBox(bp1, bp2);
+		hb.getStyleClass().addAll("catCont");
+
+		ScrollPane scrollPane = new ScrollPane(hb);
 		scrollPane.getStyleClass().add("scrollPaneCategories");
 		container.getChildren().addAll(scrollPane);
 
 		// Button add category
 		Button btnAddCategory = new Button("ADD CATEGORY");
 		btnAddCategory.setOnAction(e -> actionAddCategory());
-		btnBox = new HBox(btnAddCategory);
+		HBox btnBox = new HBox(btnAddCategory);
 		btnBox.getStyleClass().add("boxButtons");
 		container.getChildren().add(btnBox);
-
-		// Box defaults
-		VBox defaultBox = new VBox();
-		defaultBox.getStyleClass().addAll("boxButtons", "simpleBorder");
-		container.getChildren().add(defaultBox);
-
-		defaultBox.getChildren().add(new Label("DEFAULT CATEGORIES"));
-
-		ComboBox<String> comboDefault = new ComboBox<>();
-		comboDefault.getItems().setAll("NO", "ADD", "SET");
-		comboDefault.getSelectionModel().select(0);
-		defaultCatsAction.bind(comboDefault.getSelectionModel().selectedItemProperty());
-		defaultBox.getChildren().add(comboDefault);
-
-		Button btnSetDefault = new Button("SET DEFAULT CATEGORIES");
-		defaultBox.getChildren().add(btnSetDefault);
-
-		VBox labelBox = new VBox();
-		labelBox.getStyleClass().add("boxButtons");
-		defaultBox.getChildren().add(labelBox);
-
-		btnSetDefault.setOnAction(e -> {
-			defaultCategories.clear();
-			defaultCategories.addAll(showingPlayer.get().getVideo().getCategories());
-			labelBox.getChildren().clear();
-			defaultCategories.forEach(cat -> labelBox.getChildren().add(new Label(cat.getName())));
-		});
 
 		return container;
 	}
 
-	private void updateCategoriesCheckBoxPane() {
-		logger.debug("Updating categories check bos pane");
-		
+	private void updateCategoriesCheckBoxes() {
 		for(Category cat : model.getCategories()) {
 			if(!checkBoxCategoryMap.containsKey(cat)) {
 				CheckBox cb = new CheckBox(cat.getName());
 				cb.setOnAction(e -> actionSetVideoCategory(e, cat));
+				cb.disableProperty().bind(showingPlayer.isNull());
 				checkBoxCategoryMap.put(cat, cb);
 			}
 		}
-
-		categoryBox.getChildren().forEach(ch -> ((Pane)ch).getChildren().clear());
-
-		int counter = 0;
-		for(CheckBox cb : checkBoxCategoryMap.values()) {
-			Pane subPane = JkFxUtil.getChildren(categoryBox, counter % 2);
-			subPane.getChildren().add(cb);
-			counter++;
+		categoryBox.getChildren().clear();
+		categoryBox.getChildren().addAll(checkBoxCategoryMap.values());
+	}
+	private void updateCategoriesCheckBoxesMulti() {
+		for(Category cat : model.getCategories()) {
+			if(!checkBoxCategoryMapMulti.containsKey(cat)) {
+				CheckBox cb = new CheckBox(cat.getName());
+				cb.setOnAction(e -> actionSetMultiVideoCategory(e, cat));
+				ObservableList<Video> selItems = videoListView.getSelectionModel().getSelectedItems();
+				cb.disableProperty().bind(Bindings.createBooleanBinding(selItems::isEmpty, selItems));
+				checkBoxCategoryMapMulti.put(cat, cb);
+			}
 		}
+		categoryBoxMulti.getChildren().clear();
+		categoryBoxMulti.getChildren().addAll(checkBoxCategoryMapMulti.values());
 	}
 
-	private void updateCheckableFields() {
-		Video video = showingPlayer.getValue().getVideo();
-		for(Category cat : model.getCategories()) {
-			checkBoxCategoryMap.get(cat).setSelected(video.getCategories().contains(cat));
+	private void updateSelectedCheckBoxes() {
+		if(showingPlayer.getValue() != null) {
+			Video video = showingPlayer.getValue().getVideo();
+			for (Category cat : model.getCategories()) {
+				checkBoxCategoryMap.get(cat).setSelected(video.getCategories().contains(cat));
+			}
+		}
+	}
+	private void updateSelectedCheckBoxesMulti() {
+		ObservableList<Video> sel = videoListView.getSelectionModel().getSelectedItems();
+		for (Category cat : model.getCategories()) {
+			checkBoxCategoryMapMulti.get(cat).setIndeterminate(false);
+			checkBoxCategoryMapMulti.get(cat).setSelected(false);
+			int num = JkStreams.filter(sel, v -> v.getCategories().contains(cat)).size();
+			if(num == sel.size()) {
+				checkBoxCategoryMapMulti.get(cat).setSelected(true);
+			} else if(num > 0){
+				checkBoxCategoryMapMulti.get(cat).setIndeterminate(true);
+			}
 		}
 	}
 
@@ -183,10 +211,11 @@ public class CatalogVideoPane extends BorderPane implements CloseablePane {
 		Video videoToDel = showingPlayer.getValue().getVideo();
 
 		try {
-			showingPlayer.getValue().closePlayer();
-			videoList.remove(videoToDel);
+			updateShowingVideo(videoIndex.getValue() + 1);
+//			showingPlayer.getValue().closePlayer();
+			videos.remove(videoToDel);
 			model.getVideos().remove(videoToDel);
-			updateShowingVideo(videoIndex.getValue(), false);
+			videoIndex.set(videoIndex.get()-1);
 			Files.delete(videoToDel.getPath());
 			logger.info("Deleted video {}", videoToDel.getPath());
 
@@ -205,48 +234,52 @@ public class CatalogVideoPane extends BorderPane implements CloseablePane {
 			if(StringUtils.isNotBlank(trimmed) && JkStreams.filter(model.getCategories(), cat -> cat.getName().equalsIgnoreCase(trimmed)).isEmpty()) {
 				Category cat = new Category(trimmed);
 				model.getCategories().add(cat);
-				showingPlayer.getValue().getVideo().getCategories().add(cat);
-				updateCategoriesCheckBoxPane();
-				updateCheckableFields();
+				updateCategoriesCheckBoxes();
+				updateCategoriesCheckBoxesMulti();
+				if(showingPlayer.get() != null){
+					showingPlayer.getValue().getVideo().getCategories().add(cat);
+					updateSelectedCheckBoxes();
+					updateSelectedCheckBoxesMulti();
+				}
 			}
 		}
 	}
 
-	private void updateShowingVideo(int idx, boolean setCataloged) {
-		if(idx < 0)	return;
-
-		JkVideoPlayer videoPlayer = showingPlayer.getValue();
-		if(videoPlayer != null) {
-			videoPlayer.closePlayer();
-        }
-
-        if(idx < videoList.size()) {
-			Video v = videoList.get(idx);
-			if(!"NO".equals(defaultCatsAction.get())) {
-				if("SET".equals(defaultCatsAction.get())) {
-					v.getCategories().clear();
-				}
-				v.getCategories().addAll(defaultCategories);
+	private void updateShowingVideo(int idx) {
+		int newIndex = Math.max(Math.min(idx, videos.size()), -1);
+		if(videoIndex.get() != newIndex) {
+			videoIndex.setValue(newIndex);
+			JkVideoPlayer videoPlayer = showingPlayer.getValue();
+			if (videoPlayer != null) {
+				videoPlayer.closePlayer();
 			}
-			logger.info("Set new video {}", v);
-			videoIndex.setValue(idx);
-			JkVideoPlayer vp = videoPlayerBuilder.createPane(v);
-			vp.play();
-			showingPlayer.setValue(vp);
-
-		} else {
-			logger.info("End catalog list. Exiting...");
-			showingPlayer.setValue(null);
-			SceneManager.displayHomepage();
+			if(newIndex >= 0 && newIndex < videos.size()) {
+				Video video = JkStreams.filter(model.getVideos(), v -> videos.get(newIndex).getVideoTitle().equals(v.getVideoTitle())).get(0);
+				JkVideoPlayer vp = videoPlayerBuilder.createPane(video);
+				vp.play();
+				showingPlayer.setValue(vp);
+			} else {
+				showingPlayer.setValue(null);
+			}
 		}
 	}
 
 	private void actionSetVideoCategory(ActionEvent event, Category category) {
+		setVideoCategory(event, category, showingPlayer.getValue().getVideo());
+		updateSelectedCheckBoxesMulti();
+		videoListView.refresh();
+	}
+	private void actionSetMultiVideoCategory(ActionEvent event, Category category) {
+		videoListView.getSelectionModel().getSelectedItems().forEach(v -> setVideoCategory(event, category, v));
+		updateSelectedCheckBoxes();
+		videoListView.refresh();
+	}
+	private void setVideoCategory(ActionEvent event, Category category, Video video) {
 		CheckBox source = (CheckBox) event.getSource();
 		if(source.isSelected()) {
-			showingPlayer.getValue().getVideo().getCategories().add(category);
+			video.getCategories().add(category);
 		} else {
-			showingPlayer.getValue().getVideo().getCategories().remove(category);
+			video.getCategories().remove(category);
 		}
 	}
 

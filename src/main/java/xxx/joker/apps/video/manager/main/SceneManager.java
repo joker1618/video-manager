@@ -3,11 +3,7 @@ package xxx.joker.apps.video.manager.main;
 import javafx.scene.Scene;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xxx.joker.apps.video.manager.jfx.controller.CatalogVideoPane;
-import xxx.joker.apps.video.manager.jfx.controller.CloseablePane;
-import xxx.joker.apps.video.manager.jfx.controller.HomepagePane;
-import xxx.joker.apps.video.manager.jfx.controller.MultiVideoPane;
-import xxx.joker.apps.video.manager.jfx.controller.categories.CategoryManagementPane;
+import xxx.joker.apps.video.manager.jfx.controller.*;
 
 public class SceneManager {
 
@@ -37,11 +33,6 @@ public class SceneManager {
 	public static void displayMultiVideos() {
 		mainScene.setRoot(new MultiVideoPane());
 		logger.info("Set scene to MULTI VIDEOS");
-	}
-
-	public static void displayCategoryManagement() {
-		mainScene.setRoot(new CategoryManagementPane());
-		logger.info("Set scene to CATEGORY MANAGEMENT");
 	}
 
 	public static boolean isHomepageShowed() {

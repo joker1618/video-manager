@@ -1,12 +1,27 @@
+.leftBox .list-view {
+    -fx-pref-width: 500;
+}
+
 .choosePane {
     -fx-padding: 20;
     -fx-spacing: 10;
     -fx-min-width: 300;
-    -fx-background-color: #c0c0c0;
+    -fx-background-color: -container-bg-color;
     -fx-border-color: #99ccff;
     -fx-border-width: 0 0 0 1;
 }
 
+.lblTitle {
+    -fx-font-size: 24;
+}
+
+.catCont {
+    -fx-background-color: yellow;
+    -fx-spacing: 120;
+}
+.scrollPaneCategories {
+    -fx-alignment: CENTER;
+}
 
 .boxButtons .button {
     -fx-min-width: 80;
@@ -18,7 +33,7 @@
 }
 
 .boxCategories {
-    -fx-spacing: 5;
+    -fx-spacing: 10;
     -fx-background-color: #c0c0c0;
 }
 
