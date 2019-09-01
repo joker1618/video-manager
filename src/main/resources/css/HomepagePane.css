@@ -41,6 +41,18 @@
     -fx-pref-height: 30;
 }
 
+.leftBox .paneDetails {
+    -fx-pref-height: 100;
+    -fx-alignment: BOTTOM-LEFT;
+    -fx-background-color: -container-bg-color;
+    -fx-hgap: 10;
+    -fx-vgap: 5;
+}
+.leftBox .paneDetails .label {
+    -fx-font-weight: BOLD;
+}
+
+
 /* BorderPane Center */
 .centerBox {
     -fx-padding: 10;
@@ -52,13 +64,6 @@
 }
 .centerBox .table-view {
     -fx-border-color: -container-border-color-2;
-}
-.centerBox .paneDetails {
-    -fx-hgap: 10;
-    -fx-vgap: 5;
-}
-.centerBox .paneDetails .label {
-    -fx-font-weight: BOLD;
 }
 
 /* BorderPane Right */

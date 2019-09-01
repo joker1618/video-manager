@@ -6,8 +6,11 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.*;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import org.apache.commons.lang3.StringUtils;
@@ -19,9 +22,15 @@ import xxx.joker.apps.video.manager.jfx.model.VideoModel;
 import xxx.joker.apps.video.manager.jfx.model.VideoModelImpl;
 import xxx.joker.apps.video.manager.model.entity.Category;
 import xxx.joker.apps.video.manager.model.entity.Video;
+import xxx.joker.libs.core.utils.JkFiles;
 import xxx.joker.libs.core.utils.JkStreams;
 
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 import static xxx.joker.libs.core.utils.JkStrings.strf;

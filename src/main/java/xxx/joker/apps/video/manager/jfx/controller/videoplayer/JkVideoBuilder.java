@@ -1,15 +1,29 @@
 package xxx.joker.apps.video.manager.jfx.controller.videoplayer;
 
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.control.Button;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import javafx.stage.StageStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.model.entity.Video;
 import xxx.joker.apps.video.manager.jfx.controller.videoplayer.JkVideoPlayer.PlayerConfig;
+import xxx.joker.libs.core.exception.JkRuntimeException;
+import xxx.joker.libs.core.utils.JkFiles;
 import xxx.joker.libs.javafx.JkFxUtil;
 
+import javax.imageio.ImageIO;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -26,16 +40,16 @@ public class JkVideoBuilder {
 		playerConfig = new PlayerConfig();
 
 		// Set defaults
-        playerConfig.setVisibleHeading(true);
-        playerConfig.setVisiblePlayerBar(true);
+		playerConfig.setVisibleHeading(true);
+		playerConfig.setVisiblePlayerBar(true);
 		playerConfig.setMiddleMouseClickEvent(
-			e -> JkFxUtil.getStage(e).setFullScreen(!JkFxUtil.getStage(e).isFullScreen())
+				e -> JkFxUtil.getStage(e).setFullScreen(!JkFxUtil.getStage(e).isFullScreen())
 		);
 		playerConfig.setRightMouseClickEvent(
-			e -> JkFxUtil.getStage(e).setMaximized(!JkFxUtil.getStage(e).isMaximized())
+				e -> JkFxUtil.getStage(e).setMaximized(!JkFxUtil.getStage(e).isMaximized())
 		);
 		playerConfig.setCloseEvent(
-			e -> JkFxUtil.getStage(e).close()
+				e -> JkFxUtil.getStage(e).close()
 		);
 	}
 
@@ -101,6 +115,5 @@ public class JkVideoBuilder {
 		lastCreatedPane = pane;
 		return pane;
 	}
-
 
 }

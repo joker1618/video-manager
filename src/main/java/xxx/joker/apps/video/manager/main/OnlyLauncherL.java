@@ -11,7 +11,7 @@ import xxx.joker.apps.video.manager.jfx.model.VideoModelImpl;
 
 public class OnlyLauncherL extends Application {
 
-	private static boolean scenicView;
+	public static boolean scenicView;
 
 	private Stage primaryStage;
 

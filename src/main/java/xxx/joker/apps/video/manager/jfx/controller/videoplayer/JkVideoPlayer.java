@@ -8,6 +8,8 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
@@ -17,13 +19,22 @@ import javafx.scene.media.MediaView;
 import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xxx.joker.apps.video.manager.common.Config;
+import xxx.joker.apps.video.manager.common.VmUtil;
+import xxx.joker.apps.video.manager.jfx.model.VideoModelImpl;
 import xxx.joker.apps.video.manager.model.entity.Video;
 import xxx.joker.libs.core.datetime.JkTime;
 import xxx.joker.libs.core.utils.JkFiles;
 
+import java.net.URL;
+import java.nio.file.Path;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+
+import static xxx.joker.libs.core.utils.JkConsole.display;
+import static xxx.joker.libs.core.utils.JkStrings.strf;
 
 public class JkVideoPlayer extends BorderPane {
 
@@ -66,6 +77,7 @@ public class JkVideoPlayer extends BorderPane {
 		if(playerConfig.isShowBorder()) {
 			getStyleClass().add("borderedRoot");
 		}
+
 		getStylesheets().add(getClass().getResource("/css/JkVideoPlayer.css").toExternalForm());
 	}
 
@@ -84,6 +96,10 @@ public class JkVideoPlayer extends BorderPane {
 		}
 	}
 
+	public MediaView getMediaView() {
+		return mediaView;
+	}
+
 	public PlayerConfig getPlayerConfig() {
 		playerConfig.setVolume(mediaView.getMediaPlayer().getVolume());
 		playerConfig.setVisibleHeading(getTop() != null);
@@ -100,6 +116,27 @@ public class JkVideoPlayer extends BorderPane {
 
 		HBox headingBox = new HBox();
 		headingBox.getStyleClass().add("headingBox");
+
+		AtomicBoolean okSnap = new AtomicBoolean(!VideoModelImpl.getInstance().findSnapshots(video).isEmpty());
+		URL url = getClass().getResource(strf("/icons/camera-{}.png", okSnap.get() ? "green" : "red"));
+		Image iconCamera = new Image(url.toExternalForm());
+		ImageView imageView = new ImageView(iconCamera);
+		imageView.setPreserveRatio(false);
+		imageView.setFitWidth(35);
+		imageView.setFitHeight(30);
+		imageView.setOnMouseClicked(e -> {
+			Path snapPath = Config.createSnapshotOutPath(video);
+			VmUtil.takeSnapshot(mediaView, snapPath);
+			if(!okSnap.get()) {
+				URL url2 = getClass().getResource("/icons/camera-green.png");
+				Image iconCamera2 = new Image(url2.toExternalForm());
+				imageView.setImage(iconCamera2);
+				okSnap.set(true);
+			}
+			logger.info("Snapshot saved for {}", video.getVideoTitle());
+		});
+		HBox hBox = new HBox(imageView);
+		headingBox.getChildren().add(hBox);
 
 		Pane fill1 = new Pane();
 		Pane fill2 = new Pane();

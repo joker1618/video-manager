@@ -27,10 +27,9 @@
 
 .headingBox .button,
 .mediaBarPane .button {
-    -fx-min-width: 30;
-    -fx-min-height: 20;
-    -fx-max-height: 20;
-    -fx-padding: 0 0 3 0;
+    -fx-pref-width: 35;
+    -fx-pref-height: 25;
+    -fx-padding: 0 0 1 0;
     -fx-text-alignment: CENTER;
     -fx-background-color: -bg-color;
     -fx-border-color: -text-color;
@@ -50,7 +49,7 @@
     -fx-alignment: CENTER;
     -fx-spacing: 10;
 /*    -fx-padding: 3 5 3 5; */
-    -fx-padding: 10 5 10 5;
+    -fx-padding: 5;
 }
 
 .mediaBarPane .lessSpacingBox {

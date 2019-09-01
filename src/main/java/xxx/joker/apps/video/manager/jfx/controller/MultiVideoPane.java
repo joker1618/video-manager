@@ -5,8 +5,10 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.scenicview.ScenicView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xxx.joker.apps.video.manager.main.OnlyLauncherL;
 import xxx.joker.apps.video.manager.model.entity.Video;
 import xxx.joker.apps.video.manager.jfx.controller.videoplayer.JkVideoBuilder;
 import xxx.joker.apps.video.manager.jfx.controller.videoplayer.JkVideoStage;
@@ -39,18 +41,18 @@ public class MultiVideoPane extends BorderPane implements CloseablePane {
 		this.toReproduce = new ArrayList<>(videos);
 
 		JkVideoBuilder pbuilder = new JkVideoBuilder();
-		 pbuilder.setDecoratedStage(false);
-		 pbuilder.setShowBorder(true);
-		 pbuilder.setShowClose(true);
-		 pbuilder.setCloseEvent(e -> {
-		 	stages.forEach(Stage::close);
-		 	SceneManager.displayHomepage();
-		 });
-		 pbuilder.setEventRightMouseClick(e -> stages.forEach(Stage::toFront));
+		pbuilder.setDecoratedStage(false);
+		pbuilder.setShowBorder(true);
+		pbuilder.setShowClose(true);
+		pbuilder.setCloseEvent(e -> {
+			stages.forEach(Stage::close);
+			SceneManager.displayHomepage();
+		});
+		pbuilder.setEventRightMouseClick(e -> stages.forEach(Stage::toFront));
 
 		this.stages = new ArrayList<>();
 		VideoStagesPosition stagesPosition = StagePosProvider.getStagesPosition(model.getPlayOptions().getMultiVideoName());
-		for(int i = 0; i < stagesPosition.getNumStages(); i++) {
+		for (int i = 0; i < stagesPosition.getNumStages(); i++) {
 			List<Video> hlist = new ArrayList<>();
 			hlist.add(getNextRandomVideo());
 
@@ -68,6 +70,10 @@ public class MultiVideoPane extends BorderPane implements CloseablePane {
 		}
 
 		stagesPosition.setStagesPosition(stages);
+
+		if(OnlyLauncherL.scenicView && stagesPosition.getNumStages() == 1) {
+			ScenicView.show(stages.get(0).getScene());
+		}
 	}
 
 	private Pane createPane() {

@@ -5,19 +5,18 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xxx.joker.apps.video.manager.config.Config;
+import xxx.joker.apps.video.manager.common.Config;
 import xxx.joker.apps.video.manager.jfx.model.beans.PlayOptions;
 import xxx.joker.apps.video.manager.model.entity.Category;
 import xxx.joker.apps.video.manager.model.entity.Video;
 import xxx.joker.libs.core.repository.JkDataModel;
 import xxx.joker.libs.core.repository.entity.JkEntity;
 import xxx.joker.libs.core.utils.JkFiles;
+import xxx.joker.libs.core.utils.JkStreams;
 
 import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.nio.file.Path;
+import java.util.*;
 
 public class VideoModelImpl extends JkDataModel implements VideoModel {
 
@@ -76,6 +75,16 @@ public class VideoModelImpl extends JkDataModel implements VideoModel {
 	@Override
 	public PlayOptions getPlayOptions() {
 		return playOptions;
+	}
+
+	@Override
+	public List<Path> findSnapshots(Video video) {
+		if(video == null)	return Collections.emptyList();
+		return JkFiles.findFiles(
+				Config.SNAPSHOT_FOLDER, false,
+				p -> p.getFileName().toString().startsWith(video.getMd5()),
+				p -> p.getFileName().toString().endsWith(".png")
+		);
 	}
 
 	@Override

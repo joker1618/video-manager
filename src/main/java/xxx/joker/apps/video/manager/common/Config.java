@@ -1,7 +1,12 @@
-package xxx.joker.apps.video.manager.config;
+package xxx.joker.apps.video.manager.common;
+
+import xxx.joker.apps.video.manager.model.entity.Video;
+import xxx.joker.libs.core.utils.JkFiles;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import static xxx.joker.libs.core.utils.JkStrings.strf;
 
 public class Config {
 
@@ -12,7 +17,13 @@ public class Config {
 	public static final String DB_NAME = "dbvideomanager";
 
 	public static final Path VIDEOS_FOLDER = BASE_FOLDER.resolve("videos");
-//	public static final Path VIDEOS_FOLDER = Paths.get("videos");
+	public static final Path SNAPSHOT_FOLDER = BASE_FOLDER.resolve("snapshots");
 
 	public static final String CSV_STAGE_FILEPATH = "/data/MultiStagePositions.txt";
+
+	public static Path createSnapshotOutPath(Video video) {
+		String fname = strf("{}.snap.png", video.getMd5());
+		Path outPath = SNAPSHOT_FOLDER.resolve(fname);
+		return JkFiles.computeSafelyPath(outPath);
+	}
 }

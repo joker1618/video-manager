@@ -1,6 +1,7 @@
 package xxx.joker.apps.video.manager.jfx.controller;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -8,12 +9,14 @@ import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xxx.joker.apps.video.manager.config.Config;
+import xxx.joker.apps.video.manager.common.Config;
 import xxx.joker.apps.video.manager.model.entity.Category;
 import xxx.joker.apps.video.manager.model.entity.Video;
 import xxx.joker.apps.video.manager.jfx.model.VideoModel;
@@ -22,6 +25,7 @@ import xxx.joker.apps.video.manager.jfx.model.beans.SortFilter;
 import xxx.joker.apps.video.manager.main.SceneManager;
 import xxx.joker.apps.video.manager.provider.StagePosProvider;
 import xxx.joker.libs.core.datetime.JkTime;
+import xxx.joker.libs.core.exception.JkRuntimeException;
 import xxx.joker.libs.core.format.JkOutputFmt;
 import xxx.joker.libs.core.format.JkSizeUnit;
 import xxx.joker.libs.javafx.JkFxUtil;
@@ -30,7 +34,6 @@ import xxx.joker.libs.core.utils.JkStreams;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -39,7 +42,6 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import static xxx.joker.libs.core.utils.JkStrings.strf;
 
@@ -111,19 +113,42 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 		hbox.getStyleClass().addAll("centeredBox", "boxClearOpt");
 		box.getChildren().add(hbox);
 
-		return box;
+		BorderPane bp = new BorderPane();
+		bp.setCenter(box);
+		bp.getStyleClass().add("leftBox");
+
+		GridPane gp = new GridPane();
+		bp.setBottom(gp);
+		gp.getStyleClass().add("paneDetails");
+
+		int rowNum = 0;
+
+		Label fixedNum = new Label("");
+		fixedNum.textProperty().bind(Bindings.createStringBinding(() -> String.valueOf(model.getVideos().size()), model.getVideos()));
+		Label selNum = new Label("");
+		selNum.textProperty().bind(Bindings.createStringBinding(() -> model.getSelectedVideos().size()+"", model.getSelectedVideos()));
+		addDetailsLine(gp, rowNum, "Num videos", fixedNum, selNum);
+		rowNum++;
+
+		Label fixedLength = new Label("");
+		fixedLength.textProperty().bind(Bindings.createStringBinding(() -> JkTime.of(model.getVideos().stream().mapToLong(v -> v.getDuration().getTotalMillis()).sum()).toStringElapsed(false), model.getVideos()));
+		Label selLength = new Label("");
+		selLength.textProperty().bind(Bindings.createStringBinding(() -> JkTime.of(model.getSelectedVideos().stream().filter(Objects::nonNull).mapToLong(v -> v.getDuration().getTotalMillis()).sum()).toStringElapsed(false), model.getSelectedVideos()));
+		addDetailsLine(gp, rowNum, "Total length:", fixedLength, selLength);
+		rowNum++;
+
+		Label fixedSize = new Label("");
+		fixedSize.textProperty().bind(Bindings.createStringBinding(() -> JkOutputFmt.humanSize(model.getVideos().stream().mapToLong(Video::getSize).sum()), model.getVideos()));
+		Label selSize = new Label("");
+		selSize.textProperty().bind(Bindings.createStringBinding(() -> JkOutputFmt.humanSize(model.getSelectedVideos().stream().filter(Objects::nonNull).mapToLong(Video::getSize).sum()), model.getSelectedVideos()));
+		addDetailsLine(gp, rowNum, "Total size:", fixedSize, selSize);
+		rowNum++;
+
+		return bp;
+//		return box;
 	}
 	private void fillGridPaneCategFilter() {
 		gridPaneFilterCat.getChildren().clear();
-//		List<Category> existingCatList = model.getVideos().stream()
-//										   .flatMap(v -> v.getCategories().stream())
-//										   .sorted()
-//										   .distinct()
-//										   .collect(Collectors.toList());
-//		for(int i = 0; i < existingCatList.size(); i++) {
-//			Category cat = existingCatList.get(i);
-//			addRadioLine(gridPaneFilterCat, cat, i);
-//		}
 		ObservableList<Category> cats = model.getCategories();
 		for(int i = 0; i < cats.size(); i++) {
 			addRadioLine(gridPaneFilterCat, cats.get(i), i);
@@ -222,9 +247,15 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 		tview.getColumns().add(tcolLength);
 		tcolLength.setMinWidth(80);
 
-		TableColumn<Video,Integer> tcolPlayTimes = new TableColumn<>("NPLAY");
+		TableColumn<Video,Integer> tcolPlayTimes = new TableColumn<>("N.PLAY");
 		JkFxUtil.setTableCellFactoryInteger(tcolPlayTimes, "playTimes");
 		tview.getColumns().add(tcolPlayTimes);
+		tcolPlayTimes.setMinWidth(80);
+
+		TableColumn<Video,Integer> tcolNumSnapshots = new TableColumn<>("SNAP");
+		JkFxUtil.setTableCellValueBinding(tcolNumSnapshots, "md5");
+		tcolNumSnapshots.setCellValueFactory(param -> new SimpleObjectProperty<>(model.findSnapshots(param.getValue()).size()));
+		tview.getColumns().add(tcolNumSnapshots);
 		tcolPlayTimes.setMinWidth(80);
 
 		TableColumn<Video, LocalDateTime> tcolCreationTm = new TableColumn<>("CREATION");
@@ -259,33 +290,34 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 		return vbox;
 	}
 	private Pane createDetailsSection() {
-		GridPane gp = new GridPane();
-		gp.getStyleClass().add("paneDetails");
+		BorderPane bp = new BorderPane();
 
-		int rowNum = 0;
+		HBox hbox = new HBox();
+		hbox.getStyleClass().addAll("spacing20", "bgPink");
+		bp.setRight(hbox);
 
-		Label fixedNum = new Label("");
-		fixedNum.textProperty().bind(Bindings.createStringBinding(() -> String.valueOf(model.getVideos().size()), model.getVideos()));
-		Label selNum = new Label("");
-		selNum.textProperty().bind(Bindings.createStringBinding(() -> model.getSelectedVideos().size()+"", model.getSelectedVideos()));
-		addDetailsLine(gp, rowNum, "Number fo videos:", fixedNum, selNum);
-		rowNum++;
+		model.getSelectedVideos().addListener((ListChangeListener<Video>)c -> {
+			hbox.getChildren().clear();
+			if(model.getSelectedVideos().size() == 1) {
+				Video video = model.getSelectedVideos().get(0);
+				List<Path> snapPaths = model.findSnapshots(video);
+				try {
+					for (int i = 0; i < 6 && i < snapPaths.size(); i++) {
+						String url = snapPaths.get(i).toUri().toURL().toExternalForm();
+						Image snap = new Image(url);
+						ImageView imageView = new ImageView(snap);
+						imageView.setPreserveRatio(true);
+						imageView.setFitWidth(200);
+						imageView.setFitHeight(200);
+						hbox.getChildren().add(0, imageView);
+					}
+				} catch(Exception e) {
+					throw new JkRuntimeException(e);
+				}
+			}
+		});
 
-		Label fixedLength = new Label("");
-		fixedLength.textProperty().bind(Bindings.createStringBinding(() -> JkTime.of(model.getVideos().stream().mapToLong(v -> v.getDuration().getTotalMillis()).sum()).toStringElapsed(false), model.getVideos()));
-		Label selLength = new Label("");
-		selLength.textProperty().bind(Bindings.createStringBinding(() -> JkTime.of(model.getSelectedVideos().stream().filter(Objects::nonNull).mapToLong(v -> v.getDuration().getTotalMillis()).sum()).toStringElapsed(false), model.getSelectedVideos()));
-		addDetailsLine(gp, rowNum, "Total length:", fixedLength, selLength);
-		rowNum++;
-
-		Label fixedSize = new Label("");
-		fixedSize.textProperty().bind(Bindings.createStringBinding(() -> JkOutputFmt.humanSize(model.getVideos().stream().mapToLong(Video::getSize).sum()), model.getVideos()));
-		Label selSize = new Label("");
-		selSize.textProperty().bind(Bindings.createStringBinding(() -> JkOutputFmt.humanSize(model.getSelectedVideos().stream().filter(Objects::nonNull).mapToLong(Video::getSize).sum()), model.getSelectedVideos()));
-		addDetailsLine(gp, rowNum, "Total size:", fixedSize, selSize);
-		rowNum++;
-
-		return gp;
+		return bp;
 	}
 	private void addDetailsLine(GridPane gp, int row, String label, Label fixedLabel, Label selLabel) {
 		gp.add(new Label(label), 0, row);
@@ -334,13 +366,8 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 		box.getChildren().add(btnAddVideos);
 
 		Button btnGoToCategorizeVideo = new Button("CATEGORIZE VIDEOS");
-		btnGoToCategorizeVideo.disableProperty().bind(Bindings.createBooleanBinding(model.getSelectedVideos()::isEmpty, model.getSelectedVideos()));
 		btnGoToCategorizeVideo.setOnAction(e -> SceneManager.displayCatalogVideo());
 		box.getChildren().add(btnGoToCategorizeVideo);
-
-		Button btnGoToCategorizeVideo2 = new Button("CATEGORIZE VIDEOS2");
-		btnGoToCategorizeVideo2.setOnAction(e -> SceneManager.displayCatalogVideo());
-		box.getChildren().add(btnGoToCategorizeVideo2);
 
 		VBox vbox = new VBox();
 		vbox.getStyleClass().add("boxPlayVideos");
