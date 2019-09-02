@@ -259,7 +259,7 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 		tcolPlayTimes.setMinWidth(80);
 
 		TableColumn<Video, LocalDateTime> tcolCreationTm = new TableColumn<>("CREATION");
-		JkFxUtil.setTableCellFactoryLocalDateTime(tcolCreationTm, "insertTstamp", DateTimeFormatter.ofPattern("yyyy-MM-dd  HH24:mm:ss"));
+		JkFxUtil.setTableCellFactoryLocalDateTime(tcolCreationTm, "insertTstamp", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 		tview.getColumns().add(tcolCreationTm);
 		tcolCreationTm.setMinWidth(200);
 
