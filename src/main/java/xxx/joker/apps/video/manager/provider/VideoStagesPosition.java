@@ -2,6 +2,7 @@ package xxx.joker.apps.video.manager.provider;
 
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.util.ArrayList;
 import java.util.List;

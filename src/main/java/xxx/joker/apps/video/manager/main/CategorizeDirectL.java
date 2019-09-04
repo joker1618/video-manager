@@ -25,6 +25,7 @@ public class CategorizeDirectL extends Application {
 		// Create scene
 		Group root = new Group();
 		Scene scene = new Scene(root);
+		scene.getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
 
 		SceneManager.setScene(scene);
 		model.getSelectedVideos().setAll(model.getVideos());
@@ -42,11 +43,11 @@ public class CategorizeDirectL extends Application {
 
 	@Override
 	public void stop() throws Exception {
-		model.persistData();
+		model.	persistData();
 	}
 
 	public static void main(String[] args) {
-		scenicView = args.length > 0 && args[0].equals("-scenicView");
+		scenicView = args.length > 0 && args[0].equals("-sv");
 		scenicView = true;
 		launch(args);
 	}

@@ -208,7 +208,7 @@ public class JkVideoPlayer extends BorderPane {
 			if(e.getButton() == MouseButton.PRIMARY) {
 				if(getBottom() == null) {
 					double vpos = e.getY() / mvPane.getHeight();
-					if(vpos < 0.8)	setTop(topPane);
+					if(vpos < 0.7)	setTop(topPane);
 					setBottom(bottomPane);
 				} else {
 					setTop(null);

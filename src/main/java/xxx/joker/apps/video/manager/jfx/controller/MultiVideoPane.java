@@ -44,6 +44,8 @@ public class MultiVideoPane extends BorderPane implements CloseablePane {
 		pbuilder.setDecoratedStage(false);
 		pbuilder.setShowBorder(true);
 		pbuilder.setShowClose(true);
+		pbuilder.setHeadingVisible(false);
+		pbuilder.setPlayerBarVisible(false);
 		pbuilder.setCloseEvent(e -> {
 			stages.forEach(Stage::close);
 			SceneManager.displayHomepage();
