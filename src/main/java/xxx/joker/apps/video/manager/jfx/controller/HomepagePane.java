@@ -3,6 +3,7 @@ package xxx.joker.apps.video.manager.jfx.controller;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -242,7 +243,7 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 		tcolHeight.setMinWidth(80);
 
 		TableColumn<Video,Double> tcolResolution = new TableColumn<>("W/H");
-		tcolResolution.setCellValueFactory(param -> new SimpleObjectProperty<>((double) param.getValue().getWidth() / param.getValue().getHeight()));
+		tcolResolution.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue().getFormat()));
 		JkFxUtil.setTableCellFactory(tcolResolution, "", d -> strf("%.2f", d), Double::new);
 		tview.getColumns().add(tcolResolution);
 		tcolResolution.setMinWidth(80);
@@ -346,7 +347,6 @@ public class HomepagePane extends BorderPane implements CloseablePane {
                     });
 
                     VBox vBox = new VBox(ivbox, btnDelSnapshot);
-//                    VBox vBox = new VBox(imageView, btnDelSnapshot);
                     vBox.getStyleClass().addAll("spacing5", "centered");
 
                     hbox.getChildren().add(vBox);
