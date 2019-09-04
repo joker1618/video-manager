@@ -249,7 +249,9 @@ public class CatalogVideoPane extends BorderPane implements CloseablePane {
 			checkBoxCategoryMapMulti.get(cat).setIndeterminate(false);
 			checkBoxCategoryMapMulti.get(cat).setSelected(false);
 			int num = JkStreams.filter(sel, v -> v.getCategories().contains(cat)).size();
-			if(num == sel.size()) {
+			if(sel.size() == 0) {
+				checkBoxCategoryMapMulti.get(cat).setSelected(false);
+			} else if(num == sel.size()) {
 				checkBoxCategoryMapMulti.get(cat).setSelected(true);
 			} else if(num > 0){
 				checkBoxCategoryMapMulti.get(cat).setIndeterminate(true);
