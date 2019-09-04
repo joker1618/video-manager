@@ -259,13 +259,12 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 		tcolPlayTimes.setMinWidth(80);
 
 		TableColumn<Video,Integer> tcolNumSnapshots = new TableColumn<>("SNAP");
-		JkFxUtil.setTableCellValueBinding(tcolNumSnapshots, "md5");
 		tcolNumSnapshots.setCellValueFactory(param -> new SimpleObjectProperty<>(model.findSnapshots(param.getValue()).size()));
 		tview.getColumns().add(tcolNumSnapshots);
 		tcolPlayTimes.setMinWidth(80);
 
 		TableColumn<Video, LocalDateTime> tcolCreationTm = new TableColumn<>("CREATION");
-		JkFxUtil.setTableCellFactoryLocalDateTime(tcolCreationTm, "insertTstamp", DateTimeFormatter.ofPattern("dd/MM/yyyy   HH:mm:ss"));
+		JkFxUtil.setTableCellFactory(tcolCreationTm, "insertTstamp", ldt -> ldt == null ? "" : DateTimeFormatter.ofPattern("dd/MM/yyyy   HH:mm:ss").format(ldt), s -> LocalDateTime.parse(s, DateTimeFormatter.ofPattern("dd/MM/yyyy   HH:mm:ss")));
 		tview.getColumns().add(tcolCreationTm);
 		tcolCreationTm.setMinWidth(200);
 

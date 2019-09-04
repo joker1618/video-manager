@@ -228,15 +228,9 @@ public class JkVideoPlayer extends BorderPane {
 	private ChangeListener<Number> getMediaViewFitListener(Pane mvPane) {
 		return (obs, old, nez) -> {
 			if (mvPane.getWidth() > 0d && mvPane.getHeight() > 0d) {
-//			if (video != null && mvPane.getWidth() > 0d && mvPane.getHeight() > 0d) {
-//				double videoFormat = (double) video.getWidth() / video.getHeight();
-//				double paneFormat = mvPane.getWidth() / mvPane.getHeight();
-//				double fitWidth = (paneFormat < videoFormat) ? mvPane.getWidth() : (mvPane.getHeight() * videoFormat);
-//				mediaView.setFitWidth(fitWidth);
-//				logger.debug("mv fit w: {}", fitWidth);
 				mediaView.setFitWidth(mvPane.getWidth());
 				mediaView.setFitHeight(mvPane.getHeight());
-				logger.debug("mv fit wh: {}x{}", mvPane.getWidth(), mvPane.getHeight());
+//				logger.debug("mv fit: {}x{}", mvPane.getWidth(), mvPane.getHeight());
 			}
 		};
 	}
