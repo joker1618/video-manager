@@ -66,6 +66,13 @@
     -fx-border-color: -container-border-color-2;
 }
 
+.centerBox .snapshotsPane .scroll-pane {
+    -fx-pref-height: 155;
+}
+.centerBox .snapshotsPane .viewport {
+    -fx-background-color: -container-bg-color;
+}
+
 /* BorderPane Right */
 .rightBox {
     -fx-spacing: 15;

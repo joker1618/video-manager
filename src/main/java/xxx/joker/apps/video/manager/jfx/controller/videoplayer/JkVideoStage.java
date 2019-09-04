@@ -29,6 +29,10 @@ public class JkVideoStage extends Stage {
 		setOnCloseRequest(e -> close());
 	}
 
+	public JkVideoPlayer getVideoPlayer() {
+		return videoPlayer;
+	}
+
 	public void playVideo(Video video) {
 		if(isShowing()) {
 			playerConfig = videoPlayer.getPlayerConfig();
@@ -50,8 +54,7 @@ public class JkVideoStage extends Stage {
 	@Override
 	public void close() {
 		if (isShowing()) {
-			logger.trace("close video stage");
-			logger.trace("VideoStage dim: {}x{}  {}x{}", getWidth(), getHeight(), getScene().getWidth(), getScene().getHeight());
+			logger.trace("closed video stage");
 			videoPlayer.closePlayer();
 			super.close();
 		}

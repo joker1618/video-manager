@@ -57,21 +57,65 @@ public class CatalogVideoPane extends BorderPane implements CloseablePane {
 		this.videoIndex = new SimpleIntegerProperty(-1);
 		this.showingPlayer = new SimpleObjectProperty<>();
 
-		this.videoPlayerBuilder = new JkVideoBuilder().setShowBorder(true);
+		this.videoPlayerBuilder = new JkVideoBuilder().setShowBorder(true).setShowClose(false);
 
 		setLeft(createVideoListViewPane());
 
 		// CENTER
-		showingPlayer.addListener((observable, oldValue, newValue) -> {
-			setCenter(newValue);
-			if(newValue != null) {
-				updateSelectedCheckBoxes();
-				updateSelectedCheckBoxesMulti();
-			}
-		});
+		setCenter(createPlayerPane());
 
 		getStylesheets().add(getClass().getResource("/css/CatalogVideoPane.css").toExternalForm());
 
+	}
+
+	private Pane createPlayerPane() {
+		TextField txtVideoTitle = new TextField();
+		txtVideoTitle.setDisable(true);
+		Button btnChangeTitle = new Button("CHANGE TITLE");
+		btnChangeTitle.disableProperty().bind(Bindings.createBooleanBinding(
+				() -> StringUtils.isBlank(txtVideoTitle.getText()) || txtVideoTitle.getText().trim().equals(showingPlayer.get() == null ? "" : showingPlayer.get().getVideo().getVideoTitle()),
+				txtVideoTitle.textProperty()
+		));
+		btnChangeTitle.setOnAction(e -> changeVideoTitle(txtVideoTitle.getText().trim()));
+		HBox hboxTopLeft = new HBox(new Label("Video title:"), txtVideoTitle, btnChangeTitle);
+		hboxTopLeft.getStyleClass().addAll("spacing20");
+
+		Button btnDelete = new Button("DELETE");
+		btnDelete.getStyleClass().addAll("bigButton");
+		btnDelete.disableProperty().bind(showingPlayer.isNull());
+		btnDelete.setOnAction(e -> actionDeleteVideo());
+
+		BorderPane bptop = new BorderPane();
+		bptop.setLeft(hboxTopLeft);
+		bptop.setRight(btnDelete);
+
+		BorderPane bp = new BorderPane();
+		bp.getStyleClass().addAll("pad20");
+		bp.setTop(bptop);
+		showingPlayer.addListener((observable, oldValue, newValue) -> {
+			bp.setCenter(newValue);
+			txtVideoTitle.setDisable(newValue == null);
+			if(newValue != null) {
+				updateSelectedCheckBoxes();
+				updateSelectedCheckBoxesMulti();
+				txtVideoTitle.setText(newValue.getVideo().getVideoTitle());
+			} else {
+				txtVideoTitle.setText("");
+			}
+		});
+
+		return bp;
+	}
+
+	private void changeVideoTitle(String newVideoTitle) {
+		JkVideoPlayer vp = showingPlayer.get();
+		String oldTitle = vp.getVideo().getVideoTitle();
+		if(!newVideoTitle.equals(oldTitle)) {
+			vp.getVideo().setVideoTitle(newVideoTitle);
+			vp.setPlayerCaption(newVideoTitle);
+			videoListView.refresh();
+			logger.info("Changed title from [{}] to [{}]", oldTitle, newVideoTitle);
+		}
 	}
 
 	private Pane createVideoListViewPane() {
@@ -79,11 +123,8 @@ public class CatalogVideoPane extends BorderPane implements CloseablePane {
 		btnPrev.setOnAction(e -> updateShowingVideo(videoIndex.get() - 1));
 		Button btnNext = new Button("NEXT");
 		btnNext.setOnAction(e -> updateShowingVideo(videoIndex.get() + 1));
-		Button btnDelete = new Button("DELETE");
-		btnDelete.disableProperty().bind(showingPlayer.isNull());
-		btnDelete.setOnAction(e -> actionDeleteVideo());
-		HBox hboxBtns = new HBox(btnPrev, btnDelete, btnNext);
-		hboxBtns.getStyleClass().addAll("pad10", "spacing20", "centered", "bgYellow");
+		HBox hboxBtns = new HBox(btnPrev, btnNext);
+		hboxBtns.getStyleClass().addAll("pad10", "spacing20", "centered", "bigButtonBox");
 
 		this.videoListView = new ListView<>();
 		videoListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -121,7 +162,7 @@ public class CatalogVideoPane extends BorderPane implements CloseablePane {
 		Pane optionFieldsPane = createOptionFieldsPane();
 
 		VBox vbox = new VBox(hboxBtns, videoListView, optionFieldsPane);
-		vbox.getStyleClass().addAll("leftBox", "pad10", "spacing20", "bgRed", "borderBlue");
+		vbox.getStyleClass().addAll("leftBox", "pad10", "spacing20", "borderBlue");
 
 		return vbox;
 	}

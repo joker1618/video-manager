@@ -1,3 +1,5 @@
+.leftBox { -fx-background-color: -container-bg-color }
+
 .leftBox .list-view {
     -fx-pref-width: 500;
 }
@@ -6,9 +8,8 @@
     -fx-padding: 20;
     -fx-spacing: 10;
     -fx-min-width: 300;
-    -fx-background-color: -container-bg-color;
-    -fx-border-color: #99ccff;
-    -fx-border-width: 0 0 0 1;
+    -fx-border-width: 1;
+    -fx-border-color: BLACK;
 }
 
 .lblTitle {
@@ -16,7 +17,6 @@
 }
 
 .catCont {
-    -fx-background-color: yellow;
     -fx-spacing: 120;
 }
 .scrollPaneCategories {
@@ -51,4 +51,10 @@
 
 .check-box:selected {
     -fx-font-weight: BOLD;
+}
+
+.button.bigButton,
+.bigButtonBox .button {
+    -fx-pref-width: 100;
+    -fx-pref-height: 50;
 }

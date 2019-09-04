@@ -1,6 +1,7 @@
 package xxx.joker.apps.video.manager.common;
 
 import xxx.joker.apps.video.manager.model.entity.Video;
+import xxx.joker.libs.core.datetime.JkTime;
 import xxx.joker.libs.core.utils.JkFiles;
 
 import java.nio.file.Path;
@@ -21,9 +22,8 @@ public class Config {
 
 	public static final String CSV_STAGE_FILEPATH = "/data/MultiStagePositions.txt";
 
-	public static Path createSnapshotOutPath(Video video) {
-		String fname = strf("{}.snap.png", video.getMd5());
-		Path outPath = SNAPSHOT_FOLDER.resolve(fname);
-		return JkFiles.computeSafelyPath(outPath);
+	public static Path createSnapshotOutPath(Video video, long snapTime) {
+		String fname = strf("{}_{}.snap.png", video.getMd5(), snapTime);
+		return SNAPSHOT_FOLDER.resolve(fname);
 	}
 }

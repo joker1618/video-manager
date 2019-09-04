@@ -80,11 +80,13 @@ public class VideoModelImpl extends JkDataModel implements VideoModel {
 	@Override
 	public List<Path> findSnapshots(Video video) {
 		if(video == null)	return Collections.emptyList();
-		return JkFiles.findFiles(
+		List<Path> paths = JkFiles.findFiles(
 				Config.SNAPSHOT_FOLDER, false,
 				p -> p.getFileName().toString().startsWith(video.getMd5()),
 				p -> p.getFileName().toString().endsWith(".png")
 		);
+		paths.sort(Comparator.comparingInt(p -> Integer.parseInt(p.getFileName().toString().replaceAll("^[a-zA-Z0-9]*_|\\.snap.*\\.png$", ""))));
+		return paths;
 	}
 
 	@Override

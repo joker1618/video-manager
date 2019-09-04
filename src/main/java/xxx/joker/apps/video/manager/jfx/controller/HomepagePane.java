@@ -12,11 +12,18 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaView;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.common.Config;
+import xxx.joker.apps.video.manager.common.VmUtil;
+import xxx.joker.apps.video.manager.jfx.controller.videoplayer.JkVideoBuilder;
+import xxx.joker.apps.video.manager.jfx.controller.videoplayer.JkVideoStage;
 import xxx.joker.apps.video.manager.model.entity.Category;
 import xxx.joker.apps.video.manager.model.entity.Video;
 import xxx.joker.apps.video.manager.jfx.model.VideoModel;
@@ -32,14 +39,12 @@ import xxx.joker.libs.javafx.JkFxUtil;
 import xxx.joker.libs.core.utils.JkFiles;
 import xxx.joker.libs.core.utils.JkStreams;
 
+import javax.swing.event.ChangeListener;
 import java.io.File;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -259,9 +264,12 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 		tcolPlayTimes.setMinWidth(80);
 
 		TableColumn<Video, LocalDateTime> tcolCreationTm = new TableColumn<>("CREATION");
-		JkFxUtil.setTableCellFactoryLocalDateTime(tcolCreationTm, "insertTstamp", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+		JkFxUtil.setTableCellFactoryLocalDateTime(tcolCreationTm, "insertTstamp", DateTimeFormatter.ofPattern("dd/MM/yyyy   HH:mm:ss"));
 		tview.getColumns().add(tcolCreationTm);
 		tcolCreationTm.setMinWidth(200);
+
+		// Center all columns but the first one
+		tview.getColumns().subList(1, tview.getColumns().size()).forEach(col -> col.getStyleClass().add("centered"));
 
 		FilteredList<Video> filteredList = new FilteredList<>(model.getVideos());
 		filteredList.predicateProperty().bind(sortFilter);
@@ -283,53 +291,80 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 
 		vbox.getChildren().add(createDetailsSection());
 
-//		tcolTitle.minWidthProperty().bind(tview.widthProperty().multiply(0.6));
-
 		model.getSelectedVideos().setAll(tableItems);
 
 		return vbox;
 	}
 	private Pane createDetailsSection() {
 		BorderPane bp = new BorderPane();
+		bp.getStyleClass().addAll("snapshotsPane");
 
 		HBox hbox = new HBox();
-		hbox.getStyleClass().addAll("spacing20", "bgPink");
-		bp.setRight(hbox);
+		hbox.getStyleClass().addAll("spacing20");
+        ScrollPane sp = new ScrollPane(hbox);
+		bp.setCenter(sp);
 
-		model.getSelectedVideos().addListener((ListChangeListener<Video>)c -> {
-			hbox.getChildren().clear();
-			if(model.getSelectedVideos().size() == 1) {
-				Video video = model.getSelectedVideos().get(0);
-				List<Path> snapPaths = model.findSnapshots(video);
-				try {
-					for (int i = 0; i < 6 && i < snapPaths.size(); i++) {
-						String url = snapPaths.get(i).toUri().toURL().toExternalForm();
-						Image snap = new Image(url);
-						ImageView imageView = new ImageView(snap);
-						imageView.setPreserveRatio(true);
-						imageView.setFitWidth(200);
-						imageView.setFitHeight(200);
-						hbox.getChildren().add(0, imageView);
-					}
-				} catch(Exception e) {
-					throw new JkRuntimeException(e);
-				}
-			}
-		});
+        model.getSelectedVideos().addListener((ListChangeListener<Video>)c -> fillSnapshotsPane(hbox));
 
 		return bp;
 	}
+	private void fillSnapshotsPane(HBox hbox) {
+        Image imgDelete = new Image(getClass().getResource("/icons/delete.png").toExternalForm());
+
+        hbox.getChildren().clear();
+        if(model.getSelectedVideos().size() == 1) {
+            Video video = model.getSelectedVideos().get(0);
+            List<Path> snapPaths = model.findSnapshots(video);
+            try {
+                for (int i = 0; i < snapPaths.size(); i++) {
+                    Path path = snapPaths.get(i);
+                    String url = path.toUri().toURL().toExternalForm();
+                    Image snap = new Image(url);
+                    ImageView imageView = new ImageView(snap);
+                    imageView.setPreserveRatio(true);
+                    int fw = 165;
+                    int fh = 100;
+					HBox ivbox = new HBox(imageView);
+					ivbox.getStyleClass().addAll("bgBlack", "centered");
+					ivbox.setPrefWidth(fw);
+					ivbox.setPrefHeight(fh);
+					imageView.setFitWidth(ivbox.getPrefWidth());
+                    imageView.setFitHeight(ivbox.getPrefHeight());
+
+                    Button btnDelSnapshot = new Button();
+                    btnDelSnapshot.getStyleClass().addAll("pad0");
+                    ImageView iv = new ImageView(imgDelete);
+                    iv.setPreserveRatio(false);
+                    int delSize = 30;
+                    iv.setFitWidth(delSize);
+                    iv.setFitHeight(delSize);
+                    btnDelSnapshot.setGraphic(iv);
+                    btnDelSnapshot.setOnAction(e -> {
+                        JkFiles.removeFile(path);
+                        tview.refresh();
+                        fillSnapshotsPane(hbox);
+                    });
+
+                    VBox vBox = new VBox(ivbox, btnDelSnapshot);
+//                    VBox vBox = new VBox(imageView, btnDelSnapshot);
+                    vBox.getStyleClass().addAll("spacing5", "centered");
+
+                    hbox.getChildren().add(vBox);
+                }
+            } catch(Exception e) {
+                throw new JkRuntimeException(e);
+            }
+        }
+    }
 	private void addDetailsLine(GridPane gp, int row, String label, Label fixedLabel, Label selLabel) {
 		gp.add(new Label(label), 0, row);
 		gp.add(fixedLabel, 1, row);
 		gp.add(selLabel, 2, row);
 	}
 
-
-
 	private Pane createRightPane() {
 		VBox box = new VBox();
-		box.getStyleClass().add("rightBox");
+		box.getStyleClass().addAll("rightBox", "topCenter");
 
 		Button btnMark = new Button("MARK VIDEOS");
 		Category cat = new Category("MARKED");
@@ -370,7 +405,7 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 		box.getChildren().add(btnGoToCategorizeVideo);
 
 		VBox vbox = new VBox();
-		vbox.getStyleClass().add("boxPlayVideos");
+		vbox.getStyleClass().addAll("boxPlayVideos", "borderBlack1", "pad10", "centered");
 
 		Button btnPlay = new Button("PLAY");
 		btnPlay.setOnAction(e -> SceneManager.displayMultiVideos());
@@ -396,7 +431,70 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 
 		box.getChildren().add(vbox);
 
+		Button btnAutoSnap = new Button("AUTO SNAPSHOTS");
+		btnAutoSnap.setOnAction(e -> {
+			JkVideoBuilder pbuilder = new JkVideoBuilder();
+			pbuilder.setDecoratedStage(false);
+			pbuilder.setShowBorder(true);
+			pbuilder.setShowClose(true);
+			JkVideoStage autoStage = pbuilder.createStage();
+			autoStage.setMaximized(true);
+			runAutoSnapshots(autoStage, new ArrayList<>(model.getSelectedVideos()));
+		});
+		box.getChildren().add(btnAutoSnap);
+
 		return box;
+	}
+
+	private void runAutoSnapshots(JkVideoStage stage, List<Video> videos) {
+		if(videos.isEmpty()) {
+			stage.close();
+			tview.refresh();
+		} else {
+			Video video = videos.remove(0);
+			stage.playVideo(video);
+			MediaView mv = stage.getVideoPlayer().getMediaView();
+			MediaPlayer mp = mv.getMediaPlayer();
+			List<Long> times = new ArrayList<>();
+			mp.totalDurationProperty().addListener((obs,o,n) -> {
+				if(times.isEmpty()) {
+					long tot = (long) mp.getTotalDuration().toMillis();
+					tot -= 8 * 1000;
+					int numSnapMin = 7;
+					int minMinutesMs = 7 * 60 * 1000;
+					if(tot < minMinutesMs) {
+						for(int i = 0; i < numSnapMin; i++) {
+							times.add((i+1) * tot / numSnapMin);
+						}
+					} else {
+						long ns = tot / (60 * 1000);
+						for(int i = 0; i < ns; i++) {
+							times.add(1000L * 60 * (i+1));
+						}
+					}
+				}
+				mp.play();
+				mp.seek(Duration.millis(times.get(0) - 200));
+			});
+			mp.currentTimeProperty().addListener((obs,o,n) -> {
+				synchronized (times) {
+					if(!times.isEmpty()) {
+						boolean doSnap = times.get(0) <= n.toMillis();
+						if(doSnap) {
+							times.remove(0);
+							stage.getVideoPlayer().takeVideoSnapshot(500);
+							double seekMs;
+							if(times.isEmpty()) {
+								runAutoSnapshots(stage, videos);
+							} else {
+								seekMs = times.get(0) - 200;
+								mp.seek(Duration.millis(seekMs));
+							}
+						}
+					}
+				}
+			});
+		}
 	}
 
 	private void actionAddVideos(ActionEvent event) {
@@ -425,7 +523,7 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 				boolean addVideo = JkStreams.filter(model.getVideos(), vi -> vi.getMd5().equals(v.getMd5())).isEmpty();
 				if(addVideo) {
 					if(!JkFiles.areEquals(orig, outPath)) {
-						Path vpath = JkFiles.moveFileSafely(orig, outPath);
+						Path vpath = JkFiles.copyFileSafely(orig, outPath);
 						v.setPath(vpath);
 					}
 					model.getVideos().add(v);
@@ -441,7 +539,6 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 		dlg.getDialogPane().getButtonTypes().add(ButtonType.OK);
 		dlg.close();
 	}
-
 
 	@Override
 	public void closePane() {

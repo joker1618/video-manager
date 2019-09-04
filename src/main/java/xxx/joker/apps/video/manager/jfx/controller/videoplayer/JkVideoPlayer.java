@@ -17,6 +17,7 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.util.Duration;
+import opennlp.tools.stemmer.snowball.SnowballStemmer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.common.Config;
@@ -29,7 +30,10 @@ import xxx.joker.libs.core.utils.JkFiles;
 import java.net.URL;
 import java.nio.file.Path;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -39,13 +43,14 @@ import static xxx.joker.libs.core.utils.JkStrings.strf;
 public class JkVideoPlayer extends BorderPane {
 
 	private static Logger logger = LoggerFactory.getLogger(JkVideoPlayer.class);
-	
+
+	private Label lblHeading;
 	private Video video;
 	private PlayerConfig playerConfig;
 
 	private final Pane topPane;
 
-	private MediaView mediaView;
+	protected MediaView mediaView;
 
 	private final Pane bottomPane;
 	private Button btnPlay;
@@ -62,12 +67,12 @@ public class JkVideoPlayer extends BorderPane {
 		this.video = video;
 		this.playerConfig = playerConfig;
 
+		setCenter(createMediaViewPane());
+
 		this.topPane = createTopPane();
 		if(playerConfig.visibleHeading) {
 			setTop(topPane);
 		}
-
-		setCenter(createMediaViewPane());
 
 		this.bottomPane = createMediaBarPane();
 		if(playerConfig.visiblePlayerBar) {
@@ -100,7 +105,7 @@ public class JkVideoPlayer extends BorderPane {
 		return mediaView;
 	}
 
-	public PlayerConfig getPlayerConfig() {
+	protected PlayerConfig getPlayerConfig() {
 		playerConfig.setVolume(mediaView.getMediaPlayer().getVolume());
 		playerConfig.setVisibleHeading(getTop() != null);
 		playerConfig.setVisiblePlayerBar(getBottom() != null);
@@ -112,7 +117,7 @@ public class JkVideoPlayer extends BorderPane {
 	}
 
 	private Pane createTopPane() {
-		Label lblHeading = new Label(JkFiles.getFileName(video.getPath()));
+		this.lblHeading = new Label(video.getVideoTitle());
 
 		HBox headingBox = new HBox();
 		headingBox.getStyleClass().add("headingBox");
@@ -124,19 +129,23 @@ public class JkVideoPlayer extends BorderPane {
 		imageView.setPreserveRatio(false);
 		imageView.setFitWidth(35);
 		imageView.setFitHeight(30);
-		imageView.setOnMouseClicked(e -> {
-			Path snapPath = Config.createSnapshotOutPath(video);
-			VmUtil.takeSnapshot(mediaView, snapPath);
+
+		Button btnCamera = new Button();
+		btnCamera.setGraphic(imageView);
+		int snapSize = 500;
+		btnCamera.setOnAction(e -> {
+			takeVideoSnapshot(snapSize);
 			if(!okSnap.get()) {
 				URL url2 = getClass().getResource("/icons/camera-green.png");
 				Image iconCamera2 = new Image(url2.toExternalForm());
 				imageView.setImage(iconCamera2);
 				okSnap.set(true);
 			}
-			logger.info("Snapshot saved for {}", video.getVideoTitle());
 		});
-		HBox hBox = new HBox(imageView);
-		headingBox.getChildren().add(hBox);
+
+		HBox hBoxCamera = new HBox(btnCamera);
+		hBoxCamera.getStyleClass().add("boxSnapshot");
+		headingBox.getChildren().add(hBoxCamera);
 
 		Pane fill1 = new Pane();
 		Pane fill2 = new Pane();
@@ -150,6 +159,25 @@ public class JkVideoPlayer extends BorderPane {
 		}
 
 		return headingBox;
+	}
+
+	public void setPlayerCaption(String caption) {
+		lblHeading.setText(caption);
+	}
+
+	public void takeVideoSnapshot(int snapSize) {
+		Duration currentTime = mediaView.getMediaPlayer().getCurrentTime();
+		long snapTime = (long) currentTime.toMillis();
+		Path snapPath = Config.createSnapshotOutPath(video, snapTime);
+		double fw = mediaView.getFitWidth();
+		double fh = mediaView.getFitHeight();
+		mediaView.resize(snapSize, snapSize);
+		mediaView.setFitWidth(snapSize);
+		mediaView.setFitHeight(snapSize);
+		VmUtil.takeSnapshot(mediaView, snapPath);
+		mediaView.setFitWidth(fw);
+		mediaView.setFitHeight(fh);
+		logger.info("Snapshot taken at {} for {}", JkTime.of(snapTime).toStringElapsed(true), video.getVideoTitle());
 	}
 
 	private Pane createMediaViewPane() {
@@ -325,7 +353,7 @@ public class JkVideoPlayer extends BorderPane {
 			}
 		});
 		mediaPlayer.currentTimeProperty().addListener(ov -> updateValues());
-		
+
 		// time slider
 		sliderTime.setOnMouseClicked(event -> {
 			sliderTime.setValueChanging(true);
@@ -360,7 +388,7 @@ public class JkVideoPlayer extends BorderPane {
 			() -> {
 				MediaPlayer mediaPlayer = mediaView.getMediaPlayer();
 				if(mediaPlayer != null) {
-                    Duration currentTime = mediaPlayer.getCurrentTime();
+					Duration currentTime = mediaPlayer.getCurrentTime();
                     JkTime of = JkTime.of((long) currentTime.toMillis());
                     lblActualTime.setText(of.toStringElapsed(false, ChronoUnit.MINUTES));
                     if (!sliderTime.isValueChanging()) {
@@ -385,8 +413,8 @@ public class JkVideoPlayer extends BorderPane {
 		private boolean decoratedStage;
 		private boolean showBorder;
 		private double volume = 1.0;
-		private boolean visibleHeading;
 		private boolean showCloseButton;
+		private boolean visibleHeading;
 		private boolean visiblePlayerBar;
 		private EventHandler<ActionEvent> previousAction;
 		private EventHandler<ActionEvent> nextAction;
@@ -418,6 +446,14 @@ public class JkVideoPlayer extends BorderPane {
 			this.decoratedStage = decoratedStage;
 		}
 
+		public boolean isShowCloseButton() {
+			return showCloseButton;
+		}
+
+		public void setShowCloseButton(boolean showCloseButton) {
+			this.showCloseButton = showCloseButton;
+		}
+
 		public boolean isShowBorder() {
 			return showBorder;
 		}
@@ -440,14 +476,6 @@ public class JkVideoPlayer extends BorderPane {
 
 		public void setVisibleHeading(boolean visibleHeading) {
 			this.visibleHeading = visibleHeading;
-		}
-
-		public boolean isShowCloseButton() {
-			return showCloseButton;
-		}
-
-		public void setShowCloseButton(boolean showCloseButton) {
-			this.showCloseButton = showCloseButton;
 		}
 
 		public boolean isVisiblePlayerBar() {
@@ -475,7 +503,9 @@ public class JkVideoPlayer extends BorderPane {
 		}
 
 		public void consumeMiddleMouseClickEvent(MouseEvent event) {
-			middleMouseClickEvent.accept(event);
+			if(middleMouseClickEvent != null) {
+				middleMouseClickEvent.accept(event);
+			}
 		}
 
 		public void setMiddleMouseClickEvent(Consumer<MouseEvent> middleMouseClickEvent) {
@@ -483,7 +513,9 @@ public class JkVideoPlayer extends BorderPane {
 		}
 
 		public void consumeRightMouseClickEvent(MouseEvent event) {
-			rightMouseClickEvent.accept(event);
+			if(rightMouseClickEvent != null) {
+				rightMouseClickEvent.accept(event);
+			}
 		}
 
 		public void setRightMouseClickEvent(Consumer<MouseEvent> rightMouseClickEvent) {

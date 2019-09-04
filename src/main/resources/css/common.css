@@ -12,6 +12,7 @@
 .no-width  { -fx-min-width: -1; -fx-pref-width: -1; -fx-max-width: -1; }
 .no-height { -fx-min-height: -1; -fx-pref-height: -1; -fx-max-height: -1; }
 
+.pad0   { -fx-padding: 0 }
 .pad5   { -fx-padding: 5 }
 .pad10  { -fx-padding: 10 }
 .pad20  { -fx-padding: 20 }
