@@ -17,27 +17,22 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.util.Duration;
-import opennlp.tools.stemmer.snowball.SnowballStemmer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.common.Config;
-import xxx.joker.apps.video.manager.common.VmUtil;
+import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.apps.video.manager.jfx.model.VideoModelImpl;
-import xxx.joker.apps.video.manager.model.entity.Video;
-import xxx.joker.libs.core.datetime.JkTime;
-import xxx.joker.libs.core.utils.JkFiles;
+import xxx.joker.libs.core.datetime.JkDuration;
+import xxx.joker.libs.core.files.JkFiles;
+import xxx.joker.libs.core.javafx.JfxUtil;
 
 import java.net.URL;
 import java.nio.file.Path;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-import static xxx.joker.libs.core.utils.JkConsole.display;
 import static xxx.joker.libs.core.utils.JkStrings.strf;
 
 public class JkVideoPlayer extends BorderPane {
@@ -45,7 +40,7 @@ public class JkVideoPlayer extends BorderPane {
 	private static Logger logger = LoggerFactory.getLogger(JkVideoPlayer.class);
 
 	private Label lblHeading;
-	private Video video;
+	private FxVideo fxVideo;
 	private PlayerConfig playerConfig;
 
 	private final Pane topPane;
@@ -63,8 +58,8 @@ public class JkVideoPlayer extends BorderPane {
 	private boolean isMediaTerminated;
 
 
-	protected JkVideoPlayer(Video video, PlayerConfig playerConfig) {
-		this.video = video;
+	protected JkVideoPlayer(FxVideo fxVideo, PlayerConfig playerConfig) {
+		this.fxVideo = fxVideo;
 		this.playerConfig = playerConfig;
 
 		setCenter(createMediaViewPane());
@@ -112,17 +107,17 @@ public class JkVideoPlayer extends BorderPane {
 		return playerConfig;
 	}
 
-	public Video getVideo() {
-		return video;
+	public FxVideo getFxVideo() {
+		return fxVideo;
 	}
 
 	private Pane createTopPane() {
-		this.lblHeading = new Label(video.getVideoTitle());
+		this.lblHeading = new Label(fxVideo.getVideo().getTitle());
 
 		HBox headingBox = new HBox();
 		headingBox.getStyleClass().add("headingBox");
 
-		AtomicBoolean okSnap = new AtomicBoolean(!VideoModelImpl.getInstance().findSnapshots(video).isEmpty());
+		AtomicBoolean okSnap = new AtomicBoolean(!VideoModelImpl.getInstance().findSnapshots(fxVideo.getVideo()).isEmpty());
 		URL url = getClass().getResource(strf("/icons/camera-{}.png", okSnap.get() ? "green" : "red"));
 		Image iconCamera = new Image(url.toExternalForm());
 		ImageView imageView = new ImageView(iconCamera);
@@ -168,22 +163,22 @@ public class JkVideoPlayer extends BorderPane {
 	public void takeVideoSnapshot(int snapSize) {
 		Duration currentTime = mediaView.getMediaPlayer().getCurrentTime();
 		long snapTime = (long) currentTime.toMillis();
-		Path snapPath = Config.createSnapshotOutPath(video, snapTime);
+		Path snapPath = Config.createSnapshotOutPath(fxVideo.getVideo(), snapTime);
 		double fw = mediaView.getFitWidth();
 		double fh = mediaView.getFitHeight();
 		mediaView.resize(snapSize, snapSize);
 		mediaView.setFitWidth(snapSize);
 		mediaView.setFitHeight(snapSize);
-		VmUtil.takeSnapshot(mediaView, snapPath);
+		JfxUtil.takeSnapshot(mediaView, snapPath);
 		mediaView.setFitWidth(fw);
 		mediaView.setFitHeight(fh);
-		logger.info("Snapshot taken at {} for {}", JkTime.of(snapTime).toStringElapsed(true), video.getVideoTitle());
+		logger.info("Snapshot taken at {} for {}", JkDuration.of(snapTime).toStringElapsed(true), fxVideo.getVideo().getTitle());
 	}
 
 	private Pane createMediaViewPane() {
 		// Create media view
 		mediaView = new MediaView();
-		Media media = new Media(video.getURL());
+		Media media = new Media(JkFiles.toURL(fxVideo.getPath()));
 		MediaPlayer mediaPlayer = new MediaPlayer(media);
 		mediaPlayer.setAutoPlay(false);
 		mediaPlayer.setCycleCount(1);
@@ -254,9 +249,9 @@ public class JkVideoPlayer extends BorderPane {
 		sliderTime.setMaxWidth(Double.MAX_VALUE);
 
 		// Label for total time
-		String totTime = video.getDuration().toStringElapsed(false, ChronoUnit.MINUTES);
-		Label lblTotalTime = new Label(totTime);
-
+//		String totTime = fxVideo.getVideo().getLength().toStringElapsed(false, ChronoUnit.MINUTES);
+		Label lblTotalTime = new Label();
+		mediaView.getMediaPlayer().totalDurationProperty().addListener((obs,o,n) -> lblTotalTime.setText(JkDuration.of(n).toStringElapsed(false, ChronoUnit.MINUTES)));
 		HBox hboxTime = new HBox(lblActualTime, sliderTime, lblTotalTime);
 		hboxTime.getStyleClass().add("lessSpacingBox");
 		HBox.setHgrow(hboxTime, Priority.ALWAYS);
@@ -383,10 +378,11 @@ public class JkVideoPlayer extends BorderPane {
 				MediaPlayer mediaPlayer = mediaView.getMediaPlayer();
 				if(mediaPlayer != null) {
 					Duration currentTime = mediaPlayer.getCurrentTime();
-                    JkTime of = JkTime.of((long) currentTime.toMillis());
+					Duration totTime = mediaPlayer.getTotalDuration();
+                    JkDuration of = JkDuration.of((long) currentTime.toMillis());
                     lblActualTime.setText(of.toStringElapsed(false, ChronoUnit.MINUTES));
                     if (!sliderTime.isValueChanging()) {
-                        Duration divided = currentTime.divide(video.getDuration().getTotalMillis());
+                        Duration divided = currentTime.divide(totTime.toMillis());
                         sliderTime.setValue(divided.toMillis() * 100.0);
                     }
                     if (!sliderVolume.isValueChanging()) {
@@ -400,7 +396,7 @@ public class JkVideoPlayer extends BorderPane {
 
 	@Override
 	public String toString() {
-		return video.toString();
+		return fxVideo.toString();
 	}
 
 	static class PlayerConfig {

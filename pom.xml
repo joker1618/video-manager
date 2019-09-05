@@ -4,52 +4,38 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>xxx.joker.apps</groupId>
+    <artifactId>video-manager</artifactId>
+    <version>2.0</version>
+
     <parent>
         <groupId>xxx.joker.parent</groupId>
         <artifactId>java-8-base-parent</artifactId>
         <version>1.0</version>
     </parent>
 
-    <groupId>xxx.joker.apps</groupId>
-    <artifactId>video-manager</artifactId>
-    <version>1.0</version>
+    <properties>
+        <java.libs.version>2.0</java.libs.version>
+    </properties>
 
-    <packaging>jar</packaging>
-                                        
     <dependencies>
+        <!-- java-libs -->
         <dependency>
             <groupId>xxx.joker.libs</groupId>
             <artifactId>java-core</artifactId>
-            <version>1.0</version>
+            <version>${java.libs.version}</version>
         </dependency>
         <dependency>
             <groupId>xxx.joker.libs</groupId>
-            <artifactId>java-fx</artifactId>
-            <version>1.0</version>
+            <artifactId>java-repo</artifactId>
+            <version>${java.libs.version}</version>
         </dependency>
-        <dependency>
-            <groupId>xxx.joker.libs</groupId>
-            <artifactId>java-media</artifactId>
-            <version>1.0</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.zenjava/javafx-maven-plugin -->
-        <dependency>
-            <groupId>com.zenjava</groupId>
-            <artifactId>javafx-maven-plugin</artifactId>
-            <version>8.8.3</version>
-        </dependency>
-        <!-- ScenicView -->
         <dependency>
             <groupId>3rdParty.org</groupId>
             <artifactId>scenicview</artifactId>
             <version>8.7.0</version>
         </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-            <scope>test</scope>
-        </dependency>
+        <!-- Logback -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
@@ -62,62 +48,5 @@
         </dependency>
     </dependencies>
 
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.1.0</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <mainClass>xxx.joker.apps.video.manager.main.OnlyLauncherL</mainClass>
-                        </manifest>
-                    </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>create-jar-with-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <!-- Copy JAR to 'Joker apps' folder -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.0.2</version>
-                <executions>
-                    <execution>
-                        <id>copy-jar</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${joker.apps.folder}/video-manager</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${project.build.directory}</directory>
-                                    <includes>
-					`                   <include>video-manager-${project.version}-jar-with-dependencies.jar</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-        </plugins>
-    </build>
 
 </project>

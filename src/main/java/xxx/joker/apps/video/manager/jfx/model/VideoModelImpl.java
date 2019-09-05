@@ -6,33 +6,32 @@ import javafx.collections.ObservableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.common.Config;
+import xxx.joker.apps.video.manager.datalayer.VideoRepo;
+import xxx.joker.apps.video.manager.datalayer.VideoRepoImpl;
+import xxx.joker.apps.video.manager.datalayer.entities.Category;
+import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.apps.video.manager.jfx.model.beans.PlayOptions;
-import xxx.joker.apps.video.manager.model.entity.Category;
-import xxx.joker.apps.video.manager.model.entity.Video;
-import xxx.joker.libs.core.repository.JkDataModel;
-import xxx.joker.libs.core.repository.entity.JkEntity;
-import xxx.joker.libs.core.utils.JkFiles;
-import xxx.joker.libs.core.utils.JkStreams;
+import xxx.joker.libs.core.files.JkFiles;
+import xxx.joker.libs.datalayer.design.RepoEntity;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-public class VideoModelImpl extends JkDataModel implements VideoModel {
+public class VideoModelImpl implements VideoModel {
 
 	private static final Logger logger = LoggerFactory.getLogger(VideoModelImpl.class);
 
 	private static final VideoModelImpl instance = new VideoModelImpl();
-	private final Map<Class<?>, ObservableList<? extends JkEntity>> dataMap = new HashMap<>();
+	private final Map<Class<?>, ObservableList<? extends RepoEntity>> dataMap = new HashMap<>();
 	private final ObservableList<Video> selectedVideos = FXCollections.observableArrayList();
 	private final PlayOptions playOptions = new PlayOptions();
+	private final VideoRepo repo = new VideoRepoImpl();
 
 
 	private VideoModelImpl() {
-		super(Config.DB_FOLDER, Config.DB_NAME, "xxx.joker.apps.video.manager.model.entity");
 		try {
-			dataMap.put(Category.class, FXCollections.observableArrayList(super.getData(Category.class)));
-			ObservableList<Video> videos = FXCollections.observableArrayList(super.getData(Video.class));
+			dataMap.put(Category.class, FXCollections.observableArrayList(repo.getDataSet(Category.class)));
+			ObservableList<Video> videos = FXCollections.observableArrayList(repo.getDataSet(Video.class));
 			dataMap.put(Video.class, videos);
 			videos.addListener((ListChangeListener<? super Video>) c -> selectedVideos.removeIf(v -> !videos.contains(v)));
 			performInitVideoChecks();
@@ -44,8 +43,6 @@ public class VideoModelImpl extends JkDataModel implements VideoModel {
 
 	}
 	private void performInitVideoChecks() {
-		// Remove non existing videos
-		getVideos().removeIf(v -> !Files.exists(v.getPath()));
 		// Remove non existing categories
 		for(Video video : getVideos()) {
 			if(!video.getCategories().isEmpty())
@@ -91,14 +88,19 @@ public class VideoModelImpl extends JkDataModel implements VideoModel {
 
 	@Override
 	public void persistData() {
-		Set<Category> categories = super.getData(Category.class);
+		Set<Category> categories = repo.getDataSet(Category.class);
 		categories.clear();
 		categories.addAll(getCategories());
 
-		Set<Video> videos = super.getData(Video.class);
+		Set<Video> videos = repo.getDataSet(Video.class);
 		videos.clear();
 		videos.addAll(getVideos());
 
-		super.commit();
+		repo.commit();
+	}
+
+	@Override
+	public VideoRepo getRepo() {
+		return repo;
 	}
 }

@@ -3,7 +3,10 @@ package xxx.joker.apps.video.manager.main;
 import javafx.scene.Scene;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xxx.joker.apps.video.manager.jfx.controller.*;
+import xxx.joker.apps.video.manager.jfx.controller.CatalogVideoPane;
+import xxx.joker.apps.video.manager.jfx.controller.CloseablePane;
+import xxx.joker.apps.video.manager.jfx.controller.HomepagePane;
+import xxx.joker.apps.video.manager.jfx.controller.MultiVideoPane;
 
 public class SceneManager {
 

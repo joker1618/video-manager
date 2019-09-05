@@ -8,16 +8,19 @@ import javafx.stage.Stage;
 import org.scenicview.ScenicView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xxx.joker.apps.video.manager.main.OnlyLauncherL;
-import xxx.joker.apps.video.manager.model.entity.Video;
+import xxx.joker.apps.video.manager.datalayer.entities.Video;
+import xxx.joker.apps.video.manager.jfx.controller.videoplayer.FxVideo;
 import xxx.joker.apps.video.manager.jfx.controller.videoplayer.JkVideoBuilder;
 import xxx.joker.apps.video.manager.jfx.controller.videoplayer.JkVideoStage;
 import xxx.joker.apps.video.manager.jfx.model.VideoModel;
 import xxx.joker.apps.video.manager.jfx.model.VideoModelImpl;
+import xxx.joker.apps.video.manager.main.OnlyLauncherL;
 import xxx.joker.apps.video.manager.main.SceneManager;
 import xxx.joker.apps.video.manager.provider.StagePosProvider;
 import xxx.joker.apps.video.manager.provider.VideoStagesPosition;
+import xxx.joker.libs.datalayer.entities.RepoResource;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -55,12 +58,12 @@ public class MultiVideoPane extends BorderPane implements CloseablePane {
 		this.stages = new ArrayList<>();
 		VideoStagesPosition stagesPosition = StagePosProvider.getStagesPosition(model.getPlayOptions().getMultiVideoName());
 		for (int i = 0; i < stagesPosition.getNumStages(); i++) {
-			List<Video> hlist = new ArrayList<>();
+			List<FxVideo> hlist = new ArrayList<>();
 			hlist.add(getNextRandomVideo());
 
 			pbuilder.setSupplierPrevious(() -> getPreviousRandomVideo(hlist));
 			pbuilder.setSupplierNext(() -> {
-				Video v = getNextRandomVideo();
+				FxVideo v = getNextRandomVideo();
 				hlist.add(v);
 				return v;
 			});
@@ -96,7 +99,7 @@ public class MultiVideoPane extends BorderPane implements CloseablePane {
 		return vbox;
 	}
 
-	private Video getNextRandomVideo() {
+	private FxVideo getNextRandomVideo() {
 		synchronized (random) {
 			if(toReproduce.isEmpty()) {
 				toReproduce.addAll(videos);
@@ -106,18 +109,20 @@ public class MultiVideoPane extends BorderPane implements CloseablePane {
 			Video video = toReproduce.remove(idx);
 			video.incrementPlayTimes();
 
-			return video;
+			RepoResource res = model.getRepo().getResource(video.getMd5(), "videoz");
+
+			return new FxVideo(video, res.getPath());
 		}
 	}
 
-	private Video getPreviousRandomVideo(List<Video> hist) {
+	private FxVideo getPreviousRandomVideo(List<FxVideo> hist) {
 		synchronized (random) {
 			if(hist.size() > 1) {
 				hist.remove(hist.size() - 1);
 			}
 
-			Video video = hist.get(hist.size() - 1);
-			video.incrementPlayTimes();
+			FxVideo video = hist.get(hist.size() - 1);
+			video.getVideo().incrementPlayTimes();
 
 			return video;
 		}

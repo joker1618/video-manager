@@ -6,32 +6,30 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.control.*;
-import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xxx.joker.apps.video.manager.datalayer.entities.Category;
+import xxx.joker.apps.video.manager.datalayer.entities.Video;
+import xxx.joker.apps.video.manager.jfx.controller.videoplayer.FxVideo;
 import xxx.joker.apps.video.manager.jfx.controller.videoplayer.JkVideoBuilder;
 import xxx.joker.apps.video.manager.jfx.controller.videoplayer.JkVideoPlayer;
 import xxx.joker.apps.video.manager.jfx.model.VideoModel;
 import xxx.joker.apps.video.manager.jfx.model.VideoModelImpl;
-import xxx.joker.apps.video.manager.model.entity.Category;
-import xxx.joker.apps.video.manager.model.entity.Video;
-import xxx.joker.libs.core.utils.JkFiles;
-import xxx.joker.libs.core.utils.JkStreams;
+import xxx.joker.libs.core.lambdas.JkStreams;
+import xxx.joker.libs.datalayer.entities.RepoResource;
 
-import javax.imageio.ImageIO;
-import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
 
 import static xxx.joker.libs.core.utils.JkStrings.strf;
 
@@ -73,7 +71,7 @@ public class CatalogVideoPane extends BorderPane implements CloseablePane {
 		txtVideoTitle.setDisable(true);
 		Button btnChangeTitle = new Button("CHANGE TITLE");
 		btnChangeTitle.disableProperty().bind(Bindings.createBooleanBinding(
-				() -> StringUtils.isBlank(txtVideoTitle.getText()) || txtVideoTitle.getText().trim().equals(showingPlayer.get() == null ? "" : showingPlayer.get().getVideo().getVideoTitle()),
+				() -> StringUtils.isBlank(txtVideoTitle.getText()) || txtVideoTitle.getText().trim().equals(showingPlayer.get() == null ? "" : showingPlayer.get().getFxVideo().getVideo().getTitle()),
 				txtVideoTitle.textProperty()
 		));
 		btnChangeTitle.setOnAction(e -> changeVideoTitle(txtVideoTitle.getText().trim()));
@@ -98,7 +96,7 @@ public class CatalogVideoPane extends BorderPane implements CloseablePane {
 			if(newValue != null) {
 				updateSelectedCheckBoxes();
 				updateSelectedCheckBoxesMulti();
-				txtVideoTitle.setText(newValue.getVideo().getVideoTitle());
+				txtVideoTitle.setText(newValue.getFxVideo().getVideo().getTitle());
 			} else {
 				txtVideoTitle.setText("");
 			}
@@ -109,9 +107,9 @@ public class CatalogVideoPane extends BorderPane implements CloseablePane {
 
 	private void changeVideoTitle(String newVideoTitle) {
 		JkVideoPlayer vp = showingPlayer.get();
-		String oldTitle = vp.getVideo().getVideoTitle();
+		String oldTitle = vp.getFxVideo().getVideo().getTitle();
 		if(!newVideoTitle.equals(oldTitle)) {
-			vp.getVideo().setVideoTitle(newVideoTitle);
+			vp.getFxVideo().getVideo().setTitle(newVideoTitle);
 			vp.setPlayerCaption(newVideoTitle);
 			videoListView.refresh();
 			logger.info("Changed title from [{}] to [{}]", oldTitle, newVideoTitle);
@@ -133,9 +131,9 @@ public class CatalogVideoPane extends BorderPane implements CloseablePane {
 			@Override
 			protected void updateItem(Video item, boolean empty) {
 				super.updateItem(item, empty);
-				setText(item == null ? null : item.getVideoTitle());
+				setText(item == null ? null : item.getTitle());
 				showingPlayer.addListener((obs,o,n) -> {
-					if(n == null || !n.getVideo().equals(item)) {
+					if(n == null || !n.getFxVideo().equals(item)) {
 						getStyleClass().remove("bold");
 					} else {
 						getStyleClass().add("bold");
@@ -237,9 +235,9 @@ public class CatalogVideoPane extends BorderPane implements CloseablePane {
 
 	private void updateSelectedCheckBoxes() {
 		if(showingPlayer.getValue() != null) {
-			Video video = showingPlayer.getValue().getVideo();
+			FxVideo video = showingPlayer.getValue().getFxVideo();
 			for (Category cat : model.getCategories()) {
-				checkBoxCategoryMap.get(cat).setSelected(video.getCategories().contains(cat));
+				checkBoxCategoryMap.get(cat).setSelected(video.getVideo().getCategories().contains(cat));
 			}
 		}
 	}
@@ -260,7 +258,8 @@ public class CatalogVideoPane extends BorderPane implements CloseablePane {
 	}
 
 	private void actionDeleteVideo() {
-		Video videoToDel = showingPlayer.getValue().getVideo();
+		JkVideoPlayer vp = showingPlayer.getValue();
+		FxVideo videoToDel = vp.getFxVideo();
 
 		try {
 			updateShowingVideo(videoIndex.getValue() + 1);
@@ -289,7 +288,7 @@ public class CatalogVideoPane extends BorderPane implements CloseablePane {
 				updateCategoriesCheckBoxes();
 				updateCategoriesCheckBoxesMulti();
 				if(showingPlayer.get() != null){
-					showingPlayer.getValue().getVideo().getCategories().add(cat);
+					showingPlayer.getValue().getFxVideo().getVideo().getCategories().add(cat);
 					updateSelectedCheckBoxes();
 					updateSelectedCheckBoxesMulti();
 				}
@@ -306,8 +305,10 @@ public class CatalogVideoPane extends BorderPane implements CloseablePane {
 				videoPlayer.closePlayer();
 			}
 			if(newIndex >= 0 && newIndex < videos.size()) {
-				Video video = JkStreams.filter(model.getVideos(), v -> videos.get(newIndex).getVideoTitle().equals(v.getVideoTitle())).get(0);
-				JkVideoPlayer vp = videoPlayerBuilder.createPane(video);
+				Video video = JkStreams.filter(model.getVideos(), v -> videos.get(newIndex).getTitle().equals(v.getTitle())).get(0);
+				RepoResource res = model.getRepo().getResource(video.getMd5(), "videoz");
+				FxVideo fxVideo = new FxVideo(video, res.getPath());
+				JkVideoPlayer vp = videoPlayerBuilder.createPane(fxVideo);
 				vp.play();
 				showingPlayer.setValue(vp);
 			} else {
@@ -317,7 +318,7 @@ public class CatalogVideoPane extends BorderPane implements CloseablePane {
 	}
 
 	private void actionSetVideoCategory(ActionEvent event, Category category) {
-		setVideoCategory(event, category, showingPlayer.getValue().getVideo());
+		setVideoCategory(event, category, showingPlayer.getValue().getFxVideo().getVideo());
 		updateSelectedCheckBoxesMulti();
 		videoListView.refresh();
 	}

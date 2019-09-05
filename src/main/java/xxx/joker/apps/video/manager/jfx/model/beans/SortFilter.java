@@ -4,10 +4,10 @@ import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import org.apache.commons.lang3.StringUtils;
-import xxx.joker.apps.video.manager.model.entity.Category;
-import xxx.joker.apps.video.manager.model.entity.Video;
+import xxx.joker.apps.video.manager.datalayer.entities.Category;
+import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.apps.video.manager.jfx.model.VideoModelImpl;
-import xxx.joker.libs.core.utils.JkFiles;
+import xxx.joker.libs.core.files.JkFiles;
 import xxx.joker.libs.core.utils.JkStrings;
 
 import java.util.HashMap;
@@ -50,7 +50,7 @@ public class SortFilter extends ObjectBinding<Predicate<Video>> {
     }
 
     public boolean testFilter(Video video) {
-		List<String> filters = JkStrings.splitFieldsList(videoName.get(), "|");
+		List<String> filters = JkStrings.splitList(videoName.get(), "|");
 		boolean resNameFilter = false;
 		for (int i = 0; i < filters.size() && !resNameFilter; i++) {
 			String filter = filters.get(i);
@@ -58,7 +58,7 @@ public class SortFilter extends ObjectBinding<Predicate<Video>> {
 			boolean end = filter.endsWith("$");
 			filter = filter.replaceAll("^\\^", "").replaceAll("\\$$", "").trim();
 			if(!filter.isEmpty()) {
-				String vtitle = JkFiles.getFileName(video.getPath());
+				String vtitle = video.getTitle();
 				if (!begin && !end) {
 					// only contains
 					if (StringUtils.containsIgnoreCase(vtitle, filter)) {

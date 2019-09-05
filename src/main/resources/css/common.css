@@ -17,10 +17,11 @@
 .pad10  { -fx-padding: 10 }
 .pad20  { -fx-padding: 20 }
 
-.spacing3  { -fx-spacing: 3 }
-.spacing5  { -fx-spacing: 5 }
-.spacing10 { -fx-spacing: 10 }
-.spacing20 { -fx-spacing: 20 }
+.spacing3   { -fx-spacing: 3 }
+.spacing5   { -fx-spacing: 5 }
+.spacing10  { -fx-spacing: 10 }
+.spacing20  { -fx-spacing: 20 }
+.spacing100 { -fx-spacing: 100 }
 
 .hgap5  { -fx-hgap: 5 }
 .hgap10 { -fx-hgap: 10 }
