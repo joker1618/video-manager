@@ -2,7 +2,6 @@ package xxx.joker.apps.video.manager.jfx.controller;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -20,18 +19,17 @@ import javafx.util.Duration;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xxx.joker.apps.video.manager.common.Config;
 import xxx.joker.apps.video.manager.datalayer.VideoRepo;
 import xxx.joker.apps.video.manager.datalayer.entities.Category;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.apps.video.manager.fxlayer.fxview.controls.JfxTable;
 import xxx.joker.apps.video.manager.fxlayer.fxview.controls.JfxTableCol;
-import xxx.joker.apps.video.manager.jfx.controller.videoplayer.FxVideo;
+import xxx.joker.apps.video.manager.jfx.controller.videoplayer.VideoWrapper;
 import xxx.joker.apps.video.manager.jfx.controller.videoplayer.JkVideoBuilder;
 import xxx.joker.apps.video.manager.jfx.controller.videoplayer.JkVideoStage;
 import xxx.joker.apps.video.manager.jfx.model.VideoModel;
 import xxx.joker.apps.video.manager.jfx.model.VideoModelImpl;
-import xxx.joker.apps.video.manager.jfx.model.beans.SortFilter;
+import xxx.joker.apps.video.manager.jfx.model.beans.SortFilterOld;
 import xxx.joker.apps.video.manager.main.SceneManager;
 import xxx.joker.apps.video.manager.provider.StagePosProvider;
 import xxx.joker.libs.core.datetime.JkDateTime;
@@ -43,15 +41,12 @@ import xxx.joker.libs.core.files.JkFiles;
 import xxx.joker.libs.core.format.JkOutput;
 import xxx.joker.libs.core.javafx.JfxUtil;
 import xxx.joker.libs.core.lambdas.JkStreams;
-import xxx.joker.libs.core.utils.JkBytes;
 import xxx.joker.libs.datalayer.entities.RepoResource;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -66,7 +61,7 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 
 	private final VideoModel model = VideoModelImpl.getInstance();
 
-	private SortFilter sortFilter;
+	private SortFilterOld sortFilterOld;
 	private GridPane gridPaneFilterCat;
 	private JfxTable<Video> tview;
 
@@ -91,11 +86,11 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 		// right --> buttons
 		setRight(createRightPane());
 
-		getStylesheets().add(getClass().getResource("/css/HomepagePane.css").toExternalForm());
+		getStylesheets().add(getClass().getResource("/css_legacy/HomepagePane.css").toExternalForm());
 	}
 
 	private Pane createLeftPane() {
-		sortFilter = new SortFilter();
+		sortFilterOld = new SortFilterOld();
 
 		VBox box = new VBox();
 		box.getStyleClass().add("leftBox");
@@ -105,14 +100,14 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 		box.getChildren().add(boxCaption);
 
 		TextField nameFilter = new TextField("");
-		sortFilter.videoNameProperty().bind(nameFilter.textProperty());
+		sortFilterOld.videoNameProperty().bind(nameFilter.textProperty());
         HBox boxNameFilter = new HBox(nameFilter);
         boxNameFilter.getStyleClass().addAll("centeredBox");
         box.getChildren().add(boxNameFilter);
 
 		GridPane gridPane = new GridPane();
 		gridPane.getStyleClass().add("gridPane");
-		addRadioLine(gridPane, "Cataloged:", 0, sortFilter::setCataloged, false);
+		addRadioLine(gridPane, "Cataloged:", 0, sortFilterOld::setCataloged, false);
 		box.getChildren().add(gridPane);
 
 		gridPaneFilterCat = new GridPane();
@@ -123,7 +118,7 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 		box.getChildren().add(scrollPane);
 
 		Button button = new Button("CLEAR");
-		button.setOnAction(e -> clearFilterRadios());
+		button.setOnAction(e -> clearFilters());
 		HBox hbox = new HBox(button);
 		hbox.getStyleClass().addAll("centeredBox", "boxClearOpt");
 		box.getChildren().add(hbox);
@@ -170,14 +165,14 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 		}
 	}
 
-	private void clearFilterRadios() {
+	private void clearFilters() {
 		toggleMap.values().forEach(
 			tg -> tg.getValue().selectToggle(tg.getValue().getToggles().get(tg.getValue().getToggles().size()-1))
 		);
 	}
 
 	private void addRadioLine(GridPane gridPane, Category cat, int row) {
-		addRadioLine(gridPane, cat.getName(), row, b -> sortFilter.setCategory(cat, b), true);
+		addRadioLine(gridPane, cat.getName(), row, b -> sortFilterOld.setCategory(cat, b), true);
 	}
 	private void addRadioLine(GridPane gridPane, String catName, int row, Consumer<Boolean> setter, boolean showDelBtn) {
 		Pair<Label, ToggleGroup> pair = toggleMap.get(catName);
@@ -247,7 +242,7 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 		tview.getColumns().add(tcolHeight);
 		tcolHeight.setMinWidth(80);
 
-		JfxTableCol<Video,Double> tcolResolution = JfxTableCol.createCol("W/H", v -> v.getHeight() == null ? 0d : (double)v.getWidth()/v.getHeight(), d -> strf("%.2f", d));
+		JfxTableCol<Video,Double> tcolResolution = JfxTableCol.createCol("W/H", v -> v.getHeight() == 0d ? 0d : (double)v.getWidth()/v.getHeight(), d -> strf("%.2f", d));
 		tview.getColumns().add(tcolResolution);
 		tcolResolution.setMinWidth(80);
 
@@ -261,17 +256,17 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 
 		JfxTableCol<Video,Integer> tcolNumSnapshots = JfxTableCol.createCol("SNAP", param -> model.findSnapshots(param).size());
 		tview.getColumns().add(tcolNumSnapshots);
-		tcolPlayTimes.setMinWidth(80);
+		tcolNumSnapshots.setMinWidth(80);
 
 		JfxTableCol<Video, JkDateTime> tcolCreationTm = JfxTableCol.createCol("CREATION", "creationTm", null, jdt -> jdt == null ? "" : jdt.format("dd/MM/yyyy   HH:mm:ss"));
 		tview.getColumns().add(tcolCreationTm);
-		tcolCreationTm.setMinWidth(200);
+		tcolCreationTm.setMinWidth(180);
 
 		// Center all columns but the first one
 		tview.getColumns().subList(1, tview.getColumns().size()).forEach(col -> col.getStyleClass().add("centered"));
 
 		FilteredList<Video> filteredList = new FilteredList<>(model.getVideos());
-		filteredList.predicateProperty().bind(sortFilter);
+		filteredList.predicateProperty().bind(sortFilterOld);
 
 		SortedList<Video> tableItems = new SortedList<>(filteredList);
 		tableItems.comparatorProperty().bind(tview.comparatorProperty());
@@ -285,8 +280,8 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 			ObservableList<Video> sitems = tview.getSelectionModel().getSelectedItems();
 			model.getSelectedVideos().setAll(sitems.isEmpty() ? tableItems : sitems);
 		};
-		tview.getSelectionModel().getSelectedItems().addListener((ListChangeListener<? super Video>) c -> selEvent.accept(c));
-		tableItems.addListener((ListChangeListener<? super Video>) c -> selEvent.accept(c));
+		tview.getSelectionModel().getSelectedItems().addListener((ListChangeListener<? super Video>) selEvent::accept);
+		tableItems.addListener((ListChangeListener<? super Video>) selEvent::accept);
 
 		vbox.getChildren().add(createDetailsSection());
 
@@ -308,26 +303,25 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 		return bp;
 	}
 	private void fillSnapshotsPane(HBox hbox) {
-        Image imgDelete = new Image(getClass().getResource("/icons/delete.png").toExternalForm());
+        Image imgDelete = new Image(getClass().getResource("/icons/litter.png").toExternalForm());
 
         hbox.getChildren().clear();
         if(model.getSelectedVideos().size() == 1) {
             Video video = model.getSelectedVideos().get(0);
             List<Path> snapPaths = model.findSnapshots(video);
             try {
-                for (int i = 0; i < snapPaths.size(); i++) {
-                    Path path = snapPaths.get(i);
+                for (Path path : snapPaths) {
                     String url = path.toUri().toURL().toExternalForm();
                     Image snap = new Image(url);
                     ImageView imageView = new ImageView(snap);
                     imageView.setPreserveRatio(true);
-                    int fw = 165;
-                    int fh = 100;
-					HBox ivbox = new HBox(imageView);
-					ivbox.getStyleClass().addAll("bgBlack", "centered");
-					ivbox.setPrefWidth(fw);
-					ivbox.setPrefHeight(fh);
-					imageView.setFitWidth(ivbox.getPrefWidth());
+                    int fw = 100;
+                    int fh = 75;
+                    HBox ivbox = new HBox(imageView);
+                    ivbox.getStyleClass().addAll("bgBlack", "centered");
+                    ivbox.setPrefWidth(fw);
+                    ivbox.setPrefHeight(fh);
+                    imageView.setFitWidth(ivbox.getPrefWidth());
                     imageView.setFitHeight(ivbox.getPrefHeight());
 
                     Button btnDelSnapshot = new Button();
@@ -417,11 +411,11 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 
 		List<String> names = StagePosProvider.getPositionNames();
 		ToggleGroup toggleGroup = new ToggleGroup();
-		for(int i = 0; i < names.size(); i++) {
-			RadioButton rb = new RadioButton(names.get(i));
-			toggleGroup.getToggles().add(rb);
-			vbox.getChildren().add(rb);
-		}
+        for (String name : names) {
+            RadioButton rb = new RadioButton(name);
+            toggleGroup.getToggles().add(rb);
+            vbox.getChildren().add(rb);
+        }
 		vbox.getChildren().add(hbox);
 
 		toggleGroup.selectedToggleProperty().addListener(
@@ -457,7 +451,7 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 
 			RepoResource res = model.getRepo().getResource(video.getMd5(), "videoz");
 
-			stage.playVideo(new FxVideo(video, res.getPath()));
+			stage.playVideo(new VideoWrapper(video, res.getPath()));
 			MediaView mv = stage.getVideoPlayer().getMediaView();
 			MediaPlayer mp = mv.getMediaPlayer();
 			List<Long> times = new ArrayList<>();
@@ -492,7 +486,7 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 							if(times.isEmpty()) {
 								runAutoSnapshots(stage, videos);
 							} else {
-								seekMs = times.get(0) - 200;
+								seekMs = times.get(0) - 100;
 								mp.seek(Duration.millis(seekMs));
 							}
 						}
@@ -574,21 +568,23 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 	}
 
 	private void tryer() {
-		MediaView mv = new MediaView();
-		Video video = model.getVideos().get(0);
-		Path videoPath = model.getRepo().getResource(video.getMd5(), "videoz").getPath();
-		Media media = new Media(JkFiles.toURL(videoPath));
-		MediaPlayer mediaPlayer = new MediaPlayer(media);
-		mediaPlayer.setAutoPlay(false);
-		mediaPlayer.setCycleCount(1);
-		mediaPlayer.setVolume(0d);
-		mv.setMediaPlayer(mediaPlayer);
-		AtomicInteger aint = new AtomicInteger(0);
-		SimpleIntegerProperty iprop = new SimpleIntegerProperty(0);
-		mediaPlayer.totalDurationProperty().addListener((obs,o,n) -> {display("XCHANGED totalDuration: {}", JkDuration.of(n).toStringElapsed()); iprop.set(aint.incrementAndGet());});
-		media.widthProperty().addListener((obs,o,n) -> {display("XCHANGED media width: {}", n.doubleValue()); iprop.set(aint.incrementAndGet());});
-		media.heightProperty().addListener((obs,o,n) -> {display("XCHANGED media height: {}", n.doubleValue()); iprop.set(aint.incrementAndGet());});
-		iprop.addListener((obs,o,n) -> { if(n.intValue() == 3) { mediaPlayer.stop(); mediaPlayer.dispose(); display("DISPOSED");}});
-		mediaPlayer.play();
+//		MediaView mv = new MediaView();
+//		Video video = model.getVideos().get(0);
+//		Path videoPath = model.getRepo().getResource(video.getMd5(), "videoz").getPath();
+//		Media media = new Media(JkFiles.toURL(videoPath));
+//		MediaPlayer mediaPlayer = new MediaPlayer(media);
+//		mediaPlayer.setAutoPlay(false);
+//		mediaPlayer.setCycleCount(1);
+//		mediaPlayer.setVolume(0d);
+//		mv.setMediaPlayer(mediaPlayer);
+//		AtomicInteger aint = new AtomicInteger(0);
+//		SimpleIntegerProperty iprop = new SimpleIntegerProperty(0);
+//		mediaPlayer.totalDurationProperty().addListener((obs,o,n) -> {display("XCHANGED totalDuration: {}", JkDuration.of(n).toStringElapsed()); iprop.set(aint.incrementAndGet());});
+//		media.widthProperty().addListener((obs,o,n) -> {display("XCHANGED media width: {}", n.doubleValue()); iprop.set(aint.incrementAndGet());});
+//		media.heightProperty().addListener((obs,o,n) -> {display("XCHANGED media height: {}", n.doubleValue()); iprop.set(aint.incrementAndGet());});
+//		iprop.addListener((obs,o,n) -> { if(n.intValue() == 3) { mediaPlayer.stop(); mediaPlayer.dispose(); display("DISPOSED");}});
+//		mediaPlayer.play();
 	}
+
+
 }

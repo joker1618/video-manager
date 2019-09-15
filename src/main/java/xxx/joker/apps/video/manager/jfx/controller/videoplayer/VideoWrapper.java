@@ -4,15 +4,15 @@ import xxx.joker.apps.video.manager.datalayer.entities.Video;
 
 import java.nio.file.Path;
 
-public class FxVideo {
+public class VideoWrapper {
 
     private Video video;
     private Path path;
 
-    public FxVideo() {
+    public VideoWrapper() {
     }
 
-    public FxVideo(Video video, Path path) {
+    public VideoWrapper(Video video, Path path) {
         this.video = video;
         this.path = path;
     }

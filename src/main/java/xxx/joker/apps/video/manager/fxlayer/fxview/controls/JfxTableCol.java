@@ -98,6 +98,7 @@ public class JfxTableCol<T, V> extends TableColumn<T, V> {
 
     public void setFixedPrefWidth(double prefWidth) {
         getStyleClass().add(JfxTable.CSS_CLASS_FIXED_WIDTH);
+        setMinWidth(prefWidth);
         setPrefWidth(prefWidth);
     }
 

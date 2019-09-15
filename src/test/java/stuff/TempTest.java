@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static xxx.joker.libs.core.utils.JkConsole.display;
+import static xxx.joker.libs.core.utils.JkStrings.strf;
 
 public class TempTest {
 
@@ -17,7 +18,9 @@ public class TempTest {
         String str = "^^fe^$de$$";
         display(str.replace("^", "").replace("$", ""));
         display(str.replaceAll("^\\^", "").replaceAll("\\$$", ""));
-
+        Integer num = null;
+        display("Invalid number 1: {}", num);
+        display(strf("Invalid number 1: {}", num));
 	}
 
 }

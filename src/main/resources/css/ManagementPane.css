@@ -1,0 +1,110 @@
+.leftBox {
+    -fx-background-color: -container-bg-color;
+    -fx-padding: 15;
+    -fx-spacing: 15;
+    -fx-border-width: 0 1 0 0;
+    -fx-border-color: -container-border-color;
+}
+
+.leftBox .list-view {
+    -fx-pref-width: 400;
+    -fx-min-height: 400;
+    -fx-font-size: 14;
+}
+
+.leftBox .middleBtnBox {
+    -fx-alignment: CENTER;
+    -fx-spacing: 50;
+}
+
+.leftBox .button {
+   -fx-font-weight: BOLD;
+   -fx-font-size: 15;
+   -fx-pref-width: 130;
+   -fx-min-height: 40;
+   -fx-wrap-text: true;
+   -fx-text-alignment: CENTER;
+   -fx-padding: 0;
+}
+
+.leftBox .choosePane {
+    -fx-spacing: 10;
+    -fx-spacing: 10;
+    -fx-pref-width: 400;
+}
+
+.choosePane .scrollPaneCategories .viewport {
+    -fx-background-color: -container-bg-color;
+}
+.choosePane .catCont {
+    -fx-padding: 10 0 10 10;
+}
+.choosePane .catCont > .bpCatCheckBoxes {
+    -fx-pref-width: 180;
+}
+
+.choosePane .lblTitle {
+    -fx-font-weight: bold;
+    -fx-font-size: 15;
+}
+.choosePane .boxCategories {
+    -fx-padding: 10 0 0 0;
+    -fx-spacing: 10;
+}
+.choosePane .boxCategories .subBox { -fx-spacing: 3; }
+
+.choosePane .boxButtons {
+    -fx-alignment: CENTER;
+}
+
+/*  CENTER  */
+.centerBox {
+    -fx-background-color: -container-bg-color;
+    -fx-padding: 15;
+}
+.centerBox .topBox{
+    -fx-padding: 0 0 15 0;
+}
+.centerBox .topBox .bleft {
+    -fx-alignment: CENTER;
+    -fx-spacing: 10;
+}
+.centerBox .topBox .bleft .text-field{
+    -fx-pref-width: 300;
+    -fx-font-size: 14;
+}
+.centerBox .topBox .button {
+   -fx-font-weight: BOLD;
+   -fx-font-size: 15;
+   -fx-pref-width: 130;
+   -fx-min-height: 40;
+   -fx-wrap-text: true;
+   -fx-text-alignment: CENTER;
+   -fx-padding: 0;
+}
+
+
+/* RIGHT */
+.rightBox {
+    -fx-background-color: -container-bg-color;
+    -fx-padding: 15;
+    -fx-border-width: 0 0 0 1;
+    -fx-border-color: -container-border-color;
+}
+.rightBox .btop {
+    -fx-alignment: CENTER;
+    -fx-padding: 0 0 15 0;
+    -fx-font-weight: BOLD;
+    -fx-font-size: 16;
+}
+
+.rightBox .jfxGridBox {
+    -fx-hgap: 10;
+    -fx-vgap: 10;
+}
+.rightBox .scroll-pane {
+    -fx-pref-width: 522;
+}
+.rightBox .scroll-pane .viewport {
+    -fx-background-color: -container-bg-color;
+}

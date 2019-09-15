@@ -1,22 +1,23 @@
-package xxx.joker.apps.video.manager.jfx.controller.videoplayer;
+package xxx.joker.apps.video.manager.fxlayer.fxview.videoplayer;
 
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xxx.joker.apps.video.manager.jfx.controller.videoplayer.JkVideoPlayer.PlayerConfig;
+import xxx.joker.apps.video.manager.fxlayer.fxmodel.FxVideo;
 
 import java.util.function.Supplier;
+import xxx.joker.apps.video.manager.fxlayer.fxview.videoplayer.JfxVideoPlayer.PlayerConfig;
 
-public class JkVideoStage extends Stage {
+public class JfxVideoStage extends Stage {
 
-	private static Logger logger = LoggerFactory.getLogger(JkVideoStage.class);
+	private static Logger logger = LoggerFactory.getLogger(JfxVideoStage.class);
 
-	private JkVideoPlayer videoPlayer;
+	private JfxVideoPlayer videoPlayer;
 	private PlayerConfig playerConfig;
 
-	protected JkVideoStage(PlayerConfig config, Supplier<VideoWrapper> previousSupplier, Supplier<VideoWrapper> nextSupplier) {
+	protected JfxVideoStage(PlayerConfig config, Supplier<FxVideo> previousSupplier, Supplier<FxVideo> nextSupplier) {
 		this.playerConfig = config.cloneConfigs();
 		if(previousSupplier != null)	playerConfig.setPreviousAction(e -> playVideo(previousSupplier.get()));
 		if(nextSupplier != null)		playerConfig.setNextAction(e -> playVideo(nextSupplier.get()));
@@ -32,17 +33,17 @@ public class JkVideoStage extends Stage {
 		return playerConfig;
 	}
 
-	public JkVideoPlayer getVideoPlayer() {
+	public JfxVideoPlayer getVideoPlayer() {
 		return videoPlayer;
 	}
 
-	public void playVideo(VideoWrapper video) {
+	public void playVideo(FxVideo video) {
 		if(isShowing()) {
 			playerConfig = videoPlayer.getPlayerConfig();
 			videoPlayer.closePlayer();
 		}
 
-		videoPlayer = new JkVideoPlayer(video, playerConfig);
+		videoPlayer = new JfxVideoPlayer(video, playerConfig);
 
 		getScene().setRoot(videoPlayer);
 		setTitle(video.getVideo().getTitle());

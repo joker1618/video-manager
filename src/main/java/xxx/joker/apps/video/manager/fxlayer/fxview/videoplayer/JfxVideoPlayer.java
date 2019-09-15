@@ -1,4 +1,4 @@
-package xxx.joker.apps.video.manager.jfx.controller.videoplayer;
+package xxx.joker.apps.video.manager.fxlayer.fxview.videoplayer;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -17,9 +17,12 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.util.Duration;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xxx.joker.apps.video.manager.common.Config12;
+import xxx.joker.apps.video.manager.commonOK.Config;
+import xxx.joker.apps.video.manager.fxlayer.fxmodel.FxVideo;
+import xxx.joker.apps.video.manager.fxlayer.fxview.builders.SnapshotManager;
 import xxx.joker.libs.core.datetime.JkDuration;
 import xxx.joker.libs.core.files.JkFiles;
 import xxx.joker.libs.core.javafx.JfxUtil;
@@ -34,12 +37,12 @@ import java.util.function.Consumer;
 import static xxx.joker.libs.core.javafx.JfxControls.createImageView;
 import static xxx.joker.libs.core.utils.JkStrings.strf;
 
-public class JkVideoPlayer extends BorderPane {
+public class JfxVideoPlayer extends BorderPane {
 
-	private static Logger logger = LoggerFactory.getLogger(JkVideoPlayer.class);
+	private static Logger logger = LoggerFactory.getLogger(JfxVideoPlayer.class);
 
 	private Label lblHeading;
-	private VideoWrapper videoWrapper;
+	private FxVideo fxVideo;
 	private PlayerConfig playerConfig;
 
 	private final Pane topPane;
@@ -57,8 +60,8 @@ public class JkVideoPlayer extends BorderPane {
 	private boolean isMediaTerminated;
 
 
-	protected JkVideoPlayer(VideoWrapper videoWrapper, PlayerConfig playerConfig) {
-		this.videoWrapper = videoWrapper;
+	protected JfxVideoPlayer(FxVideo fxVideo, PlayerConfig playerConfig) {
+		this.fxVideo = fxVideo;
 		this.playerConfig = playerConfig;
 
 		setCenter(createMediaViewPane());
@@ -106,12 +109,12 @@ public class JkVideoPlayer extends BorderPane {
 		return playerConfig;
 	}
 
-	public VideoWrapper getVideoWrapper() {
-		return videoWrapper;
+	public FxVideo getFxVideo() {
+		return fxVideo;
 	}
 
 	private Pane createTopPane() {
-		this.lblHeading = new Label(videoWrapper.getVideo().getTitle());
+		this.lblHeading = new Label(fxVideo.getVideo().getTitle());
 
 		HBox headingBox = new HBox();
 		headingBox.getStyleClass().add("headingBox");
@@ -127,15 +130,11 @@ public class JkVideoPlayer extends BorderPane {
 
 		Button btnCamera = new Button();
 		btnCamera.setGraphic(imageView);
-		int snapSize = 500;
+//		int snapSize = 500;
 		btnCamera.setOnAction(e -> {
-			takeVideoSnapshot(snapSize);
-//			if(!okSnap.get()) {
-//				URL url2 = getClass().getResource("/icons/camera-green.png");
-//				Image iconCamera2 = new Image(url2.toExternalForm());
-//				imageView.setImage(iconCamera2);
-//				okSnap.set(true);
-//			}
+//			Pair<Path, Long> pair = takeVideoSnapshot(snapSize);
+			new SnapshotManager().takeSnapAndAddToModel(this);
+			playerConfig.runBtnCameraListener();
 		});
 
 		HBox hBoxCamera = new HBox(btnCamera);
@@ -162,10 +161,14 @@ public class JkVideoPlayer extends BorderPane {
 		lblHeading.setText(caption);
 	}
 
-	public void takeVideoSnapshot(int snapSize) {
+	public Pair<Path, JkDuration> takeVideoSnapshot(int snapSize) {
+		boolean playing = mediaView.getMediaPlayer().getStatus() == MediaPlayer.Status.PLAYING;
+		if(playing) {
+			mediaView.getMediaPlayer().pause();
+		}
 		Duration currentTime = mediaView.getMediaPlayer().getCurrentTime();
-		long snapTime = (long) currentTime.toMillis();
-		Path snapPath = Config12.createSnapshotOutPath(videoWrapper.getVideo(), snapTime);
+		JkDuration snapTime = JkDuration.of(currentTime);
+		Path snapPath = Config.createSnapshotOutPath(fxVideo.getVideo(), snapTime);
 		double fw = mediaView.getFitWidth();
 		double fh = mediaView.getFitHeight();
 		mediaView.setFitWidth(snapSize);
@@ -173,13 +176,17 @@ public class JkVideoPlayer extends BorderPane {
 		JfxUtil.takeSnapshot(mediaView, snapPath);
 		mediaView.setFitWidth(fw);
 		mediaView.setFitHeight(fh);
-		logger.info("Snapshot taken at {} for {}", JkDuration.of(snapTime).toStringElapsed(true), videoWrapper.getVideo().getTitle());
+		logger.info("Snapshot taken at {} for {}", snapTime.toStringElapsed(true), fxVideo.getVideo().getTitle());
+		if(playing) {
+			mediaView.getMediaPlayer().play();
+		}
+		return Pair.of(snapPath, snapTime);
 	}
 
 	private Pane createMediaViewPane() {
 		// Create media view
 		mediaView = new MediaView();
-		Media media = new Media(JkFiles.toURL(videoWrapper.getPath()));
+		Media media = new Media(JkFiles.toURL(fxVideo.getPath()));
 		MediaPlayer mediaPlayer = new MediaPlayer(media);
 		mediaPlayer.setAutoPlay(false);
 		mediaPlayer.setCycleCount(1);
@@ -202,13 +209,17 @@ public class JkVideoPlayer extends BorderPane {
 
 		mvPane.setOnMouseClicked(e -> {
 			if(e.getButton() == MouseButton.PRIMARY) {
-				if(getBottom() == null) {
-					double vpos = e.getY() / mvPane.getHeight();
-					if(vpos < 0.7)	setTop(topPane);
-					setBottom(bottomPane);
+				if(playerConfig.getLeftMouseType() == PlayerConfig.LeftMouseType.SHOW_HIDE) {
+					if(getBottom() == null) {
+						double vpos = e.getY() / mvPane.getHeight();
+						if(vpos < 0.7)	setTop(topPane);
+						setBottom(bottomPane);
+					} else {
+						setTop(null);
+						setBottom(null);
+					}
 				} else {
-					setTop(null);
-					setBottom(null);
+					btnPlay.fire();
 				}
 
 			} else if(e.getButton() == MouseButton.MIDDLE) {
@@ -412,8 +423,9 @@ public class JkVideoPlayer extends BorderPane {
 
 	@Override
 	public String toString() {
-		return videoWrapper.toString();
+		return fxVideo.toString();
 	}
+
 
 	public static class PlayerConfig {
 		private boolean decoratedStage;
@@ -424,9 +436,13 @@ public class JkVideoPlayer extends BorderPane {
 		private boolean visiblePlayerBar;
 		private EventHandler<ActionEvent> previousAction;
 		private EventHandler<ActionEvent> nextAction;
+		private LeftMouseType leftMouseType;
 		private Consumer<MouseEvent> middleMouseClickEvent;
 		private Consumer<MouseEvent> rightMouseClickEvent;
 		private EventHandler<ActionEvent> closeEvent;
+		private Runnable btnCameraRunnable;
+
+		public enum LeftMouseType { PLAY, SHOW_HIDE }
 
 		public PlayerConfig cloneConfigs() {
 			PlayerConfig conf = new PlayerConfig();
@@ -438,10 +454,20 @@ public class JkVideoPlayer extends BorderPane {
 			conf.visiblePlayerBar = visiblePlayerBar;
 			conf.previousAction = previousAction;
 			conf.nextAction = nextAction;
+			conf.leftMouseType = leftMouseType;
 			conf.middleMouseClickEvent = middleMouseClickEvent;
 			conf.rightMouseClickEvent = rightMouseClickEvent;
 			conf.closeEvent = closeEvent;
+			conf.btnCameraRunnable = btnCameraRunnable;
 			return conf;
+		}
+
+		public void runBtnCameraListener() {
+			btnCameraRunnable.run();
+		}
+
+		public void setBtnCameraRunnable(Runnable btnCameraRunnable) {
+			this.btnCameraRunnable = btnCameraRunnable;
 		}
 
 		public boolean isDecoratedStage() {
@@ -484,6 +510,10 @@ public class JkVideoPlayer extends BorderPane {
 			this.visibleHeading = visibleHeading;
 		}
 
+		public void setLeftMouseType(LeftMouseType leftMouseType) {
+			this.leftMouseType = leftMouseType;
+		}
+
 		public boolean isVisiblePlayerBar() {
 			return visiblePlayerBar;
 		}
@@ -516,6 +546,10 @@ public class JkVideoPlayer extends BorderPane {
 
 		public void setMiddleMouseClickEvent(Consumer<MouseEvent> middleMouseClickEvent) {
 			this.middleMouseClickEvent = middleMouseClickEvent;
+		}
+
+		public LeftMouseType getLeftMouseType() {
+			return leftMouseType;
 		}
 
 		public void consumeRightMouseClickEvent(MouseEvent event) {

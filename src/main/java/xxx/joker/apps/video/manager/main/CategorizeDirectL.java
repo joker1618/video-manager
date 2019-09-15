@@ -25,7 +25,7 @@ public class CategorizeDirectL extends Application {
 		// Create scene
 		Group root = new Group();
 		Scene scene = new Scene(root);
-		scene.getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
+		scene.getStylesheets().add(getClass().getResource("/css_legacy/common.css").toExternalForm());
 
 		SceneManager.setScene(scene);
 		model.getSelectedVideos().setAll(model.getVideos());

@@ -8,8 +8,6 @@ import javafx.stage.Stage;
 import org.apache.commons.lang3.StringUtils;
 import org.scenicview.ScenicView;
 import xxx.joker.apps.video.manager.jfx.model.VideoModelImpl;
-import xxx.joker.libs.core.utils.JkConsole;
-import xxx.joker.libs.datalayer.entities.RepoResource;
 
 import static xxx.joker.libs.core.utils.JkConsole.displayColl;
 
@@ -28,7 +26,7 @@ public class OnlyLauncherL extends Application {
 		// Create scene
 		Group root = new Group();
 		Scene scene = new Scene(root);
-		scene.getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
+		scene.getStylesheets().add(getClass().getResource("/css_legacy/common.css").toExternalForm());
 
 		SceneManager.setScene(scene);
 		SceneManager.displayHomepage();
@@ -56,7 +54,6 @@ public class OnlyLauncherL extends Application {
 
 	@Override
 	public void stop() throws Exception {
-		displayColl(VideoModelImpl.getInstance().getRepo().getDataSet(RepoResource.class), rr -> rr.getPath());
 		VideoModelImpl.getInstance().persistData();
 	}
 

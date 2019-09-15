@@ -52,8 +52,12 @@ public class StagePosProvider {
 		}
 	}
 
+	public static List<VideoStagesPosition> getVideoPosList() {
+		return videoPosList;
+	}
+
 	public static List<String> getPositionNames() {
-		return videoPosList.stream().map(VideoStagesPosition::getName).sorted().collect(Collectors.toList());
+		return JkStreams.map(videoPosList, VideoStagesPosition::getName);
 	}
 
 	public static VideoStagesPosition getStagesPosition(String name) {

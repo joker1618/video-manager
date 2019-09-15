@@ -5,7 +5,6 @@ import javafx.scene.text.Text;
 import xxx.joker.libs.core.utils.JkStrings;
 
 import java.util.Arrays;
-import java.util.Collection;
 
 public class JfxTable<T> extends TableView<T> {
 
@@ -35,11 +34,6 @@ public class JfxTable<T> extends TableView<T> {
                 col.getStyleClass().add(i == 0 ? "col-first" : i == getColumns().size() - 1 ? "col-last" : "col-middle");
             }
         }
-    }
-
-    public void update(Collection<T> items) {
-        getItems().setAll(items);
-        resizeWidth();
     }
 
     public void resizeWidth() {

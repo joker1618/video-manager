@@ -5,9 +5,8 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xxx.joker.apps.video.manager.common.Config;
+import xxx.joker.apps.video.manager.common.Config12;
 import xxx.joker.apps.video.manager.datalayer.VideoRepo;
-import xxx.joker.apps.video.manager.datalayer.VideoRepoImpl;
 import xxx.joker.apps.video.manager.datalayer.entities.Category;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.apps.video.manager.jfx.model.beans.PlayOptions;
@@ -25,7 +24,7 @@ public class VideoModelImpl implements VideoModel {
 	private final Map<Class<?>, ObservableList<? extends RepoEntity>> dataMap = new HashMap<>();
 	private final ObservableList<Video> selectedVideos = FXCollections.observableArrayList();
 	private final PlayOptions playOptions = new PlayOptions();
-	private final VideoRepo repo = new VideoRepoImpl();
+	private final VideoRepo repo = VideoRepo.getRepo();
 
 
 	private VideoModelImpl() {
@@ -78,7 +77,7 @@ public class VideoModelImpl implements VideoModel {
 	public List<Path> findSnapshots(Video video) {
 		if(video == null)	return Collections.emptyList();
 		List<Path> paths = JkFiles.findFiles(
-				Config.SNAPSHOT_FOLDER, false,
+				Config12.SNAPSHOT_FOLDER, false,
 				p -> p.getFileName().toString().startsWith(video.getMd5()),
 				p -> p.getFileName().toString().endsWith(".png")
 		);

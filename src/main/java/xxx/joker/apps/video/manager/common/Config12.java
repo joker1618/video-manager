@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 
 import static xxx.joker.libs.core.utils.JkStrings.strf;
 
-public class Config {
+public class Config12 {
 
 	public static final Path BASE_FOLDER = JkEnvironment.getAppsFolder().resolve("video-manager");
 

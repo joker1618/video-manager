@@ -46,7 +46,7 @@ public class VideoStagesPosition {
 		videoPosList.add(new VPos(row, col, rspan, cspan));
 	}
 
-	static class VPos {
+	private static class VPos {
 		int idxRow, idxCol, rowsSpan, colsSpan;
 		VPos(int idxRow, int idxCol, int rowsSpan, int colsSpan) {
 			this.idxRow = idxRow;

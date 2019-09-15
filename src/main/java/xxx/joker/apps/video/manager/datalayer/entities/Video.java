@@ -4,7 +4,7 @@ import xxx.joker.libs.core.datetime.JkDuration;
 import xxx.joker.libs.datalayer.design.RepoEntity;
 import xxx.joker.libs.datalayer.design.RepoField;
 
-import java.util.Set;
+import java.util.*;
 
 public class Video extends RepoEntity {
 
@@ -15,9 +15,9 @@ public class Video extends RepoEntity {
     @RepoField
     private long size;
     @RepoField
-    private Integer width;
+    private int width;
     @RepoField
-    private Integer height;
+    private int height;
     @RepoField
     private JkDuration length;
     @RepoField
@@ -25,7 +25,7 @@ public class Video extends RepoEntity {
     @RepoField
     private int playTimes;
     @RepoField
-    private Set<Long> snapTimes;
+    private Set<JkDuration> snapTimes;
 
 
     public Video() {
@@ -56,19 +56,19 @@ public class Video extends RepoEntity {
         this.size = size;
     }
 
-    public Integer getWidth() {
+    public int getWidth() {
         return width;
     }
 
-    public void setWidth(Integer width) {
+    public void setWidth(int width) {
         this.width = width;
     }
 
-    public Integer getHeight() {
+    public int getHeight() {
         return height;
     }
 
-    public void setHeight(Integer height) {
+    public void setHeight(int height) {
         this.height = height;
     }
 
@@ -96,12 +96,12 @@ public class Video extends RepoEntity {
         this.playTimes = playTimes;
     }
 
-    public Set<Long> getSnapTimes() {
+    public Set<JkDuration> getSnapTimes() {
         return snapTimes;
     }
 
-    public void setSnapTimes(Set<Long> snapTimes) {
-        this.snapTimes = snapTimes;
+    public void setSnapTimes(Collection<JkDuration> snapTimes) {
+        this.snapTimes = new TreeSet<>(snapTimes);
     }
 
     @Override

@@ -1,0 +1,110 @@
+/* BorderPane Left */
+.leftPane {
+    -fx-background-color: -container-bg-color;
+    -fx-padding: 15;
+}
+
+.filterBox {
+    -fx-spacing: 10;
+    -fx-padding: 0 0 10 0;
+}
+.filterBox .boxCaption {
+    -fx-alignment: CENTER;
+}
+.filterBox .boxCaption .label,
+.filterBox .boxClearOpt .text {
+    -fx-font-weight: BOLD;
+    -fx-font-size: 15;
+}
+
+.filterBox .jfxGridBox {
+    -fx-hgap: 5;
+    -fx-vgap: 10;
+}
+.filterBox .jfxGridBox .cellBox {
+    -fx-alignment: CENTER;
+}
+.filterBox .jfxGridBox .cellBox.col0 {
+    -fx-alignment: CENTER-LEFT;
+    -fx-padding: 0 10 0 0;
+}
+.filterBox .jfxGridBox .cellBox.col-last {
+    -fx-padding: 0 0 0 10;
+}
+.filterBox .jfxGridBox .cellBox.col-last .button {
+    -fx-padding: 5;
+}
+
+.filterBox .check-box:selected {
+    -fx-font-weight: BOLD;
+}
+.filterBox .scrollPaneCateg {
+    -fx-border-color: -container-border-color;
+    -fx-border-width: 1;
+    -fx-padding: 10;
+}
+.filterBox .scrollPaneCateg,
+.filterBox .scrollPaneCateg .viewport {
+    -fx-background-color: -container-bg-color;
+}
+.filterBox .boxClearOpt .button {
+    -fx-min-width: 80;
+    -fx-min-height: 30;
+}
+
+.paneDetails .jfxGridBox {
+    -fx-alignment: BOTTOM-LEFT;
+    -fx-hgap: 10;
+    -fx-vgap: 10;
+}
+.paneDetails .jfxGridBox .label {
+    -fx-font-weight: BOLD;
+}
+
+
+/* BorderPane Center */
+.centerBox {
+    -fx-min-width: 650;
+    -fx-padding: 15;
+    -fx-spacing: 15;
+    -fx-background-color: -container-bg-color;
+    -fx-border-width: 0 1 0 1;
+    -fx-border-color: -container-border-color;
+}
+.centerBox .topPane .button {
+    -fx-font-weight: BOLD;
+    -fx-font-size: 15;
+    -fx-pref-width: 110;
+    -fx-pref-height: 40;
+    -fx-wrap-text: true;
+    -fx-text-alignment: CENTER;
+    -fx-padding: 0;
+}
+.centerBox .table-view {
+    -fx-font-size: 14;
+}
+
+/* BorderPane Right */
+.rightBox {
+    -fx-spacing: 15;
+    -fx-padding: 15;
+    -fx-background-color: -container-bg-color;
+    -fx-pref-width: 375;
+    -fx-alignment: TOP-CENTER;
+}
+.rightBox .boxPlayVideos {
+    -fx-border-width: 1;
+    -fx-border-color: -container-border-color;
+    -fx-padding: 10;
+    -fx-spacing: 10;
+    -fx-alignment: CENTER;
+}
+.rightBox .button {
+    -fx-font-weight: BOLD;
+    -fx-font-size: 15;
+    -fx-pref-width: 110;
+    -fx-pref-height: 40;
+    -fx-wrap-text: true;
+    -fx-text-alignment: CENTER;
+    -fx-padding: 0;
+}

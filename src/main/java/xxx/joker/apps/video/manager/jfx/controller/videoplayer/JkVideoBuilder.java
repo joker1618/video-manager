@@ -6,7 +6,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.StageStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.apps.video.manager.jfx.controller.videoplayer.JkVideoPlayer.PlayerConfig;
 import xxx.joker.libs.core.javafx.JfxUtil;
 
@@ -18,8 +17,8 @@ public class JkVideoBuilder {
 	private static Logger logger = LoggerFactory.getLogger(JkVideoBuilder.class);
 
 	private PlayerConfig playerConfig;
-	private Supplier<FxVideo> supplierPrevious;
-	private Supplier<FxVideo> supplierNext;
+	private Supplier<VideoWrapper> supplierPrevious;
+	private Supplier<VideoWrapper> supplierNext;
 	private JkVideoPlayer lastCreatedPane;
 
 	public JkVideoBuilder() {
@@ -28,14 +27,14 @@ public class JkVideoBuilder {
 		// Set defaults
 		playerConfig.setVisibleHeading(true);
 		playerConfig.setVisiblePlayerBar(true);
+		playerConfig.setCloseEvent(
+				e -> JfxUtil.getStage(e).close()
+		);
 		playerConfig.setMiddleMouseClickEvent(
 				e -> JfxUtil.getStage(e).setFullScreen(!JfxUtil.getStage(e).isFullScreen())
 		);
 		playerConfig.setRightMouseClickEvent(
 				e -> JfxUtil.getStage(e).setMaximized(!JfxUtil.getStage(e).isMaximized())
-		);
-		playerConfig.setCloseEvent(
-				e -> JfxUtil.getStage(e).close()
 		);
 	}
 
@@ -69,12 +68,12 @@ public class JkVideoBuilder {
 		return this;
 	}
 
-	public JkVideoBuilder setSupplierPrevious(Supplier<FxVideo> supplierPrevious) {
+	public JkVideoBuilder setSupplierPrevious(Supplier<VideoWrapper> supplierPrevious) {
 		this.supplierPrevious = supplierPrevious;
 		return this;
 	}
 
-	public JkVideoBuilder setSupplierNext(Supplier<FxVideo> supplierNext) {
+	public JkVideoBuilder setSupplierNext(Supplier<VideoWrapper> supplierNext) {
 		this.supplierNext = supplierNext;
 		return this;
 	}
@@ -95,7 +94,7 @@ public class JkVideoBuilder {
 		return finalFullStage;
 	}
 
-	public JkVideoPlayer createPane(FxVideo video) {
+	public JkVideoPlayer createPane(VideoWrapper video) {
 		PlayerConfig config = lastCreatedPane == null ? this.playerConfig : lastCreatedPane.getPlayerConfig();
 		JkVideoPlayer pane = new JkVideoPlayer(video, config);
 		lastCreatedPane = pane;

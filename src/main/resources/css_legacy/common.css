@@ -2,12 +2,6 @@
     -darkBlue: #000033;
     -lightBlue: #ccf2ff;
     -container-bg-color: #ffe0b3;
-    -container-border-color: BLACK;
-}
-
-.simpleBorder {
-    -fx-border-color: BLACK;
-    -fx-border-width: 1;
 }
 
 .cell:empty { -fx-opacity: 0 }
@@ -48,8 +42,7 @@
 .bgBlue     { -fx-background-color: BLUE }
 .bgBlack    { -fx-background-color: BLACK }
 
-.tfBlack    { -fx-text-fill: BLACK }
-.tfRed      { -fx-text-fill: RED }
+.txtRed    { -fx-text-fill: RED }
 
 .borderBlack1   { -fx-border-width: 1; -fx-border-color: BLACK }
 .borderBlack    { -fx-border-width: 2; -fx-border-color: BLACK }
