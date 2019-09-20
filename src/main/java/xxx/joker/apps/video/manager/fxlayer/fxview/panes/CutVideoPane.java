@@ -27,10 +27,6 @@ import xxx.joker.libs.core.lambdas.JkStreams;
 import xxx.joker.libs.core.utils.JkConvert;
 import xxx.joker.libs.core.utils.JkStrings;
 
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -163,7 +159,7 @@ public class CutVideoPane extends BorderPane implements Closeable {
 
     private void cutVideo(boolean splitByPoints, Collection<Duration> seekPoints, Set<Category> customCats) {
         FxVideo fxVideo = videoPlayer.getFxVideo();
-        Path sourcePath = JkFiles.copyInFolder(fxVideo.getPath(), Config.CUT_FOLDER);
+        Path sourcePath = JkFiles.copyInFolder(fxVideo.getPath(), Config.TEMP_FOLDER);
         Video video = fxVideo.getVideo();
 
         Set<Category> cats = new TreeSet<>(customCats);
@@ -214,7 +210,7 @@ public class CutVideoPane extends BorderPane implements Closeable {
             });
         }
 
-        JkFiles.delete(Config.CUT_FOLDER);
+        JkFiles.delete(Config.TEMP_FOLDER);
     }
 
     @Override

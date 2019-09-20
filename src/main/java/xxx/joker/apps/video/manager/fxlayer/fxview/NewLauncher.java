@@ -10,9 +10,6 @@ import xxx.joker.apps.video.manager.commonOK.Config;
 import xxx.joker.apps.video.manager.fxlayer.fxmodel.FxModel;
 import xxx.joker.libs.core.files.JkFiles;
 
-import java.io.*;
-import java.nio.file.*;
-
 public class NewLauncher extends Application {
 
     public static boolean scenicView;
@@ -53,8 +50,7 @@ public class NewLauncher extends Application {
 
     @Override
     public void stop() throws Exception {
-        JkFiles.delete(Config.CUT_FOLDER);
-        JkFiles.delete(Config.SNAPSHOT_FOLDER);
+        JkFiles.delete(Config.TEMP_FOLDER);
         FxModel.getModel().persistData();
     }
 

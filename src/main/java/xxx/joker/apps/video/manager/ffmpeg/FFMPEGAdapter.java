@@ -26,6 +26,17 @@ public class FFMPEGAdapter {
 
     private static final Logger LOG = LoggerFactory.getLogger(FFMPEGAdapter.class);
 
+    static {
+        if(!Files.exists(Config.FFMPEG_EXE_PATH)) {
+            LOG.error(strf("FFMPEG exe does not exists at path {}", Config.FFMPEG_EXE_PATH));
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setHeaderText("FFMPEG exe not found");
+            alert.setContentText(strf("Exe path: {}", Config.FFMPEG_EXE_PATH.toAbsolutePath()));
+            alert.showAndWait();
+            throw new JkRuntimeException("FFMPEG exe does not exists at path {}", Config.FFMPEG_EXE_PATH);
+        }
+    }
+
     private FFMPEGAdapter() {
 
     }
