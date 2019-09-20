@@ -3,6 +3,7 @@ package xxx.joker.apps.video.manager.commonOK;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.libs.core.datetime.JkDuration;
 import xxx.joker.libs.core.runtimes.JkEnvironment;
+import xxx.joker.libs.core.runtimes.JkRuntime;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -21,11 +22,13 @@ public class Config {
 
     public static final Path SNAPSHOT_FOLDER = BASE_FOLDER.resolve("snapshots");
 
-    public static final Path CUT_FOLDER = BASE_FOLDER.resolve("temp");
-    public static final Path FFMPEG_EXE_PATH = Paths.get("lib/ffmpeg.exe");
+    public static final Path CUT_FOLDER = BASE_FOLDER.resolve("splitted");
+
+    public static final Path FFMPEG_EXE_PATH = Paths.get("exe/ffmpeg.exe");
 
     public static Path createSnapshotOutPath(Video video, JkDuration snapTime) {
         String fname = strf("{}_{}.snap.png", video.getMd5(), snapTime.toMillis());
         return SNAPSHOT_FOLDER.resolve(fname);
     }
+
 }

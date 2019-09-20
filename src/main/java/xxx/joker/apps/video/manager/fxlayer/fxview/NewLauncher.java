@@ -10,6 +10,9 @@ import xxx.joker.apps.video.manager.commonOK.Config;
 import xxx.joker.apps.video.manager.fxlayer.fxmodel.FxModel;
 import xxx.joker.libs.core.files.JkFiles;
 
+import java.io.*;
+import java.nio.file.*;
+
 public class NewLauncher extends Application {
 
     public static boolean scenicView;

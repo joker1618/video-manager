@@ -58,7 +58,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>xxx.joker.apps.video.manager.main.OnlyLauncherL</mainClass>
+                            <mainClass>xxx.joker.apps.video.manager.fxlayer.fxview.NewLauncher</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
