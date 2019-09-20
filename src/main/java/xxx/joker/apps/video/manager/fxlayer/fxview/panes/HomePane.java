@@ -10,6 +10,7 @@ import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -22,12 +23,15 @@ import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.datalayer.entities.Category;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.apps.video.manager.fxlayer.fxmodel.FxModel;
+import xxx.joker.apps.video.manager.fxlayer.fxmodel.FxSnapshot;
+import xxx.joker.apps.video.manager.fxlayer.fxmodel.FxVideo;
 import xxx.joker.apps.video.manager.fxlayer.fxview.PanesSelector;
 import xxx.joker.apps.video.manager.fxlayer.fxview.bindings.SortFilter;
 import xxx.joker.apps.video.manager.fxlayer.fxview.builders.SnapshotManager;
 import xxx.joker.apps.video.manager.fxlayer.fxview.builders.GridPaneBuilder;
 import xxx.joker.apps.video.manager.fxlayer.fxview.controls.JfxTable;
 import xxx.joker.apps.video.manager.fxlayer.fxview.controls.JfxTableCol;
+import xxx.joker.apps.video.manager.fxlayer.fxview.provider.IconProvider;
 import xxx.joker.apps.video.manager.provider.StagePosProvider;
 import xxx.joker.apps.video.manager.provider.VideoStagesPosition;
 import xxx.joker.libs.core.datetime.JkDateTime;
@@ -47,9 +51,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import static xxx.joker.libs.core.javafx.JfxControls.*;
+import static xxx.joker.libs.core.utils.JkConsole.display;
 import static xxx.joker.libs.core.utils.JkStrings.strf;
 
-public class HomePane extends BorderPane {
+public class HomePane extends BorderPane implements Closeable {
 
     private static final Logger logger = LoggerFactory.getLogger(HomePane.class);
 
@@ -58,14 +63,14 @@ public class HomePane extends BorderPane {
     private SortFilter sortFilter;
     private GridPane gridPaneFilterCat;
     private JfxTable<Video> tableVideos;
+    private ScrollPane scrollPaneSnaps;
 
     private Map<String,Pair<Label,ToggleGroup>> toggleMap = new TreeMap<>(String::compareToIgnoreCase);
 
     private final Image imgDelete;
-    private Set<Video> markedVideos = Collections.synchronizedSet(new HashSet<>());
 
     public HomePane() {
-        this.imgDelete = new Image(getClass().getResource("/icons/delete.png").toExternalForm());
+        this.imgDelete = new IconProvider().getIcon(IconProvider.DELETE_RED).getImage();
 
         // left -> sort & filter
         setLeft(createLeftPane());
@@ -80,7 +85,7 @@ public class HomePane extends BorderPane {
     }
 
     private Pane createLeftPane() {
-        sortFilter = new SortFilter(markedVideos);
+        sortFilter = new SortFilter();
 
         VBox box = new VBox();
         box.getStyleClass().add("filterBox");
@@ -106,6 +111,8 @@ public class HomePane extends BorderPane {
         ScrollPane scrollPane = new ScrollPane(gridPaneFilterCat);
         scrollPane.getStyleClass().add("scrollPaneCateg");
         box.getChildren().add(scrollPane);
+        scrollPane.prefWidthProperty().bind(Bindings.createDoubleBinding(() -> 15 + 10 + 2 + gridPaneFilterCat.getWidth(), gridPaneFilterCat.widthProperty()));
+        scrollPane.prefHeightProperty().bind(Bindings.createDoubleBinding(() -> 15 + 5 + 2 + gridPaneFilterCat.getHeight(), gridPaneFilterCat.heightProperty()));
 
         nameFilter.prefWidthProperty().bind(scrollPane.widthProperty());
 
@@ -121,7 +128,6 @@ public class HomePane extends BorderPane {
         BorderPane bp = new BorderPane();
         bp.getStyleClass().add("leftPane");
         bp.setCenter(box);
-//        bp.getStyleClass().add("leftBox");
 
         int rowNum = 0;
         GridPaneBuilder gbDet = new GridPaneBuilder();
@@ -150,6 +156,212 @@ public class HomePane extends BorderPane {
         bp.setBottom(createHBox("paneDetails", gbDet.createGridPane()));
 
         return bp;
+    }
+
+    private Pane createCenterPane() {
+        tableVideos = new JfxTable<>();
+        tableVideos.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+        tableVideos.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+        JfxTableCol<Video, String> tcolTitle = JfxTableCol.createCol("VIDEO", "title");
+        tableVideos.getColumns().add(tcolTitle);
+        tcolTitle.setFixedPrefWidth(467);
+
+        JfxTableCol<Video, Long> tcolSize = JfxTableCol.createCol("SIZE", "size", l -> JkOutput.humanSize(l, JkSizeUnit.MB, false));
+        tableVideos.getColumns().add(tcolSize);
+        tcolSize.setFixedPrefWidth(100);
+
+        JfxTableCol<Video,String> tcolDim = JfxTableCol.createCol("WxH", v -> v.getWidth() + v.getHeight() == 0d ? "" : strf("{}x{}", v.getWidth(), v.getHeight()));
+        tableVideos.getColumns().add(tcolDim);
+        tcolDim.setFixedPrefWidth(100);
+
+        JfxTableCol<Video,Double> tcolResolution = JfxTableCol.createCol("W/H", v -> v.getHeight() == 0d ? 0d : (double)v.getWidth()/v.getHeight(), d -> strf("%.2f", d));
+        tableVideos.getColumns().add(tcolResolution);
+        tcolResolution.setFixedPrefWidth(75);
+
+        JfxTableCol<Video, JkDuration> tcolLength = JfxTableCol.createCol("LENGTH", "length", d -> d == null ? "" : d.toStringElapsed(false));
+        tableVideos.getColumns().add(tcolLength);
+        tcolLength.setFixedPrefWidth(75);
+
+        JfxTableCol<Video,Integer> tcolNumSnapshots = JfxTableCol.createCol("SNAP", v -> v.getSnapTimes().size());
+        tableVideos.getColumns().add(tcolNumSnapshots);
+        tcolNumSnapshots.setFixedPrefWidth(75);
+
+        JfxTableCol<Video, JkDateTime> tcolCreationTm = JfxTableCol.createCol("CREATION", "creationTm", null, jdt -> jdt == null ? "" : jdt.format("dd/MM/yyyy   HH:mm:ss"));
+        tableVideos.getColumns().add(tcolCreationTm);
+        tcolCreationTm.setFixedPrefWidth(170);
+
+//        tableVideos.setMaxWidth(tableVideos.getColumns().stream().mapToDouble(TableColumn::getMinWidth).sum() + 22 + 2);
+
+        // Center all columns but the first one
+        tableVideos.getColumns().subList(1, tableVideos.getColumns().size()).forEach(col -> col.getStyleClass().add("centered"));
+
+        FilteredList<Video> filteredList = new FilteredList<>(model.getVideos());
+        filteredList.predicateProperty().bind(sortFilter);
+
+        SortedList<Video> tableItems = new SortedList<>(filteredList);
+        tableItems.comparatorProperty().bind(tableVideos.comparatorProperty());
+        tableVideos.setItems(tableItems);
+        tableVideos.resizeWidth();
+        model.getVideos().addListener((ListChangeListener<Video>)c -> tableVideos.refresh());
+
+        VBox vbox = new VBox(tableVideos);
+        vbox.getStyleClass().add("centerBox");
+        VBox.setVgrow(tableVideos, Priority.ALWAYS);
+
+        Consumer<Object> selEvent = obj -> {
+            ObservableList<Video> sitems = tableVideos.getSelectionModel().getSelectedItems();
+            model.getSelectedVideos().setAll(sitems.isEmpty() ? tableItems : sitems);
+        };
+        tableVideos.getSelectionModel().getSelectedItems().addListener((ListChangeListener<? super Video>) selEvent::accept);
+        tableItems.addListener((ListChangeListener<? super Video>) selEvent::accept);
+
+        model.getSelectedVideos().setAll(tableItems);
+
+        BorderPane bpTop = new BorderPane();
+        bpTop.getStyleClass().add("topPane");
+        vbox.getChildren().add(0, bpTop);
+
+        Button btnManageVideos = new Button("MANAGE");
+        btnManageVideos.setOnAction(e -> PanesSelector.getInstance().displayManagementPane());
+        Button btnCutVideo = new Button("CUT VIDEO");
+        btnCutVideo.setOnAction(e -> PanesSelector.getInstance().displayCutVideoPane(model.getSelectedVideos().get(0)));
+        btnCutVideo.disableProperty().bind(Bindings.createBooleanBinding(() -> model.getSelectedVideos().size() != 1, model.getSelectedVideos()));
+        Button btnAddVideos = new Button("ADD VIDEOS");
+        btnAddVideos.setOnAction(this::actionAddVideos);
+        bpTop.setLeft(createHBox("spacing10", btnManageVideos, btnCutVideo, btnAddVideos));
+
+        Button btnMark = new Button("MARK");
+        btnMark.setOnAction(e -> {
+            synchronized (model.getSelectedVideos()) {
+                if(!model.getSelectedVideos().isEmpty()) {
+                    model.getSelectedVideos().forEach(v -> v.setMarked(true));
+                    sortFilter.triggerSort();
+                }
+            }
+        });
+        Button btnUnmark = new Button("UNMARK");
+        btnUnmark.setOnAction(e -> {
+            synchronized (model.getSelectedVideos()) {
+                if(!model.getSelectedVideos().isEmpty()) {
+                    model.getSelectedVideos().forEach(v -> v.setMarked(false));
+                    sortFilter.triggerSort();
+                }
+            }
+        });
+        Button btnAutoSnap = new Button("AUTOSNAP");
+        btnAutoSnap.setOnAction(e -> {
+            SimpleBooleanProperty finished = new SnapshotManager().runAutoSnap(model.getSelectedVideos());
+            if(finished != null) {
+                finished.addListener((obs,o,n) -> {
+                    if(finished.get()){
+                        tableVideos.refresh();
+                        model.persistData();
+                    }
+                });
+            }
+        });
+        Button btnClearSnaps = new Button("CLEAR SNAPS");
+        btnClearSnaps.setOnAction(e -> {
+            model.getSelectedVideos().forEach(v -> {
+                v.getSnapTimes().forEach(st -> model.removeSnapshot(v, st));
+                v.getSnapTimes().clear();
+            });
+            tableVideos.refresh();
+            updateSnapsScrollPane();
+            model.persistData();
+        });
+        bpTop.setCenter(createHBox("spacing10 centered", btnMark, btnUnmark, btnAutoSnap, btnClearSnaps));
+
+        Button btnDelete = new Button("DELETE");
+        btnDelete.setOnAction(e -> {
+            model.getVideos().removeAll(model.getSelectedVideos());
+            updateSnapsScrollPane();
+        });
+        bpTop.setRight(createHBox("centered", btnDelete));
+
+        return vbox;
+    }
+
+    private Pane createRightPane() {
+        VBox box = createVBox("rightBox");
+
+        VBox vbox = new VBox();
+        box.getChildren().add(vbox);
+        vbox.getStyleClass().addAll("boxPlayVideos");
+
+        ComboBox<VideoStagesPosition> combo = new ComboBox<>();
+        combo.getItems().setAll(StagePosProvider.getVideoPosList());
+        combo.setConverter(new StringConverter<VideoStagesPosition>() {
+            @Override
+            public String toString(VideoStagesPosition object) {
+                return object.getName().replace("_", " ");
+            }
+            @Override
+            public VideoStagesPosition fromString(String string) {
+                return StagePosProvider.getStagesPosition(string);
+            }
+        });
+        combo.getSelectionModel().selectFirst();
+        Button btnPlay = new Button("PLAY");
+        vbox.getChildren().addAll(combo, btnPlay);
+        btnPlay.setOnAction(e -> {
+            // TODO impl
+        });
+
+        scrollPaneSnaps = new ScrollPane();
+        box.getChildren().add(scrollPaneSnaps);
+        model.getSelectedVideos().addListener((ListChangeListener<Video>)c -> updateSnapsScrollPane());
+
+        return box;
+    }
+    private void updateSnapsScrollPane() {
+        scrollPaneSnaps.setContent(createSnapViewPane(model.getSelectedVideos()));
+    }
+
+    private Pane createSnapViewPane(List<Video> videos) {
+        List<FxSnapshot> snapshots = new ArrayList<>();
+
+        int ncols = 4;
+
+        if(videos.size() == 1) {
+            Video video = videos.get(0);
+            snapshots.addAll(JkStreams.map(video.getSnapTimes(), st -> model.getSnapshot(video, st)));
+        } else if(videos.size() < 100){
+            int numSnapEach = videos.size() <= 10 ? ncols : 1;
+            videos.forEach(v -> {
+                List<JkDuration> stList = JkStruct.safeSublist(v.getSnapTimes(), 0, numSnapEach);
+                snapshots.addAll(JkStreams.map(stList, st -> model.getSnapshot(v, st)));
+                int rem = numSnapEach - stList.size();
+                for(int i = 0; i < rem; i++)    snapshots.add(null);
+            });
+        }
+
+        double ivWidth = 100d;
+        double ivHeight = ivWidth / 1.33;
+        List<HBox> ivBoxList = JkStreams.map(snapshots, sn -> {
+            if(sn == null)  return null;
+            ImageView iv = createImageView(sn.getImage());
+            HBox ivbox = new HBox(iv);
+            ivbox.getStyleClass().addAll("bgBlack", "centered");
+            ivbox.setPrefWidth(ivWidth);
+            ivbox.setPrefHeight(ivHeight);
+            iv.setFitWidth(ivbox.getPrefWidth());
+            iv.setFitHeight(ivbox.getPrefHeight());
+            return ivbox;
+        });
+
+        GridPaneBuilder gpBuilder = new GridPaneBuilder();
+        for(int row = 0, index = 0; index < ivBoxList.size(); row++) {
+            for(int col = 0; col < ncols && index < ivBoxList.size(); col++, index++) {
+                if(ivBoxList.get(index) != null) {
+                    gpBuilder.add(row, col, ivBoxList.get(index));
+                }
+            }
+        }
+
+        GridPane gp = gpBuilder.createGridPane();
+        return createVBox("vboxSnapshots", gp);
     }
 
     private void fillGpCategFilter() {
@@ -226,103 +438,7 @@ public class HomePane extends BorderPane {
     public void refreshView() {
         fillGpCategFilter();
         tableVideos.refresh();
-    }
-
-    private Pane createCenterPane() {
-        tableVideos = new JfxTable<>();
-        tableVideos.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
-        tableVideos.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-
-        JfxTableCol<Video, String> tcolTitle = JfxTableCol.createCol("VIDEO", "title");
-        tableVideos.getColumns().add(tcolTitle);
-        tcolTitle.setFixedPrefWidth(500);
-
-        JfxTableCol<Video, Long> tcolSize = JfxTableCol.createCol("SIZE", "size", l -> JkOutput.humanSize(l, JkSizeUnit.MB, false));
-        tableVideos.getColumns().add(tcolSize);
-        tcolSize.setFixedPrefWidth(100);
-
-        JfxTableCol<Video,String> tcolDim = JfxTableCol.createCol("WxH", v -> v.getWidth() + v.getHeight() == 0d ? "" : strf("{}x{}", v.getWidth(), v.getHeight()));
-        tableVideos.getColumns().add(tcolDim);
-        tcolDim.setFixedPrefWidth(100);
-
-        JfxTableCol<Video,Double> tcolResolution = JfxTableCol.createCol("W/H", v -> v.getHeight() == 0d ? 0d : (double)v.getWidth()/v.getHeight(), d -> strf("%.2f", d));
-        tableVideos.getColumns().add(tcolResolution);
-        tcolResolution.setFixedPrefWidth(75);
-
-        JfxTableCol<Video, JkDuration> tcolLength = JfxTableCol.createCol("LENGTH", "length", d -> d == null ? "" : d.toStringElapsed(false));
-        tableVideos.getColumns().add(tcolLength);
-        tcolLength.setFixedPrefWidth(75);
-
-        JfxTableCol<Video,Integer> tcolPlayTimes = JfxTableCol.createCol("N.PLAY", "playTimes");
-        tableVideos.getColumns().add(tcolPlayTimes);
-        tcolPlayTimes.setFixedPrefWidth(75);
-
-        JfxTableCol<Video,Integer> tcolNumSnapshots = JfxTableCol.createCol("SNAP", v -> v.getSnapTimes().size());
-        tableVideos.getColumns().add(tcolNumSnapshots);
-        tcolNumSnapshots.setFixedPrefWidth(75);
-
-        JfxTableCol<Video, JkDateTime> tcolCreationTm = JfxTableCol.createCol("CREATION", "creationTm", null, jdt -> jdt == null ? "" : jdt.format("dd/MM/yyyy   HH:mm:ss"));
-        tableVideos.getColumns().add(tcolCreationTm);
-        tcolCreationTm.setFixedPrefWidth(170);
-
-//        tableVideos.setMaxWidth(tableVideos.getColumns().stream().mapToDouble(TableColumn::getMinWidth).sum() + 22 + 2);
-
-        // Center all columns but the first one
-        tableVideos.getColumns().subList(1, tableVideos.getColumns().size()).forEach(col -> col.getStyleClass().add("centered"));
-
-        FilteredList<Video> filteredList = new FilteredList<>(model.getVideos());
-        filteredList.predicateProperty().bind(sortFilter);
-
-        SortedList<Video> tableItems = new SortedList<>(filteredList);
-        tableItems.comparatorProperty().bind(tableVideos.comparatorProperty());
-        tableVideos.setItems(tableItems);
-        tableVideos.resizeWidth();
-        model.getVideos().addListener((ListChangeListener<Video>)c -> {
-            tableVideos.refresh();
-            markedVideos.removeIf(v -> !model.getVideos().contains(v));
-        });
-
-        VBox vbox = new VBox(tableVideos);
-        vbox.getStyleClass().add("centerBox");
-        VBox.setVgrow(tableVideos, Priority.ALWAYS);
-
-        Consumer<Object> selEvent = obj -> {
-            ObservableList<Video> sitems = tableVideos.getSelectionModel().getSelectedItems();
-            model.getSelectedVideos().setAll(sitems.isEmpty() ? tableItems : sitems);
-        };
-        tableVideos.getSelectionModel().getSelectedItems().addListener((ListChangeListener<? super Video>) selEvent::accept);
-        tableItems.addListener((ListChangeListener<? super Video>) selEvent::accept);
-
-        model.getSelectedVideos().setAll(tableItems);
-
-        BorderPane bpTop = new BorderPane();
-        bpTop.getStyleClass().add("topPane");
-        vbox.getChildren().add(0, bpTop);
-
-        Button btnAddVideos = new Button("ADD VIDEOS");
-        btnAddVideos.setOnAction(this::actionAddVideos);
-        Button btnManageVideos = new Button("MANAGE");
-        btnManageVideos.setOnAction(e -> PanesSelector.getInstance().displayManagementPane());
-        bpTop.setLeft(createHBox("spacing20", btnManageVideos, btnAddVideos));
-
-        Button btnMark = new Button("MARK");
-        btnMark.setOnAction(e -> markedVideos.addAll(model.getSelectedVideos()));
-        Button btnUnmark = new Button("UNMARK");
-        btnUnmark.setOnAction(e -> markedVideos.removeAll(model.getSelectedVideos()));
-        Button btnAutoSnap = new Button("AUTOSNAP");
-        btnAutoSnap.setOnAction(e -> {
-            SimpleBooleanProperty finished = new SnapshotManager().runAutoSnap(model.getSelectedVideos());
-            if(finished != null) {
-                finished.addListener((obs,o,n) -> { if(finished.get()) tableVideos.refresh(); });
-            }
-        });
-        bpTop.setCenter(createHBox("spacing20 centered", btnMark, btnUnmark, btnAutoSnap));
-
-        Button btnDelete = new Button("DELETE");
-        btnDelete.setOnAction(e -> model.getVideos().removeAll(model.getSelectedVideos()));
-        bpTop.setRight(createHBox("centered", btnDelete));
-
-        return vbox;
+        sortFilter.triggerSort();
     }
 
     private void actionAddVideos(ActionEvent event) {
@@ -343,71 +459,14 @@ public class HomePane extends BorderPane {
         dlg.setContentText(strf("Analyzing {} files", pathList.size()));
         dlg.show();
 
-        for(Path p : pathList) {
-            Video v = createFromPath(p);
-            boolean addVideo = !model.getVideos().contains(v);
-            if(addVideo) {
-                model.addVideoFile(v, p);
-                readVideoLengthWidthHeight(v);
-                model.getVideos().add(v);
-                logger.info("New video added {}", p);
-            } else {
-                logger.info("Skip add for video {}: already exists", p);
-            }
-        }
+        pathList.forEach(model::addVideoFile);
 
         dlg.getDialogPane().getButtonTypes().add(ButtonType.OK);
         dlg.close();
     }
 
-    private Video createFromPath(Path path)  {
-        Video video = new Video();
-        video.setMd5(JkEncryption.getMD5(path));
-        video.setTitle(JkFiles.getFileName(path));
-        video.setSize(JkFiles.safeSize(path));
-        return video;
-    }
+    @Override
+    public void closePane() {
 
-    private void readVideoLengthWidthHeight(Video video) {
-        MediaView mv = new MediaView();
-        Path videoPath = model.getVideoFile(video);
-        Media media = new Media(JkFiles.toURL(videoPath));
-        MediaPlayer mediaPlayer = new MediaPlayer(media);
-        mediaPlayer.setAutoPlay(false);
-        mediaPlayer.setVolume(0d);
-        mv.setMediaPlayer(mediaPlayer);
-        AtomicInteger aint = new AtomicInteger(0);
-        SimpleIntegerProperty iprop = new SimpleIntegerProperty(0);
-        mediaPlayer.totalDurationProperty().addListener((obs,o,n) -> { video.setLength(JkDuration.of(n)); iprop.set(aint.incrementAndGet());});
-        media.widthProperty().addListener((obs,o,n) -> { video.setWidth(n.intValue()); iprop.set(aint.incrementAndGet());});
-        media.heightProperty().addListener((obs,o,n) -> { video.setHeight(n.intValue()); iprop.set(aint.incrementAndGet());});
-        iprop.addListener((obs,o,n) -> { if(n.intValue() == 3) { mediaPlayer.stop(); mediaPlayer.dispose(); tableVideos.refresh(); }});
-        mediaPlayer.play();
-    }
-
-    private Pane createRightPane() {
-        VBox box = createVBox("rightBox");
-
-        VBox vbox = new VBox();
-        box.getChildren().add(vbox);
-        vbox.getStyleClass().addAll("boxPlayVideos");
-
-        ComboBox<VideoStagesPosition> combo = new ComboBox<>();
-        combo.getItems().setAll(StagePosProvider.getVideoPosList());
-        combo.setConverter(new StringConverter<VideoStagesPosition>() {
-            @Override
-            public String toString(VideoStagesPosition object) {
-                return object.getName().replace("_", " ");
-            }
-            @Override
-            public VideoStagesPosition fromString(String string) {
-                return StagePosProvider.getStagesPosition(string);
-            }
-        });
-        combo.getSelectionModel().selectFirst();
-        Button btnPlay = new Button("PLAY");
-        vbox.getChildren().addAll(combo, btnPlay);
-
-        return box;
     }
 }

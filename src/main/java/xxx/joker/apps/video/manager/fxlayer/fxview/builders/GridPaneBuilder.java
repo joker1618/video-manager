@@ -34,6 +34,21 @@ public class GridPaneBuilder {
         return this;
     }
 
+    public GridPaneBuilder removeRow(int row) {
+        boxMap.remove(row);
+        return this;
+    }
+    public GridPaneBuilder removeColumn(int col) {
+        boxMap.forEach((r,map) -> map.remove(col));
+        return this;
+    }
+    public GridPaneBuilder removeCell(int row, int col) {
+        if(boxMap.containsKey(row)) {
+            boxMap.get(row).remove(col);
+        }
+        return this;
+    }
+
     public GridPane createGridPane() {
         GridPane gp = new GridPane();
         createGridPane(gp);
@@ -55,11 +70,12 @@ public class GridPaneBuilder {
         }
         maxCol++;
 
+
         // Analyze row/col span to get the positions that are spanned,
         // in order to avoid to create an HBox in that position
         Map<Integer, List<Integer>> spannedPos = new HashMap<>();
+        for(int nr = 0; nr < maxRow; nr++)  spannedPos.put(nr, new ArrayList<>());
         boxMap.forEach((rowNum,map) -> {
-            spannedPos.putIfAbsent(rowNum, new ArrayList<>());
             map.forEach((colNum,gbox) -> {
                 for(int cn = 0; cn < gbox.getColSpan(); cn++) {
                     for(int rn = 0; rn < gbox.getRowSpan(); rn++) {
@@ -76,8 +92,18 @@ public class GridPaneBuilder {
         for(int r = 0; r < maxRow; r++) {
             for(int c = 0; c < maxCol; c++) {
                 if(!spannedPos.get(r).contains(c)) {
-                    GpBox gpBox = boxMap.getOrDefault(r, new HashMap<>()).getOrDefault(c, new GpBox());
+                    boolean emptyCell;
+                    GpBox gpBox;
+                    if(boxMap.containsKey(r) && boxMap.get(r).containsKey(c)) {
+                        gpBox = boxMap.get(r).get(c);
+                        emptyCell = false;
+                    } else {
+                        gpBox = new GpBox();
+                        emptyCell = true;
+                    }
+
                     HBox hbox = gpBox.getHbox();
+                    if(emptyCell)   hbox.getStyleClass().add("cellEmpty");
                     hbox.getStyleClass().addAll("row" + r, "col" + c, "cellBox");
                     hbox.getStyleClass().add(r % 2 == 0 ? "row-odd" : "row-even");
                     hbox.getStyleClass().add(c % 2 == 0 ? "col-odd" : "col-even");

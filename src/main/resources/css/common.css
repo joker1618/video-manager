@@ -12,8 +12,13 @@
 
 .cell:empty { -fx-opacity: 0 }
 
+.scroll-bar:vertical    { -fx-pref-width: 15 }
+.scroll-bar:horizontal  { -fx-pref-height: 15 }
+
+
 .centered   { -fx-alignment: CENTER }
-.topCenter  { -fx-alignment: TOP-CENTER }
+.top-center  { -fx-alignment: TOP-CENTER }
+.center-left { -fx-alignment: CENTER-LEFT }
 
 .no-width  { -fx-min-width: -1; -fx-pref-width: -1; -fx-max-width: -1; }
 .no-height { -fx-min-height: -1; -fx-pref-height: -1; -fx-max-height: -1; }

@@ -1,0 +1,4 @@
+.rightBox {
+    -fx-background-color: -container-bg-color;
+    -fx-padding: 10;
+}

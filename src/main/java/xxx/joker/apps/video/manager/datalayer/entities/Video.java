@@ -23,9 +23,9 @@ public class Video extends RepoEntity {
     @RepoField
     private Set<Category> categories;
     @RepoField
-    private int playTimes;
-    @RepoField
     private Set<JkDuration> snapTimes;
+    @RepoField
+    private boolean marked;
 
 
     public Video() {
@@ -68,6 +68,10 @@ public class Video extends RepoEntity {
         return height;
     }
 
+    public double getFormat() {
+        return height == 0 ? 0d : (double) width / height;
+    }
+
     public void setHeight(int height) {
         this.height = height;
     }
@@ -88,14 +92,6 @@ public class Video extends RepoEntity {
         this.categories = categories;
     }
 
-    public int getPlayTimes() {
-        return playTimes;
-    }
-
-    public void setPlayTimes(int playTimes) {
-        this.playTimes = playTimes;
-    }
-
     public Set<JkDuration> getSnapTimes() {
         return snapTimes;
     }
@@ -104,12 +100,17 @@ public class Video extends RepoEntity {
         this.snapTimes = new TreeSet<>(snapTimes);
     }
 
+    public boolean isMarked() {
+        return marked;
+    }
+
+    public void setMarked(boolean marked) {
+        this.marked = marked;
+    }
+
     @Override
     public String getPrimaryKey() {
         return md5;
     }
 
-    public void incrementPlayTimes() {
-        playTimes++;
-    }
 }

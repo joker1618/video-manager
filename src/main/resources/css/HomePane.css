@@ -1,12 +1,11 @@
 /* BorderPane Left */
 .leftPane {
     -fx-background-color: -container-bg-color;
-    -fx-padding: 15;
+    -fx-padding: 10;
 }
 
 .filterBox {
     -fx-spacing: 10;
-    -fx-padding: 0 0 10 0;
 }
 .filterBox .boxCaption {
     -fx-alignment: CENTER;
@@ -19,7 +18,7 @@
 
 .filterBox .jfxGridBox {
     -fx-hgap: 5;
-    -fx-vgap: 10;
+    -fx-vgap: 5;
 }
 .filterBox .jfxGridBox .cellBox {
     -fx-alignment: CENTER;
@@ -29,10 +28,10 @@
     -fx-padding: 0 10 0 0;
 }
 .filterBox .jfxGridBox .cellBox.col-last {
-    -fx-padding: 0 0 0 10;
+    -fx-padding: 0;
 }
 .filterBox .jfxGridBox .cellBox.col-last .button {
-    -fx-padding: 5;
+    -fx-padding: 3;
 }
 
 .filterBox .check-box:selected {
@@ -41,7 +40,7 @@
 .filterBox .scrollPaneCateg {
     -fx-border-color: -container-border-color;
     -fx-border-width: 1;
-    -fx-padding: 10;
+    -fx-padding: 5;
 }
 .filterBox .scrollPaneCateg,
 .filterBox .scrollPaneCateg .viewport {
@@ -64,8 +63,7 @@
 
 /* BorderPane Center */
 .centerBox {
-    -fx-min-width: 650;
-    -fx-padding: 15;
+    -fx-padding: 10;
     -fx-spacing: 15;
     -fx-background-color: -container-bg-color;
     -fx-border-width: 0 1 0 1;
@@ -74,8 +72,8 @@
 .centerBox .topPane .button {
     -fx-font-weight: BOLD;
     -fx-font-size: 15;
-    -fx-pref-width: 110;
-    -fx-pref-height: 40;
+    -fx-min-width: 110;
+    -fx-min-height: 40;
     -fx-wrap-text: true;
     -fx-text-alignment: CENTER;
     -fx-padding: 0;
@@ -87,9 +85,8 @@
 /* BorderPane Right */
 .rightBox {
     -fx-spacing: 15;
-    -fx-padding: 15;
+    -fx-padding: 10;
     -fx-background-color: -container-bg-color;
-    -fx-pref-width: 375;
     -fx-alignment: TOP-CENTER;
 }
 .rightBox .boxPlayVideos {
@@ -102,9 +99,21 @@
 .rightBox .button {
     -fx-font-weight: BOLD;
     -fx-font-size: 15;
-    -fx-pref-width: 110;
-    -fx-pref-height: 40;
+    -fx-min-width: 110;
+    -fx-min-height: 40;
     -fx-wrap-text: true;
     -fx-text-alignment: CENTER;
     -fx-padding: 0;
 }
+
+.rightBox .scroll-pane {
+    -fx-border-width: 0;
+    -fx-padding: 0;
+    -fx-pref-width: 420;
+}
+.rightBox .scroll-pane .viewport     { -fx-background-color: -container-bg-color }
+.rightBox .vboxSnapshots .cellBox    { -fx-border-color: RED; -fx-border-width: 0 1 1 0; }
+.rightBox .vboxSnapshots .row0       { -fx-border-width: 1 1 1 0 }
+.rightBox .vboxSnapshots .col0       { -fx-border-width: 0 1 1 1 }
+.rightBox .vboxSnapshots .row0.col0  { -fx-border-width: 1 }
+.rightBox .vboxSnapshots .cellEmpty  { -fx-border-width: 0 }

@@ -38,7 +38,11 @@
     */
 }
 
-.headingBox .boxSnapshot .button {
+.headingBox .boxIcons {
+    -fx-padding: 0;
+    -fx-spacing: 10;
+}
+.headingBox .boxIcons .button {
     -fx-padding: 0;
     -fx-border-width: 0;
 }

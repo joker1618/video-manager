@@ -1,6 +1,6 @@
 .leftBox {
     -fx-background-color: -container-bg-color;
-    -fx-padding: 15;
+    -fx-padding: 10;
     -fx-spacing: 15;
     -fx-border-width: 0 1 0 0;
     -fx-border-color: -container-border-color;
@@ -14,7 +14,6 @@
 
 .leftBox .middleBtnBox {
     -fx-alignment: CENTER;
-    -fx-spacing: 50;
 }
 
 .leftBox .button {
@@ -60,16 +59,17 @@
 /*  CENTER  */
 .centerBox {
     -fx-background-color: -container-bg-color;
-    -fx-padding: 15;
+    -fx-padding: 10;
 }
 .centerBox .topBox{
     -fx-padding: 0 0 15 0;
 }
-.centerBox .topBox .bleft {
+.centerBox .topBox .subBox {
     -fx-alignment: CENTER;
     -fx-spacing: 10;
 }
-.centerBox .topBox .bleft .text-field{
+.centerBox .topBox .subBox.titleBox { -fx-padding: 0 0 10 0 }
+.centerBox .topBox .subBox .text-field {
     -fx-pref-width: 300;
     -fx-font-size: 14;
 }
@@ -87,7 +87,7 @@
 /* RIGHT */
 .rightBox {
     -fx-background-color: -container-bg-color;
-    -fx-padding: 15;
+    -fx-padding: 10;
     -fx-border-width: 0 0 0 1;
     -fx-border-color: -container-border-color;
 }
@@ -99,11 +99,12 @@
 }
 
 .rightBox .jfxGridBox {
-    -fx-hgap: 10;
-    -fx-vgap: 10;
+    -fx-hgap: 5;
+    -fx-vgap: 5;
 }
 .rightBox .scroll-pane {
-    -fx-pref-width: 522;
+    -fx-border-width: 0;
+    -fx-pref-width: 510;
 }
 .rightBox .scroll-pane .viewport {
     -fx-background-color: -container-bg-color;

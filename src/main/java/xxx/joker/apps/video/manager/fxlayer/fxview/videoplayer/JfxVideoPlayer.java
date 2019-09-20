@@ -2,6 +2,7 @@ package xxx.joker.apps.video.manager.fxlayer.fxview.videoplayer;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.ObservableSet;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -21,8 +22,11 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.commonOK.Config;
+import xxx.joker.apps.video.manager.datalayer.entities.Video;
+import xxx.joker.apps.video.manager.fxlayer.fxmodel.FxModel;
 import xxx.joker.apps.video.manager.fxlayer.fxmodel.FxVideo;
 import xxx.joker.apps.video.manager.fxlayer.fxview.builders.SnapshotManager;
+import xxx.joker.apps.video.manager.fxlayer.fxview.provider.IconProvider;
 import xxx.joker.libs.core.datetime.JkDuration;
 import xxx.joker.libs.core.files.JkFiles;
 import xxx.joker.libs.core.javafx.JfxUtil;
@@ -31,9 +35,12 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 
+import static xxx.joker.libs.core.javafx.JfxControls.createHBox;
 import static xxx.joker.libs.core.javafx.JfxControls.createImageView;
 import static xxx.joker.libs.core.utils.JkStrings.strf;
 
@@ -59,10 +66,13 @@ public class JfxVideoPlayer extends BorderPane {
 
 	private boolean isMediaTerminated;
 
+	private IconProvider iconProvider;
+
 
 	protected JfxVideoPlayer(FxVideo fxVideo, PlayerConfig playerConfig) {
 		this.fxVideo = fxVideo;
 		this.playerConfig = playerConfig;
+		this.iconProvider = new IconProvider();
 
 		setCenter(createMediaViewPane());
 
@@ -80,7 +90,7 @@ public class JfxVideoPlayer extends BorderPane {
 			getStyleClass().add("borderedRoot");
 		}
 
-		getStylesheets().add(getClass().getResource("/css_legacy/JkVideoPlayer.css").toExternalForm());
+		getStylesheets().add(getClass().getResource("/css/JfxVideoPlayer.css").toExternalForm());
 	}
 
 	public void play() {
@@ -119,27 +129,35 @@ public class JfxVideoPlayer extends BorderPane {
 		HBox headingBox = new HBox();
 		headingBox.getStyleClass().add("headingBox");
 
-//		AtomicBoolean okSnap = new AtomicBoolean(!VideoModelImpl.getInstance().findSnapshots(videoWrapper.getVideo()).isEmpty());
-//		URL url = getClass().getResource(strf("/icons/camera-{}.png", okSnap.get() ? "green" : "red"));
-		URL url = getClass().getResource(strf("/icons/camera.png"));
-		Image iconCamera = new Image(url.toExternalForm());
-		ImageView imageView = new ImageView(iconCamera);
-		imageView.setPreserveRatio(false);
-		imageView.setFitWidth(30);
-		imageView.setFitHeight(30);
+		HBox hBoxIcons = createHBox("boxIcons");
+		double bsize = 30d;
 
-		Button btnCamera = new Button();
-		btnCamera.setGraphic(imageView);
-//		int snapSize = 500;
-		btnCamera.setOnAction(e -> {
-//			Pair<Path, Long> pair = takeVideoSnapshot(snapSize);
-			new SnapshotManager().takeSnapAndAddToModel(this);
-			playerConfig.runBtnCameraListener();
-		});
+		if(playerConfig.isVisibleBtnCamera()) {
+			Button btnCamera = new Button();
+			btnCamera.setGraphic(iconProvider.getIcon(IconProvider.CAMERA, bsize, bsize, false));
+			btnCamera.setOnAction(e -> {
+				new SnapshotManager().takeSnapAndAddToModel(this);
+				playerConfig.runBtnCameraListener();
+			});
+			hBoxIcons.getChildren().add(btnCamera);
+		}
 
-		HBox hBoxCamera = new HBox(btnCamera);
-		hBoxCamera.getStyleClass().add("boxSnapshot");
-		headingBox.getChildren().add(hBoxCamera);
+		if(playerConfig.isVisibleBtnMark()) {
+			Button btnMark = new Button();
+			ImageView ivMarked = iconProvider.getIcon(fxVideo.getVideo().isMarked() ? IconProvider.MARKED_GREEN : IconProvider.UNMARKED, bsize, bsize, false);
+			btnMark.setGraphic(ivMarked);
+			btnMark.setOnAction(e -> {
+				Video v = fxVideo.getVideo();
+				v.setMarked(!v.isMarked());
+				ivMarked.setImage(iconProvider.getIcon(v.isMarked() ? IconProvider.MARKED_GREEN : IconProvider.UNMARKED).getImage());
+				playerConfig.runBtnMarkRunnable();
+			});
+			hBoxIcons.getChildren().add(btnMark);
+		}
+
+		if(playerConfig.isVisibleBtnCamera() || playerConfig.isVisibleBtnMark()) {
+			headingBox.getChildren().add(hBoxIcons);
+		}
 
 		Pane fill1 = new Pane();
 		Pane fill2 = new Pane();
@@ -147,9 +165,8 @@ public class JfxVideoPlayer extends BorderPane {
 		headingBox.getChildren().addAll(fill1, lblHeading, fill2);
 
 		if(playerConfig.isShowCloseButton()) {
-//			Button btnClose = new Button("X");
 			Button btnClose = new Button();
-			btnClose.setGraphic(createImageView(Paths.get("C:\\Users\\fbarbano\\Desktop\\icons\\close.png"), 30, 30));
+			btnClose.setGraphic(iconProvider.getIcon(IconProvider.CLOSE, bsize, bsize));
 			btnClose.setOnAction(playerConfig.getCloseEvent());
 			headingBox.getChildren().add(btnClose);
 		}
@@ -247,13 +264,14 @@ public class JfxVideoPlayer extends BorderPane {
 		mediaBar.getStyleClass().add("mediaBarPane");
 		BorderPane.setAlignment(mediaBar, Pos.CENTER);
 
-		int btnSize = 40;
+		double btnSize = 40d;
 
 		// Play button
 //		btnPlay = new Button(">");
 		btnPlay = new Button();
-		Image imgPlay = new Image(getClass().getResource("/icons/play.png").toExternalForm());
-		ImageView ivPlayPause = createImageView(imgPlay, btnSize, btnSize);
+//		Image imgPlay = new Image(getClass().getResource("/icons/play.png").toExternalForm());
+//		ImageView ivPlayPause = createImageView(imgPlay, btnSize, btnSize);
+		ImageView ivPlayPause = iconProvider.getIcon(IconProvider.PLAY, btnSize, btnSize);
 		btnPlay.setGraphic(ivPlayPause);
 		mediaBar.getChildren().add(btnPlay);
 
@@ -277,17 +295,21 @@ public class JfxVideoPlayer extends BorderPane {
 		
 		// Previous and next buttons
 		if(playerConfig.getNextAction() != null) {
-//			Button btnPrevious = new Button("<<");
 			Button btnPrevious = new Button();
-			btnPrevious.setGraphic(createImageView(new Image(getClass().getResource("/icons/previous.png").toExternalForm()), btnSize, btnSize));
+			btnPrevious.setGraphic(iconProvider.getIcon(IconProvider.PREVIOUS, btnSize, btnSize));
 			btnPrevious.setOnAction(playerConfig.getPreviousAction());
-//			btnNext = new Button(">>");
 			btnNext = new Button();
-			btnNext.setGraphic(createImageView(new Image(getClass().getResource("/icons/next.png").toExternalForm()), btnSize, btnSize));
+			btnNext.setGraphic(iconProvider.getIcon(IconProvider.NEXT, btnSize, btnSize));
 			btnNext.setOnAction(playerConfig.getNextAction());
-			HBox hboxAdditional = new HBox(btnPrevious, btnNext);
-			hboxAdditional.getStyleClass().add("lessSpacingBox");
+			HBox hboxAdditional = createHBox("lessSpacingBox", btnPrevious, btnNext);
 			mediaBar.getChildren().add(hboxAdditional);
+		}
+
+		List<Button> seekButtons = getSeekButtons(btnSize);
+		if(!seekButtons.isEmpty()) {
+			HBox hbox = createHBox("lessSpacingBox");
+			hbox.getChildren().setAll(seekButtons);
+			mediaBar.getChildren().add(hbox);
 		}
 
 		// volume slider
@@ -306,6 +328,77 @@ public class JfxVideoPlayer extends BorderPane {
 		initMediaBarBindings(ivPlayPause);
 
 		return mediaBar;
+	}
+	
+	private List<Button> getSeekButtons(double btnSize) {
+		List<Button> seekButtons = new ArrayList<>();
+		if(playerConfig.getBackward5Milli() != null) {
+			Button btnBack5 = new Button();
+			btnBack5.setGraphic(iconProvider.getIcon(IconProvider.BACKWARD_5, btnSize, btnSize));
+			btnBack5.setOnAction(e -> {
+				MediaPlayer mp = mediaView.getMediaPlayer();
+				Duration currentTime = mp.getCurrentTime();
+				Duration toSubtract = Duration.millis(playerConfig.getBackward5Milli());
+				mp.seek(currentTime.subtract(toSubtract));
+			});
+			seekButtons.add(btnBack5);
+		}
+		if(playerConfig.getBackward10Milli() != null) {
+			Button btnBack10 = new Button();
+			btnBack10.setGraphic(iconProvider.getIcon(IconProvider.BACKWARD_10, btnSize, btnSize));
+			btnBack10.setOnAction(e -> {
+				MediaPlayer mp = mediaView.getMediaPlayer();
+				Duration currentTime = mp.getCurrentTime();
+				Duration toSubtract = Duration.millis(playerConfig.getBackward10Milli());
+				mp.seek(currentTime.subtract(toSubtract));
+			});
+			seekButtons.add(btnBack10);
+		}
+		if(playerConfig.getBackward30Milli() != null) {
+			Button btnBack30 = new Button();
+			btnBack30.setGraphic(iconProvider.getIcon(IconProvider.BACKWARD_30, btnSize, btnSize));
+			btnBack30.setOnAction(e -> {
+				MediaPlayer mp = mediaView.getMediaPlayer();
+				Duration currentTime = mp.getCurrentTime();
+				Duration toSubtract = Duration.millis(playerConfig.getBackward30Milli());
+				mp.seek(currentTime.subtract(toSubtract));
+			});
+			seekButtons.add(btnBack30);
+		}
+		if(playerConfig.getForward5Milli() != null) {
+			Button btnFor5 = new Button();
+			btnFor5.setGraphic(iconProvider.getIcon(IconProvider.FORWARD_5, btnSize, btnSize));
+			btnFor5.setOnAction(e -> {
+				MediaPlayer mp = mediaView.getMediaPlayer();
+				Duration currentTime = mp.getCurrentTime();
+				Duration toAdd = Duration.millis(playerConfig.getForward5Milli());
+				mp.seek(currentTime.add(toAdd));
+			});
+			seekButtons.add(btnFor5);
+		}
+		if(playerConfig.getForward10Milli() != null) {
+			Button btnFor10 = new Button();
+			btnFor10.setGraphic(iconProvider.getIcon(IconProvider.FORWARD_10, btnSize, btnSize));
+			btnFor10.setOnAction(e -> {
+				MediaPlayer mp = mediaView.getMediaPlayer();
+				Duration currentTime = mp.getCurrentTime();
+				Duration toAdd = Duration.millis(playerConfig.getForward10Milli());
+				mp.seek(currentTime.add(toAdd));
+			});
+			seekButtons.add(btnFor10);
+		}
+		if(playerConfig.getForward30Milli() != null) {
+			Button btnFor30 = new Button();
+			btnFor30.setGraphic(iconProvider.getIcon(IconProvider.FORWARD_30, btnSize, btnSize));
+			btnFor30.setOnAction(e -> {
+				MediaPlayer mp = mediaView.getMediaPlayer();
+				Duration currentTime = mp.getCurrentTime();
+				Duration toAdd = Duration.millis(playerConfig.getForward30Milli());
+				mp.seek(currentTime.add(toAdd));
+			});
+			seekButtons.add(btnFor30);
+		}
+		return seekButtons;
 	}
 
 	private void initMediaBarBindings(ImageView ivPlayPause) {
@@ -346,8 +439,8 @@ public class JfxVideoPlayer extends BorderPane {
 			logger.trace("player event: READY");
 			updateValues();
 		});
-		Image imgPlay = new Image(getClass().getResource("/icons/play.png").toExternalForm());
-		Image imgPause = new Image(getClass().getResource("/icons/pause.png").toExternalForm());
+		Image imgPlay = iconProvider.getIcon(IconProvider.PLAY).getImage();
+		Image imgPause = iconProvider.getIcon(IconProvider.PAUSE).getImage();
 		mediaPlayer.setOnPlaying(() -> {
 			logger.trace("player event: PLAYING");
 //			btnPlay.setText("||");
@@ -434,6 +527,8 @@ public class JfxVideoPlayer extends BorderPane {
 		private boolean showCloseButton;
 		private boolean visibleHeading;
 		private boolean visiblePlayerBar;
+		private boolean visibleBtnCamera;
+		private boolean visibleBtnMark;
 		private EventHandler<ActionEvent> previousAction;
 		private EventHandler<ActionEvent> nextAction;
 		private LeftMouseType leftMouseType;
@@ -441,6 +536,13 @@ public class JfxVideoPlayer extends BorderPane {
 		private Consumer<MouseEvent> rightMouseClickEvent;
 		private EventHandler<ActionEvent> closeEvent;
 		private Runnable btnCameraRunnable;
+		private Runnable btnMarkRunnable;
+		private Long backward5Milli;
+		private Long backward10Milli;
+		private Long backward30Milli;
+		private Long forward5Milli;
+		private Long forward10Milli;
+		private Long forward30Milli;
 
 		public enum LeftMouseType { PLAY, SHOW_HIDE }
 
@@ -459,11 +561,32 @@ public class JfxVideoPlayer extends BorderPane {
 			conf.rightMouseClickEvent = rightMouseClickEvent;
 			conf.closeEvent = closeEvent;
 			conf.btnCameraRunnable = btnCameraRunnable;
+			conf.btnMarkRunnable = btnMarkRunnable;
+			conf.visibleBtnCamera = visibleBtnCamera;
+			conf.visibleBtnMark = visibleBtnMark;
+			conf.backward5Milli = backward5Milli;
+			conf.backward10Milli = backward10Milli;
+			conf.backward30Milli = backward30Milli;
+			conf.forward5Milli = forward5Milli;
+			conf.forward10Milli = forward10Milli;
+			conf.forward30Milli = forward30Milli;
 			return conf;
 		}
 
 		public void runBtnCameraListener() {
-			btnCameraRunnable.run();
+			if(btnCameraRunnable != null) {
+				btnCameraRunnable.run();
+			}
+		}
+
+		public void runBtnMarkRunnable() {
+			if(btnMarkRunnable != null) {
+				btnMarkRunnable.run();
+			}
+		}
+
+		public void setBtnMarkRunnable(Runnable btnMarkRunnable) {
+			this.btnMarkRunnable = btnMarkRunnable;
 		}
 
 		public void setBtnCameraRunnable(Runnable btnCameraRunnable) {
@@ -484,6 +607,54 @@ public class JfxVideoPlayer extends BorderPane {
 
 		public void setShowCloseButton(boolean showCloseButton) {
 			this.showCloseButton = showCloseButton;
+		}
+
+		public Long getBackward5Milli() {
+			return backward5Milli;
+		}
+
+		public void setBackward5Milli(Long backward5Milli) {
+			this.backward5Milli = backward5Milli;
+		}
+
+		public Long getBackward10Milli() {
+			return backward10Milli;
+		}
+
+		public void setBackward10Milli(Long backward10Milli) {
+			this.backward10Milli = backward10Milli;
+		}
+
+		public Long getBackward30Milli() {
+			return backward30Milli;
+		}
+
+		public void setBackward30Milli(Long backward30Milli) {
+			this.backward30Milli = backward30Milli;
+		}
+
+		public Long getForward5Milli() {
+			return forward5Milli;
+		}
+
+		public void setForward5Milli(Long forward5Milli) {
+			this.forward5Milli = forward5Milli;
+		}
+
+		public Long getForward10Milli() {
+			return forward10Milli;
+		}
+
+		public void setForward10Milli(Long forward10Milli) {
+			this.forward10Milli = forward10Milli;
+		}
+
+		public Long getForward30Milli() {
+			return forward30Milli;
+		}
+
+		public void setForward30Milli(Long forward30Milli) {
+			this.forward30Milli = forward30Milli;
 		}
 
 		public boolean isShowBorder() {
@@ -536,6 +707,22 @@ public class JfxVideoPlayer extends BorderPane {
 
 		public void setNextAction(EventHandler<ActionEvent> nextAction) {
 			this.nextAction = nextAction;
+		}
+
+		public boolean isVisibleBtnCamera() {
+			return visibleBtnCamera;
+		}
+
+		public void setVisibleBtnCamera(boolean visibleBtnCamera) {
+			this.visibleBtnCamera = visibleBtnCamera;
+		}
+
+		public boolean isVisibleBtnMark() {
+			return visibleBtnMark;
+		}
+
+		public void setVisibleBtnMark(boolean visibleBtnMark) {
+			this.visibleBtnMark = visibleBtnMark;
 		}
 
 		public void consumeMiddleMouseClickEvent(MouseEvent event) {

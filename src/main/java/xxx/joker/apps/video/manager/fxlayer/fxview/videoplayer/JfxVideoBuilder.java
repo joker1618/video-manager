@@ -58,6 +58,41 @@ public class JfxVideoBuilder {
 		return this;
 	}
 
+	public JfxVideoBuilder setBackward5Milli(Long backward5Milli) {
+		playerConfig.setBackward5Milli(backward5Milli);
+		return this;
+	}
+	public JfxVideoBuilder setBackward10Milli(Long backward10Milli) {
+		playerConfig.setBackward10Milli(backward10Milli);
+		return this;
+	}
+	public JfxVideoBuilder setBackward30Milli(Long backward30Milli) {
+		playerConfig.setBackward30Milli(backward30Milli);
+		return this;
+	}
+	public JfxVideoBuilder setForward5Milli(Long forward5Milli) {
+		playerConfig.setForward5Milli(forward5Milli);
+		return this;
+	}
+	public JfxVideoBuilder setForward10Milli(Long forward10Milli) {
+		playerConfig.setForward10Milli(forward10Milli);
+		return this;
+	}
+	public JfxVideoBuilder setForward30Milli(Long forward30Milli) {
+		playerConfig.setForward30Milli(forward30Milli);
+		return this;
+	}
+	
+	public JfxVideoBuilder setPreviousAction(EventHandler<ActionEvent> action) {
+		playerConfig.setPreviousAction(action);
+		return this;
+	}
+
+	public JfxVideoBuilder setNextAction(EventHandler<ActionEvent> action) {
+		playerConfig.setNextAction(action);
+		return this;
+	}
+
 	public JfxVideoBuilder setHeadingVisible(boolean visible) {
 		playerConfig.setVisibleHeading(visible);
 		return this;
@@ -95,6 +130,21 @@ public class JfxVideoBuilder {
 
 	public JfxVideoBuilder setBtnCameraRunnable(Runnable btnCameraListener) {
 		playerConfig.setBtnCameraRunnable(btnCameraListener);
+		return this;
+	}
+
+	public JfxVideoBuilder setBtnMarkRunnable(Runnable btnMarkListener) {
+		playerConfig.setBtnMarkRunnable(btnMarkListener);
+		return this;
+	}
+
+	public JfxVideoBuilder setVisibleBtnCamera(boolean visible) {
+		playerConfig.setVisibleBtnCamera(visible);
+		return this;
+	}
+
+	public JfxVideoBuilder setVisibleBtnMark(boolean visible) {
+		playerConfig.setVisibleBtnMark(visible);
 		return this;
 	}
 

@@ -242,17 +242,13 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 		tview.getColumns().add(tcolHeight);
 		tcolHeight.setMinWidth(80);
 
-		JfxTableCol<Video,Double> tcolResolution = JfxTableCol.createCol("W/H", v -> v.getHeight() == 0d ? 0d : (double)v.getWidth()/v.getHeight(), d -> strf("%.2f", d));
+		JfxTableCol<Video,Double> tcolResolution = JfxTableCol.createCol("W/H", Video::getFormat, d -> strf("%.2f", d));
 		tview.getColumns().add(tcolResolution);
 		tcolResolution.setMinWidth(80);
 
 		JfxTableCol<Video, JkDuration> tcolLength = JfxTableCol.createCol("LENGTH", "length", d -> d == null ? "" : d.toStringElapsed(false));
 		tview.getColumns().add(tcolLength);
 		tcolLength.setMinWidth(80);
-
-		JfxTableCol<Video,Integer> tcolPlayTimes = JfxTableCol.createCol("N.PLAY", "playTimes");
-		tview.getColumns().add(tcolPlayTimes);
-		tcolPlayTimes.setMinWidth(80);
 
 		JfxTableCol<Video,Integer> tcolNumSnapshots = JfxTableCol.createCol("SNAP", param -> model.findSnapshots(param).size());
 		tview.getColumns().add(tcolNumSnapshots);
@@ -303,7 +299,7 @@ public class HomepagePane extends BorderPane implements CloseablePane {
 		return bp;
 	}
 	private void fillSnapshotsPane(HBox hbox) {
-        Image imgDelete = new Image(getClass().getResource("/icons/litter.png").toExternalForm());
+        Image imgDelete = new Image(getClass().getResource("/icons/deleteRed.png").toExternalForm());
 
         hbox.getChildren().clear();
         if(model.getSelectedVideos().size() == 1) {

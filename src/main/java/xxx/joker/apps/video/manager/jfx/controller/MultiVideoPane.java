@@ -106,7 +106,6 @@ public class MultiVideoPane extends BorderPane implements CloseablePane {
 
 			int idx = random.nextInt(toReproduce.size());
 			Video video = toReproduce.remove(idx);
-			video.incrementPlayTimes();
 
 			RepoResource res = model.getRepo().getResource(video.getMd5(), "videoz");
 
@@ -121,7 +120,6 @@ public class MultiVideoPane extends BorderPane implements CloseablePane {
 			}
 
 			VideoWrapper video = hist.get(hist.size() - 1);
-			video.getVideo().incrementPlayTimes();
 
 			return video;
 		}

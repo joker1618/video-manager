@@ -29,10 +29,10 @@ import xxx.joker.apps.video.manager.fxlayer.fxmodel.FxSnapshot;
 import xxx.joker.apps.video.manager.fxlayer.fxmodel.FxVideo;
 import xxx.joker.apps.video.manager.fxlayer.fxview.builders.GridPaneBuilder;
 import xxx.joker.apps.video.manager.fxlayer.fxview.builders.SnapshotManager;
+import xxx.joker.apps.video.manager.fxlayer.fxview.provider.IconProvider;
 import xxx.joker.apps.video.manager.fxlayer.fxview.videoplayer.JfxVideoBuilder;
 import xxx.joker.apps.video.manager.fxlayer.fxview.videoplayer.JfxVideoPlayer;
 import xxx.joker.libs.core.datetime.JkDuration;
-import xxx.joker.libs.core.javafx.JfxControls;
 import xxx.joker.libs.core.lambdas.JkStreams;
 
 import java.util.*;
@@ -41,9 +41,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static xxx.joker.libs.core.javafx.JfxControls.*;
 import static xxx.joker.libs.core.utils.JkStrings.strf;
 
-public class ManagementPane extends BorderPane {
+public class ManagementPane extends BorderPane implements Closeable {
 
-    private static Logger logger = LoggerFactory.getLogger(ManagementPane.class);
+    private static Logger LOG = LoggerFactory.getLogger(ManagementPane.class);
 
     private FxModel model = FxModel.getModel();
 
@@ -58,22 +58,23 @@ public class ManagementPane extends BorderPane {
     private Map<Category, CheckBox> checkBoxCategoryMapMulti;
     private final JfxVideoBuilder videoPlayerBuilder;
 
-    private Image imgDelete;
-
     private ObservableList<JkDuration> obsSnapList = FXCollections.observableArrayList(new ArrayList<>());
 
 
-    public ManagementPane() {
-        this.videos = model.getSelectedVideos();
+    public ManagementPane(ObservableList<Video> videos) {
+        this.videos = videos;
         this.videoIndex = new SimpleIntegerProperty(-1);
         this.showingPlayer = new SimpleObjectProperty<>();
 
         this.videoPlayerBuilder = new JfxVideoBuilder();
-        videoPlayerBuilder.setShowBorder(true).setShowClose(false);
+        videoPlayerBuilder.setShowBorder(true);
         videoPlayerBuilder.setShowClose(false);
+        videoPlayerBuilder.setVisibleBtnCamera(true);
+        videoPlayerBuilder.setVisibleBtnMark(true);
         videoPlayerBuilder.setBtnCameraRunnable(this::updateSnapshotsPane);
-
-        this.imgDelete = new Image(getClass().getResource("/icons/delete.png").toExternalForm());
+//        videoPlayerBuilder.setBtnCameraRunnable(this::updateSnapshotsPane);
+        videoPlayerBuilder.setNextAction(e -> updateShowingVideo(videoIndex.get() + 1));
+        videoPlayerBuilder.setPreviousAction(e -> updateShowingVideo(videoIndex.get() - 1));
 
         setLeft(createVideoListViewPane());
         setCenter(createPlayerPane());
@@ -121,24 +122,19 @@ public class ManagementPane extends BorderPane {
 
         videoListView.setItems(videos);
 
-        ObservableList<Video> selItems = videoListView.getSelectionModel().getSelectedItems();
-        BooleanBinding disBind = Bindings.createBooleanBinding(selItems::isEmpty, selItems);
-        Button btnSnap = new Button("AUTOSNAP (0)");
-        btnSnap.disableProperty().bind(disBind);
-        btnSnap.setOnAction(e -> manageAutoSnap(videoListView.getSelectionModel().getSelectedItems()));
-        Button btnDelete = new Button("DELETE (0)");
-        btnDelete.disableProperty().bind(disBind);
-        videoListView.getSelectionModel().getSelectedItems().addListener(
-                (ListChangeListener<? super Video>) c -> {
-                    btnSnap.setText(strf("AUTOSNAP ({})", videoListView.getSelectionModel().getSelectedItems().size()));
-                    btnDelete.setText(strf("DELETE ({})", videoListView.getSelectionModel().getSelectedItems().size()));
-                    updateSelectedCheckBoxesMulti();
-                });
-        HBox middleBtnBox = createHBox("middleBtnBox", btnSnap, btnDelete);
+//        ObservableList<Video> selItems = videoListView.getSelectionModel().getSelectedItems();
+//        BooleanBinding disBind = Bindings.createBooleanBinding(selItems::isEmpty, selItems);
+//        Button btnSnap = new Button("DEL SNAPS (0)");
+//        btnSnap.disableProperty().bind(disBind);
+//        selItems.addListener(
+//                (ListChangeListener<? super Video>) c -> btnSnap.setText(strf("DEL SNAPS ({})", selItems.size()))
+//        );
+//        HBox middleBtnBox = createHBox("centered", btnSnap);
 
         Pane optionFieldsPane = createOptionFieldsPane();
 
-        return createVBox("leftBox", videoListView, middleBtnBox, optionFieldsPane);
+        return createVBox("leftBox", videoListView, optionFieldsPane);
+//        return createVBox("leftBox", videoListView, middleBtnBox, optionFieldsPane);
     }
     private Pane createOptionFieldsPane() {
         VBox container = new VBox();
@@ -159,9 +155,10 @@ public class ManagementPane extends BorderPane {
         BorderPane bp1 = new BorderPane(categoryBox, lblSingle, null, null, null);
         Label lblMultiNumSel = new Label("MULTI (0)");
         lblMultiNumSel.getStyleClass().add("lblTitle");
-        videoListView.getSelectionModel().getSelectedItems().addListener(
+        ObservableList<Video> selItems = videoListView.getSelectionModel().getSelectedItems();
+        selItems.addListener(
                 (ListChangeListener<? super Video>) c -> {
-                    lblMultiNumSel.setText(strf("MULTI ({})", videoListView.getSelectionModel().getSelectedItems().size()));
+                    lblMultiNumSel.setText(strf("MULTI ({})", selItems.size()));
                     updateSelectedCheckBoxesMulti();
                 });
         BorderPane bp2 = new BorderPane(categoryBoxMulti, lblMultiNumSel, null, null, null);
@@ -197,26 +194,36 @@ public class ManagementPane extends BorderPane {
                 txtTitle.textProperty()
         ));
         btnChangeTitle.setOnAction(e -> changeVideoTitle(txtTitle.getText().trim()));
-        HBox hboxTopLeft = new HBox(new Label("Video title:"), txtTitle, btnChangeTitle);
-        hboxTopLeft.getStyleClass().addAll("bleft");
+        HBox hboxChangeTitle = createHBox("subBox titleBox", new Label("Video title:"), txtTitle, btnChangeTitle);
 
         Button btnAutoSnap = new Button("AUTOSNAP");
         btnAutoSnap.setOnAction(e -> manageAutoSnap(Collections.singletonList(showingPlayer.get().getFxVideo().getVideo())));
         btnAutoSnap.disableProperty().bind(showingPlayer.isNull());
 
+        Button btnClearSnaps = new Button("CLEAR SNAPS");
+        btnClearSnaps.disableProperty().bind(showingPlayer.isNull());
+        btnClearSnaps.setOnAction(e -> {
+            Video v = showingPlayer.get().getFxVideo().getVideo();
+            v.getSnapTimes().forEach(st -> model.removeSnapshot(v, st));
+            v.getSnapTimes().clear();
+            model.persistData();
+            updateSnapshotsPane();
+        });
         Button btnDelete = new Button("DELETE");
         btnDelete.disableProperty().bind(showingPlayer.isNull());
         btnDelete.setOnAction(e -> {
             Video video = showingPlayer.get().getFxVideo().getVideo();
-            updateShowingVideo(-1);
+            updateShowingVideo(videoIndex.get() + 1);
             model.getVideos().remove(video);
             obsSnapList.clear();
+            videoListView.refresh();
         });
+        HBox snapSubBox = createHBox("subBox", btnAutoSnap, btnClearSnaps);
 
         BorderPane bpTop = new BorderPane();
         bpTop.getStyleClass().addAll("topBox");
-        bpTop.setLeft(hboxTopLeft);
-        bpTop.setCenter(btnAutoSnap);
+        bpTop.setTop(hboxChangeTitle);
+        bpTop.setLeft(snapSubBox);
         bpTop.setRight(btnDelete);
 
         BorderPane bp = new BorderPane();
@@ -243,14 +250,16 @@ public class ManagementPane extends BorderPane {
             vp.getFxVideo().getVideo().setTitle(newVideoTitle);
             vp.setPlayerCaption(newVideoTitle);
             videoListView.refresh();
-            logger.info("Changed title from [{}] to [{}]", oldTitle, newVideoTitle);
+            LOG.info("Changed title from [{}] to [{}]", oldTitle, newVideoTitle);
         }
     }
 
     private void updateSnapshotsPane() {
+        Set<JkDuration> snapTimes = new TreeSet<>();
         if(showingPlayer.get() != null) {
-            obsSnapList.setAll(showingPlayer.get().getFxVideo().getVideo().getSnapTimes());
+            snapTimes.addAll(showingPlayer.get().getFxVideo().getVideo().getSnapTimes());
         }
+        obsSnapList.setAll(snapTimes);
     }
     private Node createSnapshotsPane() {
         BorderPane toRet = new BorderPane();
@@ -259,9 +268,11 @@ public class ManagementPane extends BorderPane {
         Label lblTitle = new Label();
         toRet.setTop(createHBox("btop", lblTitle));
 
+        Image imgDelete = new IconProvider().getIcon(IconProvider.DELETE_RED).getImage();
         obsSnapList.addListener((ListChangeListener<JkDuration>)c -> {
             lblTitle.setText(strf("Snapshots ({})", obsSnapList.size()));
 
+            Video video = showingPlayer.get().getFxVideo().getVideo();
             GridPaneBuilder gpBuilder = new GridPaneBuilder();
             int numCols = 3;
             int counter = 0;
@@ -271,7 +282,7 @@ public class ManagementPane extends BorderPane {
                 for(int col = 0; col < numCols && counter < obsSnapList.size(); col++, counter++) {
                     int index = row * numCols + col;
                     JkDuration dur = obsSnapList.get(index);
-                    FxSnapshot snap = model.getSnapshot(showingPlayer.get().getFxVideo().getVideo(), dur);
+                    FxSnapshot snap = model.getSnapshot(video, dur);
                     ImageView ivSnap = createImageView(snap.getImage(), width, height);
                     HBox ivbox = new HBox(ivSnap);
                     ivbox.getStyleClass().addAll("bgBlack", "centered");
@@ -282,6 +293,11 @@ public class ManagementPane extends BorderPane {
                     ImageView ivDel = createImageView(imgDelete, 20, 20);
                     Button btnDel = new Button(null, ivDel);
                     btnDel.setStyle("-fx-padding: 0; -fx-pref-width: " + width);
+                    btnDel.setOnAction(e -> {
+                        video.getSnapTimes().remove(dur);
+                        model.removeSnapshot(video, dur);
+                        updateSnapshotsPane();
+                    });
                     gpBuilder.add(row, col, createVBox("centered", ivbox, btnDel));
                 }
             }
@@ -330,6 +346,7 @@ public class ManagementPane extends BorderPane {
         } else {
             showingPlayer.setValue(null);
         }
+        videoListView.refresh();
     }
     
     private void updateCategoriesCheckBoxes() {
@@ -420,5 +437,14 @@ public class ManagementPane extends BorderPane {
                 }
             });
         }
+    }
+
+    @Override
+    public void closePane() {
+        JfxVideoPlayer videoPlayer = showingPlayer.getValue();
+        if (videoPlayer != null) {
+            videoPlayer.closePlayer();
+        }
+        LOG.debug("Closed management pane");
     }
 }

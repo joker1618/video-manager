@@ -139,7 +139,7 @@ public class JkVideoPlayer extends BorderPane {
 		});
 
 		HBox hBoxCamera = new HBox(btnCamera);
-		hBoxCamera.getStyleClass().add("boxSnapshot");
+		hBoxCamera.getStyleClass().add("boxIcons");
 		headingBox.getChildren().add(hBoxCamera);
 
 		Pane fill1 = new Pane();

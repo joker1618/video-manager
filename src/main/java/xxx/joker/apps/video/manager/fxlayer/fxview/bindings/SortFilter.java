@@ -3,7 +3,9 @@ package xxx.joker.apps.video.manager.fxlayer.fxview.bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleSetProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.ObservableSet;
 import org.apache.commons.lang3.StringUtils;
 import xxx.joker.apps.video.manager.datalayer.entities.Category;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
@@ -26,16 +28,9 @@ public class SortFilter extends ObjectBinding<Predicate<Video>> {
 
 	private Map<Category,SimpleObjectProperty<Boolean>> categoryMap = new HashMap<>();
 
-	private Set<Video> markedVideos;
-
 	public SortFilter() {
 		bind(videoName, cataloged, marked, trigger);
 		VideoModelImpl.getInstance().getCategories().forEach(cat -> setCategory(cat, null));
-	}
-
-	public SortFilter(Set<Video> markedVideos) {
-		this();
-		this.markedVideos = markedVideos;
 	}
 
 	public void triggerSort() {
@@ -75,7 +70,7 @@ public class SortFilter extends ObjectBinding<Predicate<Video>> {
 			boolean begin = filter.startsWith("^");
 			boolean end = filter.endsWith("$");
 			filter = filter.replaceAll("^\\^", "").replaceAll("\\$$", "").trim();
-			if(!filter.isEmpty()) {
+			if (!filter.isEmpty()) {
 				String vtitle = video.getTitle();
 				if (!begin && !end) {
 					// only contains
@@ -92,19 +87,19 @@ public class SortFilter extends ObjectBinding<Predicate<Video>> {
 				}
 			}
 		}
-		if(StringUtils.isNotBlank(videoName.get()) && !resNameFilter) {
+		if (StringUtils.isNotBlank(videoName.get()) && !resNameFilter) {
 			return false;
 		}
 
 
-		if(useAndOperator.get()) {
-			if(cataloged.getValue() != null) {
-				if(cataloged.get() && video.getCategories().isEmpty())		return false;
-				if(!cataloged.get() && !video.getCategories().isEmpty())	return false;
+		if (useAndOperator.get()) {
+			if (cataloged.getValue() != null) {
+				if (cataloged.get() && video.getCategories().isEmpty()) return false;
+				if (!cataloged.get() && !video.getCategories().isEmpty()) return false;
 			}
-			if(marked.getValue() != null) {
-				if(marked.get() && !markedVideos.contains(video))	return false;
-				if(!marked.get() && markedVideos.contains(video))	return false;
+			if (marked.getValue() != null) {
+				if (marked.get() && !video.isMarked()) return false;
+				if (!marked.get() && video.isMarked()) return false;
 			}
 			for (Category cat : categoryMap.keySet()) {
 				Boolean value = categoryMap.get(cat).getValue();
@@ -116,20 +111,20 @@ public class SortFilter extends ObjectBinding<Predicate<Video>> {
 
 		} else { // use OR
 			Boolean res = null;
-			if(cataloged.getValue() != null) {
-				if(cataloged.get() && !video.getCategories().isEmpty())		return true;
-				if(!cataloged.get() && video.getCategories().isEmpty())		return true;
+			if (cataloged.getValue() != null) {
+				if (cataloged.get() && !video.getCategories().isEmpty()) return true;
+				if (!cataloged.get() && video.getCategories().isEmpty()) return true;
 				res = false;
 			}
-			if(marked.getValue() != null) {
-				if(marked.get() && markedVideos.contains(video))		return true;
-				if(!marked.get() && !markedVideos.contains(video))		return true;
+			if (marked.getValue() != null) {
+				if (marked.get() && video.isMarked()) return true;
+				if (!marked.get() && !video.isMarked()) return true;
 				res = false;
 			}
 			for (Category cat : categoryMap.keySet()) {
 				Boolean value = categoryMap.get(cat).getValue();
 				if (value != null) {
-					if(value == video.getCategories().contains(cat))	return true;
+					if (value == video.getCategories().contains(cat)) return true;
 					res = false;
 				}
 			}

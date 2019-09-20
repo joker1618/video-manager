@@ -19,10 +19,11 @@ public interface FxModel {
     ObservableList<Video> getSelectedVideos();
 
     Path getVideoFile(Video video);
-    void addVideoFile(Video video, Path videoPath);
+    FxVideo addVideoFile(Path videoPath);
 
     FxSnapshot getSnapshot(Video video, JkDuration snapTime);
     void addSnapshot(Video video, JkDuration snapTime, Path snapPath);
+    void removeSnapshot(Video video, JkDuration snapTime);
 
     void persistData();
 }
