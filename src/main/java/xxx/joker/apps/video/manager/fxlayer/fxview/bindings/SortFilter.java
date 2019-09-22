@@ -29,7 +29,7 @@ public class SortFilter extends ObjectBinding<Predicate<Video>> {
 	private Map<Category,SimpleObjectProperty<Boolean>> categoryMap = new HashMap<>();
 
 	public SortFilter() {
-		bind(videoName, cataloged, marked, trigger);
+		bind(useAndOperator, videoName, cataloged, marked, trigger);
 		VideoModelImpl.getInstance().getCategories().forEach(cat -> setCategory(cat, null));
 	}
 

@@ -2,14 +2,18 @@ package xxx.joker.apps.video.manager.fxlayer.fxview;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.apps.video.manager.fxlayer.fxmodel.FxModel;
-import xxx.joker.apps.video.manager.fxlayer.fxview.panes.Closeable;
-import xxx.joker.apps.video.manager.fxlayer.fxview.panes.CutVideoPane;
-import xxx.joker.apps.video.manager.fxlayer.fxview.panes.HomePane;
-import xxx.joker.apps.video.manager.fxlayer.fxview.panes.ManagementPane;
+import xxx.joker.apps.video.manager.fxlayer.fxmodel.FxVideo;
+import xxx.joker.apps.video.manager.fxlayer.fxview.panes.*;
+import xxx.joker.apps.video.manager.provider.VideoStagesPosition;
+import xxx.joker.libs.core.javafx.JfxUtil;
+
+import java.util.Collection;
+import java.util.List;
 
 public class PanesSelector {
 
@@ -42,10 +46,16 @@ public class PanesSelector {
 	}
 
 	public void displayHomePane() {
-		homePane.refreshView();
-		scene.setRoot(homePane);
-		actualPane.set(homePane);
-		LOG.debug("Set scene to HOME");
+		if(actualPane.get() != homePane) {
+			actualPane.set(homePane);
+			homePane.refreshView();
+			scene.setRoot(homePane);
+			LOG.debug("Set scene to HOME");
+		}
+	}
+
+	public HomePane getHomePane() {
+		return homePane;
 	}
 
 	public void displayManagementPane() {
@@ -60,6 +70,13 @@ public class PanesSelector {
 		scene.setRoot(pane);
 		actualPane.set(pane);
 		LOG.debug("Set scene to CUT VIDEO");
+	}
+
+	public void displayMultiVideoPane(VideoStagesPosition stagesPosition, List<FxVideo> fxVideos) {
+		MultiDisplayPane pane = new MultiDisplayPane(stagesPosition, fxVideos);
+		scene.setRoot(pane);
+		actualPane.set(pane);
+		LOG.debug("Set scene to DISPLAY MULTI VIDEOS");
 	}
 
 	public boolean isHomeShowed() {

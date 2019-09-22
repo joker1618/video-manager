@@ -3,11 +3,14 @@ package xxx.joker.apps.video.manager.fxlayer.fxview.videoplayer;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.scenicview.ScenicView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.fxlayer.fxmodel.FxVideo;
 
 import java.util.function.Supplier;
+
+import xxx.joker.apps.video.manager.fxlayer.fxview.NewLauncher;
 import xxx.joker.apps.video.manager.fxlayer.fxview.videoplayer.JfxVideoPlayer.PlayerConfig;
 
 public class JfxVideoStage extends Stage {
@@ -17,16 +20,26 @@ public class JfxVideoStage extends Stage {
 	private JfxVideoPlayer videoPlayer;
 	private PlayerConfig playerConfig;
 
-	protected JfxVideoStage(PlayerConfig config, Supplier<FxVideo> previousSupplier, Supplier<FxVideo> nextSupplier) {
+//	protected JfxVideoStage(PlayerConfig config) {
+//		this(config, null, null);
+//	}
+	protected JfxVideoStage(PlayerConfig config) {
 		this.playerConfig = config.cloneConfigs();
-		if(previousSupplier != null)	playerConfig.setPreviousAction(e -> playVideo(previousSupplier.get()));
-		if(nextSupplier != null)		playerConfig.setNextAction(e -> playVideo(nextSupplier.get()));
 
 		Group root = new Group();
 		Scene scene = new Scene(root);
 		setScene(scene);
 
 		setOnCloseRequest(e -> close());
+	}
+
+
+	public void setSupplierPrevious(Supplier<FxVideo> supplierPrevious) {
+		playerConfig.setPreviousAction(e -> playVideo(supplierPrevious.get()));
+	}
+
+	public void setSupplierNext(Supplier<FxVideo> supplierNext) {
+		playerConfig.setNextAction(e -> playVideo(supplierNext.get()));
 	}
 
 	public PlayerConfig getPlayerConfig() {
@@ -50,6 +63,9 @@ public class JfxVideoStage extends Stage {
 
 		if(!isShowing()) {
 			show();
+			if(NewLauncher.scenicView) {
+				ScenicView.show(getScene());
+			}
 		}
 
 		videoPlayer.play();
@@ -58,8 +74,8 @@ public class JfxVideoStage extends Stage {
 	@Override
 	public void close() {
 		if (isShowing()) {
-			logger.trace("closed video stage");
 			videoPlayer.closePlayer();
+			logger.trace("closed video stage");
 			super.close();
 		}
 	}

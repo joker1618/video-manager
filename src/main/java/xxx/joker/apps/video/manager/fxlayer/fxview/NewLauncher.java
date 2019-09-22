@@ -7,8 +7,19 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.scenicview.ScenicView;
 import xxx.joker.apps.video.manager.commonOK.Config;
+import xxx.joker.apps.video.manager.datalayer.VideoRepo;
+import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.apps.video.manager.fxlayer.fxmodel.FxModel;
 import xxx.joker.libs.core.files.JkFiles;
+import xxx.joker.libs.core.lambdas.JkStreams;
+import xxx.joker.libs.core.runtimes.JkEnvironment;
+import xxx.joker.libs.core.runtimes.JkRuntime;
+import xxx.joker.libs.core.tests.JkTests;
+import xxx.joker.libs.datalayer.entities.RepoResource;
+
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public class NewLauncher extends Application {
 
@@ -50,12 +61,13 @@ public class NewLauncher extends Application {
 
     @Override
     public void stop() throws Exception {
+        panesSel.getHomePane().closePane();
         JkFiles.delete(Config.TEMP_FOLDER);
         FxModel.getModel().persistData();
     }
 
     public static void main(String[] args) {
-        scenicView = args.length > 0 && "-sv".equals(args[0]);
+        scenicView = args.length == 1 && "-sv".equals(args[0]);
 //		scenicView = true;
         launch(args);
     }

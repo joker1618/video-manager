@@ -8,7 +8,7 @@
 
 .leftBox .list-view {
     -fx-pref-width: 400;
-    -fx-min-height: 400;
+    -fx-max-height: 250;
     -fx-font-size: 14;
 }
 

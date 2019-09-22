@@ -56,13 +56,13 @@ public class StagePosProvider {
 		return videoPosList;
 	}
 
+	@Deprecated
 	public static List<String> getPositionNames() {
 		return JkStreams.map(videoPosList, VideoStagesPosition::getName);
 	}
 
 	public static VideoStagesPosition getStagesPosition(String name) {
-		List<VideoStagesPosition> filter = JkStreams.filter(videoPosList, v -> name.equalsIgnoreCase(v.getName()));
-		return filter.isEmpty() ? null : filter.get(0);
+		return JkStreams.findUnique(videoPosList, v -> name.equalsIgnoreCase(v.getName()));
 	}
 
 }

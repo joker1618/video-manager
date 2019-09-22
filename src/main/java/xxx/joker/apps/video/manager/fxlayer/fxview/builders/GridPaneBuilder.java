@@ -57,7 +57,9 @@ public class GridPaneBuilder {
 
     public void createGridPane(GridPane gp) {
         gp.getChildren().clear();
-        gp.getStyleClass().addAll("jfxGridBox");
+        if(!gp.getStyleClass().contains("jfxGridBox")) {
+            gp.getStyleClass().addAll("jfxGridBox");
+        }
 
         // Compute column number
         int maxRow = 1 + boxMap.keySet().stream().mapToInt(i -> i).max().orElse(-1);

@@ -59,7 +59,7 @@ public class VideoStagesPosition {
 	public void setStagesPosition(List<? extends Stage> stages) {
 		double ww = Screen.getPrimary().getVisualBounds().getWidth() / ncol;
 		double hh = Screen.getPrimary().getVisualBounds().getHeight() / nrow;
-		for(int i = 0; i < videoPosList.size(); i++) {
+		for(int i = 0; i < stages.size() && i < videoPosList.size(); i++) {
 			Stage stage = stages.get(i);
 			VPos vpos = videoPosList.get(i);
 			stage.setX(vpos.idxCol * ww);

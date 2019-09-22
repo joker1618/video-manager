@@ -1,4 +1,4 @@
-package xxx.joker.apps.video.manager.fxlayer.fxview.controls;
+package xxx.joker.apps.video.manager.fxlayer.fxview.table;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.TableCell;

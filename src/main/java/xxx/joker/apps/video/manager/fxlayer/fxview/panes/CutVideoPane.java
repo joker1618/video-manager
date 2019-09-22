@@ -44,7 +44,7 @@ public class CutVideoPane extends BorderPane implements Closeable {
     private JfxVideoPlayer videoPlayer;
 
     public CutVideoPane(Video video) {
-        FxVideo fxVideo = new FxVideo(video, model.getVideoFile(video));
+        FxVideo fxVideo = model.getFxVideo(video);
 
         setCenter(createCenterPane(fxVideo));
         setRight(createRightPane());

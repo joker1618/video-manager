@@ -18,6 +18,7 @@ public interface FxModel {
 
     ObservableList<Video> getSelectedVideos();
 
+    FxVideo getFxVideo(Video video);
     Path getVideoFile(Video video);
     FxVideo addVideoFile(Path videoPath);
 

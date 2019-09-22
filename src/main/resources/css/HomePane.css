@@ -84,16 +84,27 @@
 
 /* BorderPane Right */
 .rightBox {
+    -fx-pref-width: 440;
     -fx-spacing: 15;
     -fx-padding: 10;
     -fx-background-color: -container-bg-color;
     -fx-alignment: TOP-CENTER;
 }
+.rightBox .subVBox {
+    -fx-spacing: 10;
+    -fx-alignment: CENTER;
+}
+.rightBox .subVBox .jfxGridBox {
+    -fx-alignment: CENTER;
+}
+.rightBox .subVBox .jfxGridBox .cellBox {
+    -fx-alignment: CENTER;
+}
 .rightBox .boxPlayVideos {
-    -fx-border-width: 1;
+    -fx-border-width: 0 0 1 0;
     -fx-border-color: -container-border-color;
     -fx-padding: 10;
-    -fx-spacing: 10;
+    -fx-spacing: 50;
     -fx-alignment: CENTER;
 }
 .rightBox .button {
@@ -109,7 +120,6 @@
 .rightBox .scroll-pane {
     -fx-border-width: 0;
     -fx-padding: 0;
-    -fx-pref-width: 420;
 }
 .rightBox .scroll-pane .viewport     { -fx-background-color: -container-bg-color }
 .rightBox .vboxSnapshots .cellBox    { -fx-border-color: RED; -fx-border-width: 0 1 1 0; }

@@ -18,11 +18,14 @@ import xxx.joker.apps.video.manager.main.OnlyLauncherL;
 import xxx.joker.apps.video.manager.main.SceneManager;
 import xxx.joker.apps.video.manager.provider.StagePosProvider;
 import xxx.joker.apps.video.manager.provider.VideoStagesPosition;
+import xxx.joker.libs.core.javafx.JfxControls;
 import xxx.joker.libs.datalayer.entities.RepoResource;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import static xxx.joker.libs.core.javafx.JfxControls.createVBox;
 
 public class MultiVideoPane extends BorderPane implements CloseablePane {
 
@@ -36,6 +39,8 @@ public class MultiVideoPane extends BorderPane implements CloseablePane {
 	private final VideoModel model = VideoModelImpl.getInstance();
 
 	public MultiVideoPane() {
+		getStylesheets().add(getClass().getResource("/css_legacy/MultiVideoPane.css").toExternalForm());
+
 		setCenter(createPane());
 
 		this.random = new Random(System.currentTimeMillis());
@@ -90,12 +95,7 @@ public class MultiVideoPane extends BorderPane implements CloseablePane {
 		Button btnExit = new Button("EXIT");
 		btnExit.setOnAction(e -> SceneManager.displayHomepage());
 
-		VBox vbox = new VBox(btnToFront, btnToBack, btnExit);
-		vbox.getStyleClass().add("container");
-
-		getStylesheets().add(getClass().getResource("/css_legacy/MultiVideoPane.css").toExternalForm());
-
-		return vbox;
+		return createVBox("container", btnToFront, btnToBack, btnExit);
 	}
 
 	private VideoWrapper getNextRandomVideo() {

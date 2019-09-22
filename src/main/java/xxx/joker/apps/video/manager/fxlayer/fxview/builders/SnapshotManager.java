@@ -35,7 +35,7 @@ public class SnapshotManager {
     }
 
     public SimpleBooleanProperty runAutoSnap(Collection<Video> videos) {
-        List<FxVideo> fxVideos = JkStreams.map(videos, v -> new FxVideo(v, model.getVideoFile(v)));
+        List<FxVideo> fxVideos = JkStreams.map(videos, model::getFxVideo);
         Pair<SnapType, Integer> pair = askAutoSnapType();
         if(pair != null) {
             Integer num = pair.getValue();
@@ -60,7 +60,7 @@ public class SnapshotManager {
         Dialog<ButtonType> dlg = new Dialog<>();
         GridPaneBuilder gpBuilder = new GridPaneBuilder();
         RadioButton rbSnap = new RadioButton("Number of snapshots");
-        TextField txtNumSnap = new TextField("10");
+        TextField txtNumSnap = new TextField("16");
         TextField txtNumSec = new TextField("20");
         RadioButton rbSec = new RadioButton("Every X seconds");
         txtNumSnap.disableProperty().bind(rbSec.selectedProperty());
@@ -149,7 +149,7 @@ public class SnapshotManager {
     private List<Long> computeSnapTimes(Video video, int numSnap) {
         List<Long> times = new ArrayList<>();
         long tot = video.getLength().toMillis();
-        long lastSnapFromEnd = 1000 * (tot > 60*1000*30 ? 8 : 4);
+        long lastSnapFromEnd = 1000 * (tot > 90*1000 ? 8 : 4);
         tot -= lastSnapFromEnd;
         for(int i = 0; i < numSnap; i++) {
             times.add((i+1) * tot / numSnap);

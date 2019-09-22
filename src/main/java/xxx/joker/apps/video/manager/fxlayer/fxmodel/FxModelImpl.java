@@ -100,6 +100,11 @@ public class FxModelImpl implements FxModel {
     }
 
     @Override
+    public FxVideo getFxVideo(Video video) {
+        return new FxVideo(video, getVideoFile(video));
+    }
+
+    @Override
     public Path getVideoFile(Video video) {
         return repo.getVideoResource(video).getPath();
     }
@@ -111,8 +116,8 @@ public class FxModelImpl implements FxModel {
             LOG.info("Skip add for video {}: already exists", videoPath);
             return null;
         }
-        RepoResource res = repo.addVideoResource(video, videoPath);
-        FxVideo fxVideo = new FxVideo(video, res.getPath());
+        FxVideo fxVideo = new FxVideo(video, videoPath);
+        repo.addVideoResource(video, videoPath);
         SimpleBooleanProperty finished = readVideoLengthWidthHeight(fxVideo);
         videos.add(video);
         finished.addListener((obs,o,n) -> LOG.info("New video added {}", videoPath));

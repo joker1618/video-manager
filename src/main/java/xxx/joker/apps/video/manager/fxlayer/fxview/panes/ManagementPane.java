@@ -1,7 +1,6 @@
 package xxx.joker.apps.video.manager.fxlayer.fxview.panes;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -19,6 +18,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.MediaPlayer;
+import javafx.util.Duration;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,25 +56,24 @@ public class ManagementPane extends BorderPane implements Closeable {
     private VBox categoryBoxMulti;
     private Map<Category, CheckBox> checkBoxCategoryMap;
     private Map<Category, CheckBox> checkBoxCategoryMapMulti;
-    private final JfxVideoBuilder videoPlayerBuilder;
+    private final JfxVideoBuilder vpBuilder;
 
     private ObservableList<JkDuration> obsSnapList = FXCollections.observableArrayList(new ArrayList<>());
 
 
     public ManagementPane(ObservableList<Video> videos) {
-        this.videos = videos;
+        this.videos = FXCollections.observableArrayList(videos);
         this.videoIndex = new SimpleIntegerProperty(-1);
         this.showingPlayer = new SimpleObjectProperty<>();
 
-        this.videoPlayerBuilder = new JfxVideoBuilder();
-        videoPlayerBuilder.setShowBorder(true);
-        videoPlayerBuilder.setShowClose(false);
-        videoPlayerBuilder.setVisibleBtnCamera(true);
-        videoPlayerBuilder.setVisibleBtnMark(true);
-        videoPlayerBuilder.setBtnCameraRunnable(this::updateSnapshotsPane);
-//        videoPlayerBuilder.setBtnCameraRunnable(this::updateSnapshotsPane);
-        videoPlayerBuilder.setNextAction(e -> updateShowingVideo(videoIndex.get() + 1));
-        videoPlayerBuilder.setPreviousAction(e -> updateShowingVideo(videoIndex.get() - 1));
+        this.vpBuilder = new JfxVideoBuilder();
+        vpBuilder.setShowBorder(true);
+        vpBuilder.setShowClose(false);
+        vpBuilder.setVisibleBtnCamera(true);
+        vpBuilder.setVisibleBtnMark(true);
+        vpBuilder.setBtnCameraRunnable(this::updateSnapshotsPane);
+        vpBuilder.setNextAction(e -> updateShowingVideo(videoIndex.get() + 1));
+        vpBuilder.setPreviousAction(e -> updateShowingVideo(videoIndex.get() - 1));
 
         setLeft(createVideoListViewPane());
         setCenter(createPlayerPane());
@@ -122,19 +121,9 @@ public class ManagementPane extends BorderPane implements Closeable {
 
         videoListView.setItems(videos);
 
-//        ObservableList<Video> selItems = videoListView.getSelectionModel().getSelectedItems();
-//        BooleanBinding disBind = Bindings.createBooleanBinding(selItems::isEmpty, selItems);
-//        Button btnSnap = new Button("DEL SNAPS (0)");
-//        btnSnap.disableProperty().bind(disBind);
-//        selItems.addListener(
-//                (ListChangeListener<? super Video>) c -> btnSnap.setText(strf("DEL SNAPS ({})", selItems.size()))
-//        );
-//        HBox middleBtnBox = createHBox("centered", btnSnap);
-
         Pane optionFieldsPane = createOptionFieldsPane();
 
         return createVBox("leftBox", videoListView, optionFieldsPane);
-//        return createVBox("leftBox", videoListView, middleBtnBox, optionFieldsPane);
     }
     private Pane createOptionFieldsPane() {
         VBox container = new VBox();
@@ -216,7 +205,7 @@ public class ManagementPane extends BorderPane implements Closeable {
             updateShowingVideo(videoIndex.get() + 1);
             model.getVideos().remove(video);
             obsSnapList.clear();
-            videoListView.refresh();
+            videoListView.getItems().remove(video);
         });
         HBox snapSubBox = createHBox("subBox", btnAutoSnap, btnClearSnaps);
 
@@ -284,6 +273,7 @@ public class ManagementPane extends BorderPane implements Closeable {
                     JkDuration dur = obsSnapList.get(index);
                     FxSnapshot snap = model.getSnapshot(video, dur);
                     ImageView ivSnap = createImageView(snap.getImage(), width, height);
+                    ivSnap.setOnMouseClicked(e -> showingPlayer.get().getMediaView().getMediaPlayer().seek(Duration.millis(dur.toMillis())));
                     HBox ivbox = new HBox(ivSnap);
                     ivbox.getStyleClass().addAll("bgBlack", "centered");
                     ivbox.setPrefWidth(width);
@@ -339,8 +329,8 @@ public class ManagementPane extends BorderPane implements Closeable {
         }
         if(newIndex >= 0 && newIndex < videos.size()) {
             Video video = JkStreams.filter(model.getVideos(), v -> videos.get(newIndex).getTitle().equals(v.getTitle())).get(0);
-            FxVideo FxVideo = new FxVideo(video, model.getVideoFile(video));
-            JfxVideoPlayer vp = videoPlayerBuilder.createPane(FxVideo);
+            FxVideo FxVideo = model.getFxVideo(video);
+            JfxVideoPlayer vp = vpBuilder.createPane(FxVideo);
             vp.play();
             showingPlayer.setValue(vp);
         } else {

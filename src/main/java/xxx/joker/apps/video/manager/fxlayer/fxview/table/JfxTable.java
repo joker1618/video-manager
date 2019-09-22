@@ -1,4 +1,4 @@
-package xxx.joker.apps.video.manager.fxlayer.fxview.controls;
+package xxx.joker.apps.video.manager.fxlayer.fxview.table;
 
 import javafx.scene.control.TableView;
 import javafx.scene.text.Text;

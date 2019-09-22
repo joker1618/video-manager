@@ -4,24 +4,25 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.StageStyle;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.fxlayer.fxmodel.FxVideo;
 import xxx.joker.apps.video.manager.fxlayer.fxview.videoplayer.JfxVideoPlayer.PlayerConfig;
 import xxx.joker.libs.core.javafx.JfxUtil;
 
-import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class JfxVideoBuilder {
 
-	private static Logger logger = LoggerFactory.getLogger(JfxVideoBuilder.class);
+	private static Logger LOG = LoggerFactory.getLogger(JfxVideoBuilder.class);
 
 	private PlayerConfig playerConfig;
-	private Supplier<FxVideo> supplierPrevious;
-	private Supplier<FxVideo> supplierNext;
+//	private Supplier<FxVideo> supplierPrevious;
+//	private Supplier<FxVideo> supplierNext;
 	private JfxVideoPlayer lastCreatedPane;
 
 	public JfxVideoBuilder() {
@@ -32,9 +33,9 @@ public class JfxVideoBuilder {
 		playerConfig.setVisiblePlayerBar(true);
 		playerConfig.setShowCloseButton(true);
 		playerConfig.setLeftMouseType(PlayerConfig.LeftMouseType.PLAY);
-		playerConfig.setCloseEvent(
-				e -> JfxUtil.getStage(e).close()
-		);
+//		playerConfig.setCloseRunnable(
+//				e -> JfxUtil.getStage(e).close()
+//		);
 		playerConfig.setMiddleMouseClickEvent(
 				e -> JfxUtil.getStage(e).setFullScreen(!JfxUtil.getStage(e).isFullScreen())
 		);
@@ -66,6 +67,16 @@ public class JfxVideoBuilder {
 		playerConfig.setBackward10Milli(backward10Milli);
 		return this;
 	}
+	public JfxVideoBuilder setLeftMouseType(PlayerConfig.LeftMouseType leftMouseType) {
+		playerConfig.setLeftMouseType(leftMouseType);
+		return this;
+	}
+
+	public JfxVideoBuilder setLeftMouseListener(BiConsumer<JfxVideoPlayer, PlayerConfig.LeftMouseType> leftMouseListener) {
+		playerConfig.setLeftMouseListener(leftMouseListener);
+		return this;
+	}
+
 	public JfxVideoBuilder setBackward30Milli(Long backward30Milli) {
 		playerConfig.setBackward30Milli(backward30Milli);
 		return this;
@@ -103,20 +114,20 @@ public class JfxVideoBuilder {
 		return this;
 	}
 
-	public JfxVideoBuilder setCloseEvent(EventHandler<ActionEvent> closeEvent) {
-		playerConfig.setCloseEvent(closeEvent);
+	public JfxVideoBuilder setCloseRunnable(Runnable closeRunnable) {
+		playerConfig.setCloseRunnable(closeRunnable);
 		return this;
 	}
 
-	public JfxVideoBuilder setSupplierPrevious(Supplier<FxVideo> supplierPrevious) {
-		this.supplierPrevious = supplierPrevious;
-		return this;
-	}
-
-	public JfxVideoBuilder setSupplierNext(Supplier<FxVideo> supplierNext) {
-		this.supplierNext = supplierNext;
-		return this;
-	}
+//	public JfxVideoBuilder setSupplierPrevious(Supplier<FxVideo> supplierPrevious) {
+//		this.supplierPrevious = supplierPrevious;
+//		return this;
+//	}
+//
+//	public JfxVideoBuilder setSupplierNext(Supplier<FxVideo> supplierNext) {
+//		this.supplierNext = supplierNext;
+//		return this;
+//	}
 
 	public JfxVideoBuilder setEventMiddleMouseClick(Consumer<MouseEvent> event) {
 		playerConfig.setMiddleMouseClickEvent(event);
@@ -138,6 +149,11 @@ public class JfxVideoBuilder {
 		return this;
 	}
 
+	public JfxVideoBuilder setBottomListener(Runnable bottomListener) {
+		playerConfig.setBottomPropertyListener(bottomListener);
+		return this;
+	}
+
 	public JfxVideoBuilder setVisibleBtnCamera(boolean visible) {
 		playerConfig.setVisibleBtnCamera(visible);
 		return this;
@@ -149,9 +165,16 @@ public class JfxVideoBuilder {
 	}
 
 	public JfxVideoStage createStage() {
-		JfxVideoStage finalFullStage = new JfxVideoStage(playerConfig, supplierPrevious, supplierNext);
+		JfxVideoStage finalFullStage = new JfxVideoStage(playerConfig);
 		finalFullStage.initStyle(playerConfig.isDecoratedStage() ? StageStyle.DECORATED : StageStyle.UNDECORATED);
 		return finalFullStage;
+	}
+	public List<JfxVideoStage> createStages(int num) {
+		List<JfxVideoStage> toRet = new ArrayList<>();
+		for(int i = 0; i < num; i++) {
+			toRet.add(createStage());
+		}
+		return toRet;
 	}
 
 	public JfxVideoPlayer createPane(FxVideo video) {

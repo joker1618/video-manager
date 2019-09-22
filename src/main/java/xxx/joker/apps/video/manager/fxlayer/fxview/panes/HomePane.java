@@ -2,19 +2,16 @@ package xxx.joker.apps.video.manager.fxlayer.fxview.panes;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
-import javafx.scene.media.MediaView;
 import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
 import org.apache.commons.lang3.tuple.Pair;
@@ -29,16 +26,17 @@ import xxx.joker.apps.video.manager.fxlayer.fxview.PanesSelector;
 import xxx.joker.apps.video.manager.fxlayer.fxview.bindings.SortFilter;
 import xxx.joker.apps.video.manager.fxlayer.fxview.builders.SnapshotManager;
 import xxx.joker.apps.video.manager.fxlayer.fxview.builders.GridPaneBuilder;
-import xxx.joker.apps.video.manager.fxlayer.fxview.controls.JfxTable;
-import xxx.joker.apps.video.manager.fxlayer.fxview.controls.JfxTableCol;
+import xxx.joker.apps.video.manager.fxlayer.fxview.table.JfxTable;
+import xxx.joker.apps.video.manager.fxlayer.fxview.table.JfxTableCol;
 import xxx.joker.apps.video.manager.fxlayer.fxview.provider.IconProvider;
+import xxx.joker.apps.video.manager.fxlayer.fxview.videoplayer.JfxVideoBuilder;
+import xxx.joker.apps.video.manager.fxlayer.fxview.videoplayer.JfxVideoPlayer;
+import xxx.joker.apps.video.manager.fxlayer.fxview.videoplayer.JfxVideoStage;
 import xxx.joker.apps.video.manager.provider.StagePosProvider;
 import xxx.joker.apps.video.manager.provider.VideoStagesPosition;
 import xxx.joker.libs.core.datetime.JkDateTime;
 import xxx.joker.libs.core.datetime.JkDuration;
 import xxx.joker.libs.core.enums.JkSizeUnit;
-import xxx.joker.libs.core.files.JkEncryption;
-import xxx.joker.libs.core.files.JkFiles;
 import xxx.joker.libs.core.format.JkOutput;
 import xxx.joker.libs.core.javafx.JfxUtil;
 import xxx.joker.libs.core.lambdas.JkStreams;
@@ -47,7 +45,6 @@ import xxx.joker.libs.core.utils.JkStruct;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import static xxx.joker.libs.core.javafx.JfxControls.*;
@@ -62,10 +59,14 @@ public class HomePane extends BorderPane implements Closeable {
 
     private SortFilter sortFilter;
     private GridPane gridPaneFilterCat;
-    private JfxTable<Video> tableVideos;
-    private ScrollPane scrollPaneSnaps;
-
     private Map<String,Pair<Label,ToggleGroup>> toggleMap = new TreeMap<>(String::compareToIgnoreCase);
+    private JfxTable<Video> tableVideos;
+
+    private SimpleBooleanProperty showCategories;
+    private GridPane gpCategories;
+    private SimpleBooleanProperty showSnapshots;
+    private ScrollPane scrollPaneSnaps;
+    private List<JfxVideoStage> showedVideoStages = new ArrayList<>();
 
     private final Image imgDelete;
 
@@ -268,7 +269,7 @@ public class HomePane extends BorderPane implements Closeable {
                 v.getSnapTimes().clear();
             });
             tableVideos.refresh();
-            updateSnapsScrollPane();
+            updateRightPane();
             model.persistData();
         });
         bpTop.setCenter(createHBox("spacing10 centered", btnMark, btnUnmark, btnAutoSnap, btnClearSnaps));
@@ -276,7 +277,7 @@ public class HomePane extends BorderPane implements Closeable {
         Button btnDelete = new Button("DELETE");
         btnDelete.setOnAction(e -> {
             model.getVideos().removeAll(model.getSelectedVideos());
-            updateSnapsScrollPane();
+            updateRightPane();
         });
         bpTop.setRight(createHBox("centered", btnDelete));
 
@@ -286,10 +287,22 @@ public class HomePane extends BorderPane implements Closeable {
     private Pane createRightPane() {
         VBox box = createVBox("rightBox");
 
-        VBox vbox = new VBox();
-        box.getChildren().add(vbox);
-        vbox.getStyleClass().addAll("boxPlayVideos");
-
+        // VBox PLAY
+        JfxVideoBuilder videoBuilder = new JfxVideoBuilder();
+        videoBuilder.setShowClose(false);
+        videoBuilder.setVisibleBtnCamera(true);
+        videoBuilder.setVisibleBtnMark(true);
+        videoBuilder.setDecoratedStage(true);
+        Button btnPlay = new Button("PLAY");
+        btnPlay.disableProperty().bind(Bindings.createBooleanBinding(() -> model.getSelectedVideos().size() != 1, model.getSelectedVideos()));
+        btnPlay.setOnAction(e -> {
+            JfxVideoStage vstage = videoBuilder.createStage();
+            vstage.setWidth(800);
+            vstage.setHeight(600);
+            vstage.getPlayerConfig().setCloseRunnable(() -> showedVideoStages.remove(vstage));
+            vstage.playVideo(model.getFxVideo(model.getSelectedVideos().get(0)));
+            showedVideoStages.add(vstage);
+        });
         ComboBox<VideoStagesPosition> combo = new ComboBox<>();
         combo.getItems().setAll(StagePosProvider.getVideoPosList());
         combo.setConverter(new StringConverter<VideoStagesPosition>() {
@@ -303,23 +316,76 @@ public class HomePane extends BorderPane implements Closeable {
             }
         });
         combo.getSelectionModel().selectFirst();
-        Button btnPlay = new Button("PLAY");
-        vbox.getChildren().addAll(combo, btnPlay);
-        btnPlay.setOnAction(e -> {
-            // TODO impl
+        Button btnDisplay = new Button("DISPLAY");
+        btnDisplay.setOnAction(e -> {
+            List<FxVideo> fxVideos = JkStreams.map(model.getSelectedVideos(), model::getFxVideo);
+            PanesSelector.getInstance().displayMultiVideoPane(combo.getValue(), fxVideos);
+        });
+        VBox vboxDisplay = createVBox("subVBox", combo, btnDisplay);
+        box.getChildren().add(createHBox("boxPlayVideos", btnPlay, vboxDisplay));
+
+        // VBox CATEGORIES
+        showCategories = new SimpleBooleanProperty(false);
+        Button btnShowCats = new Button("SHOW CATEGORIES");
+        btnShowCats.setStyle(strf("{}; -fx-padding: 0 10 0 10", btnShowCats.getStyle()));
+        btnShowCats.setOnAction(e -> showCategories.set(!showCategories.get()));
+        HBox hboxBtnShowCats = createHBox("centered", btnShowCats);
+        gpCategories = new GridPane();
+        VBox vboxCats = createVBox("subVBox", hboxBtnShowCats);
+        box.getChildren().add(vboxCats);
+        showCategories.addListener((obs, o, n) -> {
+            ObservableList<Node> children = vboxCats.getChildren();
+            if(n) {
+                btnShowCats.setText("HIDE CATEGORIES");
+                children.add(gpCategories);
+                updateRightPane();
+            } else {
+                btnShowCats.setText("SHOW CATEGORIES");
+                children.remove(gpCategories);
+            }
         });
 
+        // VBox SNAPSHOTS
+        showSnapshots = new SimpleBooleanProperty(false);
+        Button btnShowSnaps = new Button("SHOW SNAPS");
+        btnShowSnaps.setOnAction(e -> showSnapshots.set(!showSnapshots.get()));
+        HBox hboxBtnShoSnap = createHBox("centered", btnShowSnaps);
         scrollPaneSnaps = new ScrollPane();
-        box.getChildren().add(scrollPaneSnaps);
-        model.getSelectedVideos().addListener((ListChangeListener<Video>)c -> updateSnapsScrollPane());
+        VBox vboxSnaps = createVBox("subVBox", hboxBtnShoSnap);
+        box.getChildren().add(vboxSnaps);
+        showSnapshots.addListener((obs, o, n) -> {
+            ObservableList<Node> children = vboxSnaps.getChildren();
+            if(n) {
+                btnShowSnaps.setText("HIDE SNAPS");
+                children.add(scrollPaneSnaps);
+                updateRightPane();
+            } else {
+                btnShowSnaps.setText("SHOW SNAPS");
+                children.remove(scrollPaneSnaps);
+            }
+        });
+
+        model.getSelectedVideos().addListener((ListChangeListener<Video>)c -> updateRightPane());
 
         return box;
     }
-    private void updateSnapsScrollPane() {
-        scrollPaneSnaps.setContent(createSnapViewPane(model.getSelectedVideos()));
-    }
+    private void updateRightPane() {
+        if(showSnapshots.get()) {
+            scrollPaneSnaps.setContent(createSnapsPane(model.getSelectedVideos()));
+        }
+        if(showCategories.get()) {
+            model.getSelectedVideos().stream().flatMap(v -> v.getCategories().stream());
+            Set<Category> catSet = new TreeSet<>(JkStreams.flatMap(model.getSelectedVideos(), Video::getCategories));
 
-    private Pane createSnapViewPane(List<Video> videos) {
+            GridPaneBuilder builder = new GridPaneBuilder();
+            int row = 0;
+            for (Category category : catSet) {
+                builder.add(row++, 0, category.getName());
+            }
+            builder.createGridPane(gpCategories);
+        }
+    }
+    private Pane createSnapsPane(List<Video> videos) {
         List<FxSnapshot> snapshots = new ArrayList<>();
 
         int ncols = 4;
@@ -327,14 +393,22 @@ public class HomePane extends BorderPane implements Closeable {
         if(videos.size() == 1) {
             Video video = videos.get(0);
             snapshots.addAll(JkStreams.map(video.getSnapTimes(), st -> model.getSnapshot(video, st)));
-        } else if(videos.size() < 100){
-            int numSnapEach = videos.size() <= 10 ? ncols : 1;
+        } else if(videos.size() < 11){
+            int numSnapEach = ncols;
             videos.forEach(v -> {
                 List<JkDuration> stList = JkStruct.safeSublist(v.getSnapTimes(), 0, numSnapEach);
                 snapshots.addAll(JkStreams.map(stList, st -> model.getSnapshot(v, st)));
                 int rem = numSnapEach - stList.size();
                 for(int i = 0; i < rem; i++)    snapshots.add(null);
             });
+//        } else if(videos.size() < 100){
+//            int numSnapEach = videos.size() <= 10 ? ncols : 1;
+//            videos.forEach(v -> {
+//                List<JkDuration> stList = JkStruct.safeSublist(v.getSnapTimes(), 0, numSnapEach);
+//                snapshots.addAll(JkStreams.map(stList, st -> model.getSnapshot(v, st)));
+//                int rem = numSnapEach - stList.size();
+//                for(int i = 0; i < rem; i++)    snapshots.add(null);
+//            });
         }
 
         double ivWidth = 100d;
@@ -366,7 +440,7 @@ public class HomePane extends BorderPane implements Closeable {
 
     private void fillGpCategFilter() {
         GridPaneBuilder gb = new GridPaneBuilder();
-        ObservableList<Category> cats = model.getCategories();
+        List<Category> cats = JkStreams.sorted(model.getCategories());
         for(int i = 0; i < cats.size(); i++) {
             addRadioLine(gb, cats.get(i), i);
         }
@@ -417,7 +491,7 @@ public class HomePane extends BorderPane implements Closeable {
         }
         if(showDelBtn) {
             Button btnDelCat = new Button();
-            btnDelCat.setGraphic(createImageView(imgDelete, 25d, 25d));
+            btnDelCat.setGraphic(createImageView(imgDelete, 20d, 20d));
             gpBuilder.add(row, col++, btnDelCat);
             btnDelCat.setOnAction(e -> {
                 model.getVideos().forEach(v -> v.getCategories().removeIf(c -> c.getName().equals(catName)));
@@ -467,6 +541,7 @@ public class HomePane extends BorderPane implements Closeable {
 
     @Override
     public void closePane() {
-
+        new ArrayList<>(showedVideoStages).forEach(JfxVideoStage::close);
+        showedVideoStages.clear();
     }
 }
