@@ -3,19 +3,16 @@ package xxx.joker.apps.video.manager.fxlayer.fxview.bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleSetProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.ObservableSet;
 import org.apache.commons.lang3.StringUtils;
+import xxx.joker.apps.video.manager.datalayer.VideoRepo;
 import xxx.joker.apps.video.manager.datalayer.entities.Category;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
-import xxx.joker.apps.video.manager.jfx.model.VideoModelImpl;
 import xxx.joker.libs.core.utils.JkStrings;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Predicate;
 
 public class SortFilter extends ObjectBinding<Predicate<Video>> {
@@ -30,7 +27,7 @@ public class SortFilter extends ObjectBinding<Predicate<Video>> {
 
 	public SortFilter() {
 		bind(useAndOperator, videoName, cataloged, marked, trigger);
-		VideoModelImpl.getInstance().getCategories().forEach(cat -> setCategory(cat, null));
+		VideoRepo.getRepo().getCategories().forEach(cat -> setCategory(cat, null));
 	}
 
 	public void triggerSort() {

@@ -4,7 +4,9 @@ import xxx.joker.libs.core.datetime.JkDuration;
 import xxx.joker.libs.datalayer.design.RepoEntity;
 import xxx.joker.libs.datalayer.design.RepoField;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class Video extends RepoEntity {
 

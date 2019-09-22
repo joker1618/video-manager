@@ -2,7 +2,6 @@ package xxx.joker.apps.video.manager.fxlayer.fxview;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
-import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
@@ -10,9 +9,7 @@ import xxx.joker.apps.video.manager.fxlayer.fxmodel.FxModel;
 import xxx.joker.apps.video.manager.fxlayer.fxmodel.FxVideo;
 import xxx.joker.apps.video.manager.fxlayer.fxview.panes.*;
 import xxx.joker.apps.video.manager.provider.VideoStagesPosition;
-import xxx.joker.libs.core.javafx.JfxUtil;
 
-import java.util.Collection;
 import java.util.List;
 
 public class PanesSelector {

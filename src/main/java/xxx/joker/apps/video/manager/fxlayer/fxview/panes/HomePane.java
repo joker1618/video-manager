@@ -24,13 +24,12 @@ import xxx.joker.apps.video.manager.fxlayer.fxmodel.FxSnapshot;
 import xxx.joker.apps.video.manager.fxlayer.fxmodel.FxVideo;
 import xxx.joker.apps.video.manager.fxlayer.fxview.PanesSelector;
 import xxx.joker.apps.video.manager.fxlayer.fxview.bindings.SortFilter;
-import xxx.joker.apps.video.manager.fxlayer.fxview.builders.SnapshotManager;
 import xxx.joker.apps.video.manager.fxlayer.fxview.builders.GridPaneBuilder;
+import xxx.joker.apps.video.manager.fxlayer.fxview.builders.SnapshotManager;
+import xxx.joker.apps.video.manager.fxlayer.fxview.provider.IconProvider;
 import xxx.joker.apps.video.manager.fxlayer.fxview.table.JfxTable;
 import xxx.joker.apps.video.manager.fxlayer.fxview.table.JfxTableCol;
-import xxx.joker.apps.video.manager.fxlayer.fxview.provider.IconProvider;
 import xxx.joker.apps.video.manager.fxlayer.fxview.videoplayer.JfxVideoBuilder;
-import xxx.joker.apps.video.manager.fxlayer.fxview.videoplayer.JfxVideoPlayer;
 import xxx.joker.apps.video.manager.fxlayer.fxview.videoplayer.JfxVideoStage;
 import xxx.joker.apps.video.manager.provider.StagePosProvider;
 import xxx.joker.apps.video.manager.provider.VideoStagesPosition;
@@ -48,7 +47,6 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import static xxx.joker.libs.core.javafx.JfxControls.*;
-import static xxx.joker.libs.core.utils.JkConsole.display;
 import static xxx.joker.libs.core.utils.JkStrings.strf;
 
 public class HomePane extends BorderPane implements Closeable {

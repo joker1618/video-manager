@@ -24,7 +24,7 @@ import javafx.util.Duration;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xxx.joker.apps.video.manager.commonOK.Config;
+import xxx.joker.apps.video.manager.common.Config;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.apps.video.manager.fxlayer.fxmodel.FxVideo;
 import xxx.joker.apps.video.manager.fxlayer.fxview.builders.SnapshotManager;
@@ -42,8 +42,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import static xxx.joker.libs.core.javafx.JfxControls.createHBox;
-import static xxx.joker.libs.core.javafx.JfxControls.createImageView;
-import static xxx.joker.libs.core.utils.JkConsole.display;
 
 public class JfxVideoPlayer extends BorderPane {
 

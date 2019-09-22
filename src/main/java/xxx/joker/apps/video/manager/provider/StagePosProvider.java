@@ -3,7 +3,7 @@ package xxx.joker.apps.video.manager.provider;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xxx.joker.apps.video.manager.commonOK.Config;
+import xxx.joker.apps.video.manager.common.Config;
 import xxx.joker.libs.core.exception.JkRuntimeException;
 import xxx.joker.libs.core.files.JkFiles;
 import xxx.joker.libs.core.lambdas.JkStreams;
@@ -13,7 +13,6 @@ import xxx.joker.libs.core.utils.JkStrings;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class StagePosProvider {
 

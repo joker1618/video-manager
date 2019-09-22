@@ -6,20 +6,9 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.scenicview.ScenicView;
-import xxx.joker.apps.video.manager.commonOK.Config;
-import xxx.joker.apps.video.manager.datalayer.VideoRepo;
-import xxx.joker.apps.video.manager.datalayer.entities.Video;
+import xxx.joker.apps.video.manager.common.Config;
 import xxx.joker.apps.video.manager.fxlayer.fxmodel.FxModel;
 import xxx.joker.libs.core.files.JkFiles;
-import xxx.joker.libs.core.lambdas.JkStreams;
-import xxx.joker.libs.core.runtimes.JkEnvironment;
-import xxx.joker.libs.core.runtimes.JkRuntime;
-import xxx.joker.libs.core.tests.JkTests;
-import xxx.joker.libs.datalayer.entities.RepoResource;
-
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 
 public class NewLauncher extends Application {
 

@@ -7,11 +7,10 @@ import org.scenicview.ScenicView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.fxlayer.fxmodel.FxVideo;
-
-import java.util.function.Supplier;
-
 import xxx.joker.apps.video.manager.fxlayer.fxview.NewLauncher;
 import xxx.joker.apps.video.manager.fxlayer.fxview.videoplayer.JfxVideoPlayer.PlayerConfig;
+
+import java.util.function.Supplier;
 
 public class JfxVideoStage extends Stage {
 

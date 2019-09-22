@@ -1,7 +1,6 @@
 package xxx.joker.apps.video.manager.datalayer;
 
-import xxx.joker.apps.video.manager.common.Config12;
-import xxx.joker.apps.video.manager.commonOK.Config;
+import xxx.joker.apps.video.manager.common.Config;
 import xxx.joker.apps.video.manager.datalayer.entities.Category;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.libs.core.datetime.JkDuration;

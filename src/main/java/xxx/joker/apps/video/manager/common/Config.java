@@ -1,4 +1,4 @@
-package xxx.joker.apps.video.manager.commonOK;
+package xxx.joker.apps.video.manager.common;
 
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.libs.core.datetime.JkDuration;

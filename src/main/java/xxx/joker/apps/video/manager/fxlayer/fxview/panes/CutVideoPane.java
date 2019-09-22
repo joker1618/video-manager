@@ -1,19 +1,26 @@
 package xxx.joker.apps.video.manager.fxlayer.fxview.panes;
 
 import javafx.beans.binding.Bindings;
-import javafx.collections.*;
-import javafx.scene.control.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
+import javafx.collections.SetChangeListener;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
-import javafx.scene.layout.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xxx.joker.apps.video.manager.ffmpeg.FFMPEGAdapter;
-import xxx.joker.apps.video.manager.commonOK.Config;
+import xxx.joker.apps.video.manager.common.Config;
 import xxx.joker.apps.video.manager.datalayer.entities.Category;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
+import xxx.joker.apps.video.manager.ffmpeg.FFMPEGAdapter;
 import xxx.joker.apps.video.manager.fxlayer.fxmodel.FxModel;
 import xxx.joker.apps.video.manager.fxlayer.fxmodel.FxVideo;
 import xxx.joker.apps.video.manager.fxlayer.fxview.PanesSelector;
@@ -32,7 +39,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static xxx.joker.libs.core.javafx.JfxControls.*;
-import static xxx.joker.libs.core.utils.JkStrings.splitList;
 import static xxx.joker.libs.core.utils.JkStrings.strf;
 
 public class CutVideoPane extends BorderPane implements Closeable {
