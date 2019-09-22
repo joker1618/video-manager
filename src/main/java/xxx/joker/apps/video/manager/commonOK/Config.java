@@ -12,12 +12,12 @@ import static xxx.joker.libs.core.utils.JkStrings.strf;
 
 public class Config {
 
-//    public static final Path BASE_FOLDER;
-//    static {
-//        String baseFolderName = JkRuntime.isRunFromJar(Config.class) ? "vmx" : "vmxIDE";
-//        BASE_FOLDER = JkEnvironment.getAppsFolder().resolve(baseFolderName);
-//    }
-    public static final Path BASE_FOLDER = JkEnvironment.getAppsFolder().resolve("vmx");
+    public static final Path BASE_FOLDER;
+    static {
+        String baseFolderName = JkRuntime.isRunFromJar(Config.class) ? "vmx" : "vmxIDE";
+        BASE_FOLDER = JkEnvironment.getAppsFolder().resolve(baseFolderName);
+    }
+//    public static final Path BASE_FOLDER = JkEnvironment.getAppsFolder().resolve("vmx");
 
     public static final Path REPO_FOLDER = BASE_FOLDER.resolve("repo");
     public static final String DB_NAME = "vm";
