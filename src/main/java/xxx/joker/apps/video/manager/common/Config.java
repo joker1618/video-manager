@@ -14,7 +14,7 @@ public class Config {
 
     public static final Path BASE_FOLDER;
     static {
-        String baseFolderName = JkRuntime.isRunFromJar(Config.class) ? "vmx" : "vmxIDE";
+        String baseFolderName = JkRuntime.isRunFromJar(Config.class) ? "video-manager" : "video-manager-IDE";
         BASE_FOLDER = JkEnvironment.getAppsFolder().resolve(baseFolderName);
     }
 //    public static final Path BASE_FOLDER = JkEnvironment.getAppsFolder().resolve("vmx");
