@@ -3,10 +3,8 @@ package stuff;
 import org.junit.Test;
 import xxx.joker.apps.video.manager.datalayer.VideoRepo;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
-import xxx.joker.apps.video.manager.fxlayer.fxmodel.FxModel;
 import xxx.joker.libs.core.files.JkFiles;
 import xxx.joker.libs.core.lambdas.JkStreams;
-import xxx.joker.libs.core.utils.JkConsole;
 import xxx.joker.libs.datalayer.entities.RepoResource;
 
 import java.nio.file.Path;
