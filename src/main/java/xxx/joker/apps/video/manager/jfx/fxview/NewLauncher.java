@@ -6,11 +6,15 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.scenicview.ScenicView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.common.Config;
 import xxx.joker.apps.video.manager.jfx.fxmodel.FxModel;
 import xxx.joker.libs.core.files.JkFiles;
 
 public class NewLauncher extends Application {
+
+    private static final Logger LOG = LoggerFactory.getLogger(NewLauncher.class);
 
     public static boolean scenicView;
 
@@ -51,8 +55,10 @@ public class NewLauncher extends Application {
     @Override
     public void stop() throws Exception {
         panesSel.getHomePane().closePane();
-        JkFiles.delete(Config.TEMP_FOLDER);
+        JkFiles.delete(Config.FOLDER_TEMP_SNAPS);
+        JkFiles.delete(Config.FOLDER_TEMP_CUT);
         FxModel.getModel().persistData();
+        LOG.info("Closing app");
     }
 
     public static void main(String[] args) {

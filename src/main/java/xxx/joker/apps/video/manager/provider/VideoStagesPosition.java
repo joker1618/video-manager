@@ -46,12 +46,44 @@ public class VideoStagesPosition {
 		videoPosList.add(new VPos(row, col, rspan, cspan));
 	}
 
-	private static class VPos {
-		int idxRow, idxCol, rowsSpan, colsSpan;
+	public static class VPos {
+		private int idxRow, idxCol, rowsSpan, colsSpan;
 		VPos(int idxRow, int idxCol, int rowsSpan, int colsSpan) {
 			this.idxRow = idxRow;
 			this.idxCol = idxCol;
 			this.rowsSpan = rowsSpan;
+			this.colsSpan = colsSpan;
+		}
+
+		public int getIdxRow() {
+			return idxRow;
+		}
+
+		public void setIdxRow(int idxRow) {
+			this.idxRow = idxRow;
+		}
+
+		public int getIdxCol() {
+			return idxCol;
+		}
+
+		public void setIdxCol(int idxCol) {
+			this.idxCol = idxCol;
+		}
+
+		public int getRowsSpan() {
+			return rowsSpan;
+		}
+
+		public void setRowsSpan(int rowsSpan) {
+			this.rowsSpan = rowsSpan;
+		}
+
+		public int getColsSpan() {
+			return colsSpan;
+		}
+
+		public void setColsSpan(int colsSpan) {
 			this.colsSpan = colsSpan;
 		}
 	}
@@ -69,4 +101,7 @@ public class VideoStagesPosition {
 		}
 	}
 
+	public List<VPos> getVideoPosList() {
+		return videoPosList;
+	}
 }

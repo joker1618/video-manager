@@ -165,7 +165,7 @@ public class CutVideoPane extends BorderPane implements Closeable {
 
     private void cutVideo(boolean splitByPoints, Collection<Duration> seekPoints, Set<Category> customCats) {
         FxVideo fxVideo = videoPlayer.getFxVideo();
-        Path sourcePath = JkFiles.copyInFolder(fxVideo.getPath(), Config.TEMP_FOLDER);
+        Path sourcePath = JkFiles.copyInFolder(fxVideo.getPath(), Config.FOLDER_TEMP_CUT);
         Video video = fxVideo.getVideo();
 
         Set<Category> cats = new TreeSet<>(customCats);
@@ -215,8 +215,6 @@ public class CutVideoPane extends BorderPane implements Closeable {
                 }
             });
         }
-
-        JkFiles.delete(Config.TEMP_FOLDER);
     }
 
     @Override

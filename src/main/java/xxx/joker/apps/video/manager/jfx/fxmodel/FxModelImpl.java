@@ -21,6 +21,7 @@ import xxx.joker.libs.core.datetime.JkDuration;
 import xxx.joker.libs.core.files.JkEncryption;
 import xxx.joker.libs.core.files.JkFiles;
 import xxx.joker.libs.core.lambdas.JkStreams;
+import xxx.joker.libs.core.utils.JkStruct;
 import xxx.joker.libs.datalayer.entities.RepoResource;
 
 import java.nio.file.Path;
@@ -40,14 +41,16 @@ public class FxModelImpl implements FxModel {
     private final ObservableList<Video> videos;
     private final ObservableList<Category> categories;
     private final ObservableList<Video> selectedVideos;
-    private final ObservableSet<Video> markedVideos;
 
     private FxModelImpl() {
         videos = FXCollections.observableArrayList(repo.getVideos());
         videos.sort(Comparator.comparing(v -> v.getTitle().toLowerCase()));
         categories = FXCollections.observableArrayList(repo.getCategories());
         selectedVideos = FXCollections.observableArrayList(new ArrayList<>());
-        markedVideos = FXCollections.observableSet(new TreeSet<>());
+
+        // for some reason, sometimes when a video is added, the length and the formats are not computed, so I check at start
+        JkStreams.filterMap(videos, v -> v.getLength() == null, this::getFxVideo)
+                .forEach(this::readVideoLengthWidthHeight);
 
         videos.addListener((ListChangeListener<? super Video>) lc -> {
             JkStreams.filter(videos, v -> !repo.getVideos().contains(v)).forEach(repo::add);
@@ -67,13 +70,13 @@ public class FxModelImpl implements FxModel {
             });
             List<Video> toDel = JkStreams.filter(selectedVideos, v -> !videos.contains(v));
             selectedVideos.removeAll(toDel);
-            persistData();
+//            persistData();
         });
 
         categories.addListener((ListChangeListener<? super Category>) lc -> {
             JkStreams.filter(categories, c -> !repo.getCategories().contains(c)).forEach(repo::add);
             JkStreams.filter(repo.getCategories(), c -> !categories.contains(c)).forEach(repo::remove);
-            persistData();
+//            persistData();
         });
     }
 

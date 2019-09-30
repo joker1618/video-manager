@@ -25,14 +25,25 @@
 }
 .filterBox .jfxGridBox .cellBox.col0 {
     -fx-alignment: CENTER-LEFT;
-    -fx-padding: 0 10 0 0;
 }
 .filterBox .jfxGridBox .cellBox.col-last {
     -fx-padding: 0;
 }
 .filterBox .jfxGridBox .cellBox.col-last .button {
-    -fx-padding: 3;
+    -fx-padding: 2;
 }
+
+.filterBox .scrollPaneCateg .jfxGridBox {
+    -fx-hgap: 0;
+    -fx-vgap: 0;
+}
+.filterBox .scrollPaneCateg .jfxGridBox .cellBox {
+    -fx-padding: 3 5 3 5;
+}
+.filterBox .scrollPaneCateg .jfxGridBox .cellBox.row-odd {
+    -fx-background-color: #ecffb3;
+}
+
 
 .filterBox .check-box:selected {
     -fx-font-weight: BOLD;
@@ -69,7 +80,7 @@
     -fx-border-width: 0 1 0 1;
     -fx-border-color: -container-border-color;
 }
-.centerBox .topPane .button {
+.centerBox .buttonsPane .button {
     -fx-font-weight: BOLD;
     -fx-font-size: 15;
     -fx-min-width: 110;

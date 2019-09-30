@@ -6,6 +6,8 @@ import org.junit.Test;
 import xxx.joker.libs.core.adapter.JkProcess;
 import xxx.joker.libs.core.files.JkFiles;
 import xxx.joker.libs.core.lambdas.JkStreams;
+import xxx.joker.libs.core.runtimes.JkEnvironment;
+import xxx.joker.libs.core.web.JkWeb;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,8 +21,23 @@ import static xxx.joker.libs.core.utils.JkStrings.strf;
 
 public class TempTest {
 
-	@Test
-	public void splitFile() throws IOException {
+    @Test
+    public void dw() throws IOException {
+        String url = "https://ev.ypncdn.com/201908/11/15511108/720p_1500k_15511108/YouPorn_-_girlfriend-blowjob-in-afternoon-cum-in-mouth.mp4?rate=350k\u0026burst=1600k\u0026validfrom=1569720800\u0026validto=1569735200\u0026hash=WKAGK9wa45b7oAkj4gp7Tvnio6I%3D";
+//        String url = "https://ev.phncdn.com/videos/201901/06/200451641/720P_1500K_200451641.mp4?validfrom=1569721469&validto=1569728669&rate=207k&burst=1200k&hash=Lf39P9%2F9MBfA8%2FayJb2IpKaZo%2Bk%3D";
+        Path outPath = JkEnvironment.getHomeFolder().resolve("Desktop/dwweb").resolve(url.replaceAll("\\?.*", "").replaceAll("^.*/", ""));
+        JkWeb.downloadResource(url, outPath);
+        display("END");
+    }
+    @Test
+    public void dwhtml() throws IOException {
+        String url = "https://www.pornhub.com/view_video.php?viewkey=ph5c32589432137";
+        Path outPath = JkEnvironment.getHomeFolder().resolve("Desktop/dwweb/html").resolve(url.replaceAll("^.*viewkey=", ""));
+        JkFiles.writeFile(outPath, JkWeb.downloadHtml(url));
+        display("END");
+    }
+    @Test
+    public void splitFile() throws IOException {
         Path baseFolder = Paths.get("src/test/resources");
         String fname = "ert.mp4";
         List<Path> files = JkFiles.findFiles(baseFolder, false, p -> !p.getFileName().toString().equals(fname));

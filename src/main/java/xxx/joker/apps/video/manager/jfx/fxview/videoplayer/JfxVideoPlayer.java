@@ -1,6 +1,7 @@
 package xxx.joker.apps.video.manager.jfx.fxview.videoplayer;
 
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
@@ -212,7 +213,7 @@ public class JfxVideoPlayer extends BorderPane {
 		lblHeading.setText(caption);
 	}
 
-	public Pair<Path, JkDuration> takeVideoSnapshot(int snapSize) {
+	public Pair<Path, JkDuration> takeVideoSnapshot(int snapSquareSize) {
 		boolean playing = mediaView.getMediaPlayer().getStatus() == MediaPlayer.Status.PLAYING;
 		if(playing) {
 			mediaView.getMediaPlayer().pause();
@@ -222,8 +223,8 @@ public class JfxVideoPlayer extends BorderPane {
 		Path snapPath = Config.createSnapshotOutPath(fxVideo.getVideo(), snapTime);
 		double fw = mediaView.getFitWidth();
 		double fh = mediaView.getFitHeight();
-		mediaView.setFitWidth(snapSize);
-		mediaView.setFitHeight(snapSize);
+		mediaView.setFitWidth(snapSquareSize);
+		mediaView.setFitHeight(snapSquareSize);
 		JfxUtil.takeSnapshot(mediaView, snapPath);
 		mediaView.setFitWidth(fw);
 		mediaView.setFitHeight(fh);
@@ -337,7 +338,22 @@ public class JfxVideoPlayer extends BorderPane {
 
 		// Label for total time
 		Label lblTotalTime = new Label();
-		mediaView.getMediaPlayer().totalDurationProperty().addListener((obs,o,n) -> lblTotalTime.setText(JkDuration.of(n).toStringElapsed(false, ChronoUnit.MINUTES)));
+		lblTotalTime.getStyleClass().add("center-left");
+		Video video = fxVideo.getVideo();
+		if(video.getLength() != null) {
+			lblTotalTime.setText(video.getLength().toStringElapsed(false, ChronoUnit.MINUTES));
+		} else {
+			ReadOnlyObjectProperty<Duration> totTimeProp = mediaView.getMediaPlayer().totalDurationProperty();
+			ChangeListener<Duration> totEvent = (obs, o, n) -> {
+				if(n != null && n.toMillis() > 0 && video.getLength() == null) {
+					video.setLength(JkDuration.of(n));
+					lblTotalTime.setText(video.getLength().toStringElapsed(false, ChronoUnit.MINUTES));
+				}
+			};
+			totTimeProp.addListener(totEvent);
+		}
+//		Label lblTotalTime = new Label();
+//		mediaView.getMediaPlayer().totalDurationProperty().addListener((obs,o,n) -> lblTotalTime.setText(JkDuration.of(n).toStringElapsed(false, ChronoUnit.MINUTES)));
 		HBox hboxTime = createHBox("lessSpacingBox", lblActualTime, sliderTime, lblTotalTime);
 		HBox.setHgrow(hboxTime, Priority.ALWAYS);
 		panesNotMinimal.add(hboxTime);

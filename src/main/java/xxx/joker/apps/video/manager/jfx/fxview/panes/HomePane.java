@@ -2,8 +2,10 @@ package xxx.joker.apps.video.manager.jfx.fxview.panes;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
@@ -60,6 +62,8 @@ public class HomePane extends BorderPane implements Closeable {
     private Map<String,Pair<Label,ToggleGroup>> toggleMap = new TreeMap<>(String::compareToIgnoreCase);
     private JfxTable<Video> tableVideos;
 
+    private ObservableSet<Video> holdVideos = FXCollections.observableSet();
+
     private SimpleBooleanProperty showCategories;
     private GridPane gpCategories;
     private SimpleBooleanProperty showSnapshots;
@@ -84,7 +88,7 @@ public class HomePane extends BorderPane implements Closeable {
     }
 
     private Pane createLeftPane() {
-        sortFilter = new SortFilter();
+        sortFilter = new SortFilter(holdVideos);
 
         VBox box = new VBox();
         box.getStyleClass().add("filterBox");
@@ -164,19 +168,19 @@ public class HomePane extends BorderPane implements Closeable {
 
         JfxTableCol<Video, String> tcolTitle = JfxTableCol.createCol("VIDEO", "title");
         tableVideos.getColumns().add(tcolTitle);
-        tcolTitle.setFixedPrefWidth(467);
+        tcolTitle.setFixedPrefWidth(500);
 
         JfxTableCol<Video, Long> tcolSize = JfxTableCol.createCol("SIZE", "size", l -> JkOutput.humanSize(l, JkSizeUnit.MB, false));
         tableVideos.getColumns().add(tcolSize);
-        tcolSize.setFixedPrefWidth(100);
+        tcolSize.setFixedPrefWidth(80);
 
         JfxTableCol<Video,String> tcolDim = JfxTableCol.createCol("WxH", v -> v.getWidth() + v.getHeight() == 0d ? "" : strf("{}x{}", v.getWidth(), v.getHeight()));
         tableVideos.getColumns().add(tcolDim);
-        tcolDim.setFixedPrefWidth(100);
+        tcolDim.setFixedPrefWidth(80);
 
         JfxTableCol<Video,Double> tcolResolution = JfxTableCol.createCol("W/H", v -> v.getHeight() == 0d ? 0d : (double)v.getWidth()/v.getHeight(), d -> strf("%.2f", d));
         tableVideos.getColumns().add(tcolResolution);
-        tcolResolution.setFixedPrefWidth(75);
+        tcolResolution.setFixedPrefWidth(65);
 
         JfxTableCol<Video, JkDuration> tcolLength = JfxTableCol.createCol("LENGTH", "length", d -> d == null ? "" : d.toStringElapsed(false));
         tableVideos.getColumns().add(tcolLength);
@@ -184,13 +188,11 @@ public class HomePane extends BorderPane implements Closeable {
 
         JfxTableCol<Video,Integer> tcolNumSnapshots = JfxTableCol.createCol("SNAP", v -> v.getSnapTimes().size());
         tableVideos.getColumns().add(tcolNumSnapshots);
-        tcolNumSnapshots.setFixedPrefWidth(75);
+        tcolNumSnapshots.setFixedPrefWidth(65);
 
         JfxTableCol<Video, JkDateTime> tcolCreationTm = JfxTableCol.createCol("CREATION", "creationTm", null, jdt -> jdt == null ? "" : jdt.format("dd/MM/yyyy   HH:mm:ss"));
         tableVideos.getColumns().add(tcolCreationTm);
-        tcolCreationTm.setFixedPrefWidth(170);
-
-//        tableVideos.setMaxWidth(tableVideos.getColumns().stream().mapToDouble(TableColumn::getMinWidth).sum() + 22 + 2);
+        tcolCreationTm.setFixedPrefWidth(160);
 
         // Center all columns but the first one
         tableVideos.getColumns().subList(1, tableVideos.getColumns().size()).forEach(col -> col.getStyleClass().add("centered"));
@@ -217,8 +219,12 @@ public class HomePane extends BorderPane implements Closeable {
 
         model.getSelectedVideos().setAll(tableItems);
 
+        BorderPane bpBottom = createCenterBottomButtonsPane();
+        bpBottom.getStyleClass().addAll("bottomPane", "buttonsPane");
+        vbox.getChildren().add(bpBottom);
+
         BorderPane bpTop = new BorderPane();
-        bpTop.getStyleClass().add("topPane");
+        bpTop.getStyleClass().addAll("topPane", "buttonsPane");
         vbox.getChildren().add(0, bpTop);
 
         Button btnManageVideos = new Button("MANAGE");
@@ -230,23 +236,45 @@ public class HomePane extends BorderPane implements Closeable {
         btnAddVideos.setOnAction(this::actionAddVideos);
         bpTop.setLeft(createHBox("spacing10", btnManageVideos, btnCutVideo, btnAddVideos));
 
-        Button btnMark = new Button("MARK");
-        btnMark.setOnAction(e -> {
+        String lblHold = "HOLD";
+        String lblUnhold = "UNHOLD";
+        Button btnHold = new Button(lblHold);
+        btnHold.setOnAction(e -> {
             synchronized (model.getSelectedVideos()) {
                 if(!model.getSelectedVideos().isEmpty()) {
-                    model.getSelectedVideos().forEach(v -> v.setMarked(true));
+                    if(lblHold.equals(btnHold.getText())) {
+                        holdVideos.addAll(model.getSelectedVideos());
+                        btnHold.setText(lblUnhold);
+                    } else {
+                        holdVideos.removeAll(model.getSelectedVideos());
+                        btnHold.setText(lblHold);
+                    }
                     sortFilter.triggerSort();
                 }
             }
         });
-        Button btnUnmark = new Button("UNMARK");
-        btnUnmark.setOnAction(e -> {
+        String lblMark = "MARK";
+        String lblUnmark = "UNMARK";
+        Button btnMark = new Button(lblMark);
+        btnMark.setOnAction(e -> {
             synchronized (model.getSelectedVideos()) {
                 if(!model.getSelectedVideos().isEmpty()) {
-                    model.getSelectedVideos().forEach(v -> v.setMarked(false));
+                    if(lblMark.equals(btnMark.getText())) {
+                        model.getSelectedVideos().forEach(v -> v.setMarked(true));
+                        btnMark.setText(lblUnmark);
+                    } else {
+                        model.getSelectedVideos().forEach(v -> v.setMarked(false));
+                        btnMark.setText(lblMark);
+                    }
                     sortFilter.triggerSort();
                 }
             }
+        });
+        model.getSelectedVideos().addListener((ListChangeListener<Video>)c -> {
+            int numUnmarked = JkStreams.count(model.getSelectedVideos(), v -> !v.isMarked());
+            btnMark.setText(numUnmarked == 0 ? lblUnmark : lblMark);
+            int numUnhold = JkStreams.count(model.getSelectedVideos(), v -> !holdVideos.contains(v));
+            btnHold.setText(numUnhold == 0 ? lblUnhold : lblHold);
         });
         Button btnAutoSnap = new Button("AUTOSNAP");
         btnAutoSnap.setOnAction(e -> {
@@ -255,7 +283,7 @@ public class HomePane extends BorderPane implements Closeable {
                 finished.addListener((obs,o,n) -> {
                     if(finished.get()){
                         tableVideos.refresh();
-                        model.persistData();
+//                        model.persistData();
                     }
                 });
             }
@@ -268,22 +296,30 @@ public class HomePane extends BorderPane implements Closeable {
             });
             tableVideos.refresh();
             updateRightPane();
-            model.persistData();
+//            model.persistData();
         });
-        bpTop.setCenter(createHBox("spacing10 centered", btnMark, btnUnmark, btnAutoSnap, btnClearSnaps));
+        bpTop.setCenter(createHBox("spacing10 centered", btnHold, btnMark, btnAutoSnap, btnClearSnaps));
 
         Button btnDelete = new Button("DELETE");
         btnDelete.setOnAction(e -> {
-            model.getVideos().removeAll(model.getSelectedVideos());
+            manageDelete(model.getSelectedVideos());
             updateRightPane();
         });
         bpTop.setRight(createHBox("centered", btnDelete));
 
         return vbox;
     }
+    private void manageDelete(List<Video> videos) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setHeaderText(strf("Delete {} videos?", videos.size()));
+        Optional<ButtonType> res = alert.showAndWait();
+        if(res != null && res.isPresent() && res.get().getButtonData() == ButtonBar.ButtonData.OK_DONE) {
+            model.getVideos().removeAll(model.getSelectedVideos());
+        }
+    }
 
-    private Pane createRightPane() {
-        VBox box = createVBox("rightBox");
+    private BorderPane createCenterBottomButtonsPane() {
+        BorderPane bp = new BorderPane();
 
         // VBox PLAY
         JfxVideoBuilder videoBuilder = new JfxVideoBuilder();
@@ -306,7 +342,7 @@ public class HomePane extends BorderPane implements Closeable {
         combo.setConverter(new StringConverter<VideoStagesPosition>() {
             @Override
             public String toString(VideoStagesPosition object) {
-                return object.getName().replace("_", " ");
+                return object.getName();
             }
             @Override
             public VideoStagesPosition fromString(String string) {
@@ -319,8 +355,16 @@ public class HomePane extends BorderPane implements Closeable {
             List<FxVideo> fxVideos = JkStreams.map(model.getSelectedVideos(), model::getFxVideo);
             PanesSelector.getInstance().displayMultiVideoPane(combo.getValue(), fxVideos);
         });
-        VBox vboxDisplay = createVBox("subVBox", combo, btnDisplay);
-        box.getChildren().add(createHBox("boxPlayVideos", btnPlay, vboxDisplay));
+        HBox hboxDisplay = createHBox("centered spacing10", combo, btnDisplay);
+
+        bp.setLeft(createHBox("", btnPlay));
+        bp.setCenter(hboxDisplay);
+
+        return bp;
+    }
+
+    private Pane createRightPane() {
+        VBox box = createVBox("rightBox");
 
         // VBox CATEGORIES
         showCategories = new SimpleBooleanProperty(false);
@@ -386,30 +430,22 @@ public class HomePane extends BorderPane implements Closeable {
     private Pane createSnapsPane(List<Video> videos) {
         List<FxSnapshot> snapshots = new ArrayList<>();
 
-        int ncols = 4;
+        final double totWidth = 400d;
+        final int ncols = 3;
 
         if(videos.size() == 1) {
             Video video = videos.get(0);
             snapshots.addAll(JkStreams.map(video.getSnapTimes(), st -> model.getSnapshot(video, st)));
         } else if(videos.size() < 11){
-            int numSnapEach = ncols;
             videos.forEach(v -> {
-                List<JkDuration> stList = JkStruct.safeSublist(v.getSnapTimes(), 0, numSnapEach);
+                List<JkDuration> stList = JkStruct.safeSublist(v.getSnapTimes(), 0, ncols);
                 snapshots.addAll(JkStreams.map(stList, st -> model.getSnapshot(v, st)));
-                int rem = numSnapEach - stList.size();
+                int rem = ncols - stList.size();
                 for(int i = 0; i < rem; i++)    snapshots.add(null);
             });
-//        } else if(videos.size() < 100){
-//            int numSnapEach = videos.size() <= 10 ? ncols : 1;
-//            videos.forEach(v -> {
-//                List<JkDuration> stList = JkStruct.safeSublist(v.getSnapTimes(), 0, numSnapEach);
-//                snapshots.addAll(JkStreams.map(stList, st -> model.getSnapshot(v, st)));
-//                int rem = numSnapEach - stList.size();
-//                for(int i = 0; i < rem; i++)    snapshots.add(null);
-//            });
         }
 
-        double ivWidth = 100d;
+        double ivWidth = totWidth / ncols;
         double ivHeight = ivWidth / 1.33;
         List<HBox> ivBoxList = JkStreams.map(snapshots, sn -> {
             if(sn == null)  return null;

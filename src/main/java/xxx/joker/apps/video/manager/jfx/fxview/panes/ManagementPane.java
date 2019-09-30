@@ -195,7 +195,7 @@ public class ManagementPane extends BorderPane implements Closeable {
             Video v = showingPlayer.get().getFxVideo().getVideo();
             v.getSnapTimes().forEach(st -> model.removeSnapshot(v, st));
             v.getSnapTimes().clear();
-            model.persistData();
+//            model.persistData();
             updateSnapshotsPane();
         });
         Button btnDelete = new Button("DELETE");
@@ -346,6 +346,7 @@ public class ManagementPane extends BorderPane implements Closeable {
                 CheckBox cb = new CheckBox(cat.getName());
                 cb.setOnAction(e -> actionSetVideoCategory(e, cat));
                 cb.disableProperty().bind(showingPlayer.isNull());
+                cb.setMnemonicParsing(false);
                 checkBoxCategoryMap.put(cat, cb);
             }
         }
@@ -360,6 +361,7 @@ public class ManagementPane extends BorderPane implements Closeable {
                 cb.setOnAction(e -> actionSetMultiVideoCategory(e, cat));
                 ObservableList<Video> selItems = videoListView.getSelectionModel().getSelectedItems();
                 cb.disableProperty().bind(Bindings.createBooleanBinding(selItems::isEmpty, selItems));
+                cb.setMnemonicParsing(false);
                 checkBoxCategoryMapMulti.put(cat, cb);
             }
         }

@@ -4,6 +4,7 @@ import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.ObservableSet;
 import org.apache.commons.lang3.StringUtils;
 import xxx.joker.apps.video.manager.datalayer.VideoRepo;
 import xxx.joker.apps.video.manager.datalayer.entities.Category;
@@ -24,8 +25,10 @@ public class SortFilter extends ObjectBinding<Predicate<Video>> {
 	private SimpleBooleanProperty useAndOperator = new SimpleBooleanProperty();
 
 	private Map<Category,SimpleObjectProperty<Boolean>> categoryMap = new HashMap<>();
+	private ObservableSet<Video> holdVideos;
 
-	public SortFilter() {
+	public SortFilter(ObservableSet<Video> holdVideos) {
+		this.holdVideos = holdVideos;
 		bind(useAndOperator, videoName, cataloged, marked, trigger);
 		VideoRepo.getRepo().getCategories().forEach(cat -> setCategory(cat, null));
 	}
@@ -59,7 +62,9 @@ public class SortFilter extends ObjectBinding<Predicate<Video>> {
         return videoName;
     }
 
-    public boolean testFilter(Video video) {
+    private boolean testFilter(Video video) {
+		if(holdVideos.contains(video))	return true;
+
 		List<String> filters = JkStrings.splitList(videoName.get(), "|");
 		boolean resNameFilter = false;
 		for (int i = 0; i < filters.size() && !resNameFilter; i++) {

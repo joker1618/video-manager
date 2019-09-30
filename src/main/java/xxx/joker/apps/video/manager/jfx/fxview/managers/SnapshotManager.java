@@ -2,6 +2,7 @@ package xxx.joker.apps.video.manager.jfx.fxview.managers;
 
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
 import org.apache.commons.lang3.tuple.Pair;
@@ -17,6 +18,7 @@ import xxx.joker.apps.video.manager.jfx.fxview.videoplayer.JfxVideoStage;
 import xxx.joker.libs.core.datetime.JkDuration;
 import xxx.joker.libs.core.lambdas.JkStreams;
 import xxx.joker.libs.core.utils.JkConvert;
+import xxx.joker.libs.core.utils.JkStrings;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -51,7 +53,7 @@ public class SnapshotManager {
                 JfxVideoStage stage = videoBuilder.createStage();
                 stage.setMaximized(true);
                 SimpleBooleanProperty finished = new SimpleBooleanProperty(false);
-                takeSnapshots(stage, fxVideos, pair, finished);
+                takeSnapshots(stage, fxVideos, pair, finished, 0);
                 return finished;
             }
         }
@@ -88,13 +90,13 @@ public class SnapshotManager {
         return null;
     }
 
-    private void takeSnapshots(JfxVideoStage stage, List<FxVideo> fxVideos, Pair<SnapType, Integer> pairChoose, SimpleBooleanProperty finished) {
-        if(fxVideos.isEmpty()) {
+    private void takeSnapshots(JfxVideoStage stage, List<FxVideo> fxVideos, Pair<SnapType, Integer> pairChoose, SimpleBooleanProperty finished, int index) {
+        if(index >= fxVideos.size()) {
             stage.close();
-            model.persistData();
+//            model.persistData();
             finished.setValue(true);
         } else {
-            FxVideo fxVideo = fxVideos.remove(0);
+            FxVideo fxVideo = fxVideos.get(index);
 
             List<Long> times = new ArrayList<>();
             Integer numChoosed = pairChoose.getValue();
@@ -109,15 +111,19 @@ public class SnapshotManager {
             }
 
             if(times.isEmpty()) {
-                takeSnapshots(stage, fxVideos, pairChoose, finished);
+                takeSnapshots(stage, fxVideos, pairChoose, finished, index + 1);
             } else {
                 stage.playVideo(fxVideo);
+                Label lblCounter = new Label(strf("{}/{}", index + 1, fxVideos.size()));
+                ((HBox)stage.getVideoPlayer().getTop()).getChildren().add(0, lblCounter);
                 MediaPlayer mp = stage.getVideoPlayer().getMediaView().getMediaPlayer();
+                double rate = 0.2;
+                mp.setRate(rate);
                 AtomicBoolean first = new AtomicBoolean(true);
                 mp.currentTimeProperty().addListener((obs,o,n) -> {
                     synchronized (times) {
                         if(first.get()) {
-                            mp.seek(Duration.millis(times.get(0) - 100));
+                            mp.seek(Duration.millis(times.get(0) - 100 * rate));
                             first.set(false);
                         }
                         if(!times.isEmpty()) {
@@ -125,13 +131,10 @@ public class SnapshotManager {
                             if(doSnap) {
                                 times.remove(0);
                                 takeSnapAndAddToModel(stage.getVideoPlayer());
-//                                Pair<Path, Long> pair = stage.getVideoPlayer().takeVideoSnapshot(500);
-//                                fxVideo.getVideo().getSnapTimes().add(pair.getValue());
-//                                model.addSnapshot(fxVideo.getVideo(), pair.getValue(), pair.getKey());
                                 if(times.isEmpty()) {
-                                    takeSnapshots(stage, fxVideos, pairChoose, finished);
+                                    takeSnapshots(stage, fxVideos, pairChoose, finished, index + 1);
                                 } else {
-                                    mp.seek(Duration.millis(times.get(0) - 100));
+                                    mp.seek(Duration.millis(times.get(0) - 100 * rate));
                                 }
                             }
                         }

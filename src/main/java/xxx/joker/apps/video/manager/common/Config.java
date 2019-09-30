@@ -24,13 +24,14 @@ public class Config {
 
     public static final String CSV_STAGE_FILEPATH = "/data/MultiStagePositions.txt";
 
-    public static final Path TEMP_FOLDER = BASE_FOLDER.resolve("temp");
+    public static final Path FOLDER_TEMP_SNAPS = BASE_FOLDER.resolve("tempSnaps");
+    public static final Path FOLDER_TEMP_CUT = BASE_FOLDER.resolve("tempCut");
 
     public static final Path FFMPEG_EXE_PATH = Paths.get("exe/ffmpeg.exe");
 
     public static Path createSnapshotOutPath(Video video, JkDuration snapTime) {
         String fname = strf("{}_{}.snap.png", video.getMd5(), snapTime.toMillis());
-        return TEMP_FOLDER.resolve(fname);
+        return FOLDER_TEMP_SNAPS.resolve(fname);
     }
 
 }
