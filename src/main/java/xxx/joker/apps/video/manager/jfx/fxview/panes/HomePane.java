@@ -13,6 +13,7 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
@@ -37,6 +38,7 @@ import xxx.joker.apps.video.manager.provider.StagePosProvider;
 import xxx.joker.apps.video.manager.provider.VideoStagesPosition;
 import xxx.joker.libs.core.datetime.JkDateTime;
 import xxx.joker.libs.core.datetime.JkDuration;
+import xxx.joker.libs.core.datetime.JkTimer;
 import xxx.joker.libs.core.enums.JkSizeUnit;
 import xxx.joker.libs.core.format.JkOutput;
 import xxx.joker.libs.core.javafx.JfxUtil;
@@ -53,7 +55,7 @@ import static xxx.joker.libs.core.utils.JkStrings.strf;
 
 public class HomePane extends BorderPane implements Closeable {
 
-    private static final Logger logger = LoggerFactory.getLogger(HomePane.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HomePane.class);
 
     private final FxModel model = FxModel.getModel();
 
@@ -170,17 +172,17 @@ public class HomePane extends BorderPane implements Closeable {
         tableVideos.getColumns().add(tcolTitle);
         tcolTitle.setFixedPrefWidth(500);
 
-        JfxTableCol<Video, Long> tcolSize = JfxTableCol.createCol("SIZE", "size", l -> JkOutput.humanSize(l, JkSizeUnit.MB, false));
-        tableVideos.getColumns().add(tcolSize);
-        tcolSize.setFixedPrefWidth(80);
-
-        JfxTableCol<Video,String> tcolDim = JfxTableCol.createCol("WxH", v -> v.getWidth() + v.getHeight() == 0d ? "" : strf("{}x{}", v.getWidth(), v.getHeight()));
-        tableVideos.getColumns().add(tcolDim);
-        tcolDim.setFixedPrefWidth(80);
-
-        JfxTableCol<Video,Double> tcolResolution = JfxTableCol.createCol("W/H", v -> v.getHeight() == 0d ? 0d : (double)v.getWidth()/v.getHeight(), d -> strf("%.2f", d));
-        tableVideos.getColumns().add(tcolResolution);
-        tcolResolution.setFixedPrefWidth(65);
+//        JfxTableCol<Video, Long> tcolSize = JfxTableCol.createCol("SIZE", "size", l -> JkOutput.humanSize(l, JkSizeUnit.MB, false));
+//        tableVideos.getColumns().add(tcolSize);
+//        tcolSize.setFixedPrefWidth(80);
+//
+//        JfxTableCol<Video,String> tcolDim = JfxTableCol.createCol("WxH", v -> v.getWidth() + v.getHeight() == 0d ? "" : strf("{}x{}", v.getWidth(), v.getHeight()));
+//        tableVideos.getColumns().add(tcolDim);
+//        tcolDim.setFixedPrefWidth(80);
+//
+//        JfxTableCol<Video,Double> tcolResolution = JfxTableCol.createCol("W/H", v -> v.getHeight() == 0d ? 0d : (double)v.getWidth()/v.getHeight(), d -> strf("%.2f", d));
+//        tableVideos.getColumns().add(tcolResolution);
+//        tcolResolution.setFixedPrefWidth(65);
 
         JfxTableCol<Video, JkDuration> tcolLength = JfxTableCol.createCol("LENGTH", "length", d -> d == null ? "" : d.toStringElapsed(false));
         tableVideos.getColumns().add(tcolLength);
@@ -206,6 +208,33 @@ public class HomePane extends BorderPane implements Closeable {
         tableVideos.resizeWidth();
         model.getVideos().addListener((ListChangeListener<Video>)c -> tableVideos.refresh());
 
+        // On row double click, open a new stage player
+        tableVideos.setRowFactory( tv -> {
+            TableRow<Video> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && !row.isEmpty()) {
+                    ObservableList<Video> selItems = tableVideos.getSelectionModel().getSelectedItems();
+                    if(selItems.size() == 1) {
+                        Video rowData = row.getItem();
+                        if(rowData.equals(selItems.get(0))) {
+                            JfxVideoBuilder videoBuilder = new JfxVideoBuilder();
+                            videoBuilder.setShowClose(false);
+                            videoBuilder.setVisibleBtnCamera(true);
+                            videoBuilder.setVisibleBtnMark(true);
+                            videoBuilder.setDecoratedStage(true);
+                            JfxVideoStage vstage = videoBuilder.createStage();
+                            vstage.setWidth(800);
+                            vstage.setHeight(600);
+                            vstage.getPlayerConfig().setCloseRunnable(() -> showedVideoStages.remove(vstage));
+                            vstage.playVideo(model.toFxVideo(rowData));
+                            showedVideoStages.add(vstage);
+                        }
+                    }
+                }
+            });
+            return row ;
+        });
+
         VBox vbox = new VBox(tableVideos);
         vbox.getStyleClass().add("centerBox");
         VBox.setVgrow(tableVideos, Priority.ALWAYS);
@@ -224,7 +253,7 @@ public class HomePane extends BorderPane implements Closeable {
         vbox.getChildren().add(bpBottom);
 
         BorderPane bpTop = new BorderPane();
-        bpTop.getStyleClass().addAll("topPane", "buttonsPane");
+        bpTop.getStyleClass().addAll("topPane", "buttonsPane", "smallBtn");
         vbox.getChildren().add(0, bpTop);
 
         Button btnManageVideos = new Button("MANAGE");
@@ -283,20 +312,18 @@ public class HomePane extends BorderPane implements Closeable {
                 finished.addListener((obs,o,n) -> {
                     if(finished.get()){
                         tableVideos.refresh();
-//                        model.persistData();
                     }
                 });
             }
         });
-        Button btnClearSnaps = new Button("CLEAR SNAPS");
+        Button btnClearSnaps = new Button("DEL SNAPS");
         btnClearSnaps.setOnAction(e -> {
             model.getSelectedVideos().forEach(v -> {
-                v.getSnapTimes().forEach(st -> model.removeSnapshot(v, st));
+                model.removeSnapshots(v);
                 v.getSnapTimes().clear();
             });
             tableVideos.refresh();
             updateRightPane();
-//            model.persistData();
         });
         bpTop.setCenter(createHBox("spacing10 centered", btnHold, btnMark, btnAutoSnap, btnClearSnaps));
 
@@ -322,21 +349,21 @@ public class HomePane extends BorderPane implements Closeable {
         BorderPane bp = new BorderPane();
 
         // VBox PLAY
-        JfxVideoBuilder videoBuilder = new JfxVideoBuilder();
-        videoBuilder.setShowClose(false);
-        videoBuilder.setVisibleBtnCamera(true);
-        videoBuilder.setVisibleBtnMark(true);
-        videoBuilder.setDecoratedStage(true);
-        Button btnPlay = new Button("PLAY");
-        btnPlay.disableProperty().bind(Bindings.createBooleanBinding(() -> model.getSelectedVideos().size() != 1, model.getSelectedVideos()));
-        btnPlay.setOnAction(e -> {
-            JfxVideoStage vstage = videoBuilder.createStage();
-            vstage.setWidth(800);
-            vstage.setHeight(600);
-            vstage.getPlayerConfig().setCloseRunnable(() -> showedVideoStages.remove(vstage));
-            vstage.playVideo(model.getFxVideo(model.getSelectedVideos().get(0)));
-            showedVideoStages.add(vstage);
-        });
+//        JfxVideoBuilder videoBuilder = new JfxVideoBuilder();
+//        videoBuilder.setShowClose(false);
+//        videoBuilder.setVisibleBtnCamera(true);
+//        videoBuilder.setVisibleBtnMark(true);
+//        videoBuilder.setDecoratedStage(true);
+//        Button btnPlay = new Button("PLAY");
+//        btnPlay.disableProperty().bind(Bindings.createBooleanBinding(() -> model.getSelectedVideos().size() != 1, model.getSelectedVideos()));
+//        btnPlay.setOnAction(e -> {
+//            JfxVideoStage vstage = videoBuilder.createStage();
+//            vstage.setWidth(800);
+//            vstage.setHeight(600);
+//            vstage.getPlayerConfig().setCloseRunnable(() -> showedVideoStages.remove(vstage));
+//            vstage.playVideo(model.toFxVideo(model.getSelectedVideos().get(0)));
+//            showedVideoStages.add(vstage);
+//        });
         ComboBox<VideoStagesPosition> combo = new ComboBox<>();
         combo.getItems().setAll(StagePosProvider.getVideoPosList());
         combo.setConverter(new StringConverter<VideoStagesPosition>() {
@@ -352,12 +379,12 @@ public class HomePane extends BorderPane implements Closeable {
         combo.getSelectionModel().selectFirst();
         Button btnDisplay = new Button("DISPLAY");
         btnDisplay.setOnAction(e -> {
-            List<FxVideo> fxVideos = JkStreams.map(model.getSelectedVideos(), model::getFxVideo);
+            List<FxVideo> fxVideos = model.toFxVideos(model.getSelectedVideos());
             PanesSelector.getInstance().displayMultiVideoPane(combo.getValue(), fxVideos);
         });
         HBox hboxDisplay = createHBox("centered spacing10", combo, btnDisplay);
 
-        bp.setLeft(createHBox("", btnPlay));
+//        bp.setLeft(createHBox("", btnPlay));
         bp.setCenter(hboxDisplay);
 
         return bp;
@@ -435,11 +462,11 @@ public class HomePane extends BorderPane implements Closeable {
 
         if(videos.size() == 1) {
             Video video = videos.get(0);
-            snapshots.addAll(JkStreams.map(video.getSnapTimes(), st -> model.getSnapshot(video, st)));
-        } else if(videos.size() < 11){
+            snapshots.addAll(model.getSnapshots(video));
+        } else if(videos.size() <= 10){
             videos.forEach(v -> {
-                List<JkDuration> stList = JkStruct.safeSublist(v.getSnapTimes(), 0, ncols);
-                snapshots.addAll(JkStreams.map(stList, st -> model.getSnapshot(v, st)));
+                List<FxSnapshot> stList = model.getSnapshots(v, ncols);
+                snapshots.addAll(stList);
                 int rem = ncols - stList.size();
                 for(int i = 0; i < rem; i++)    snapshots.add(null);
             });
@@ -492,7 +519,7 @@ public class HomePane extends BorderPane implements Closeable {
 
             RadioButton radioYes = new RadioButton("Y");
             RadioButton radioNo = new RadioButton("N");
-            RadioButton radioSkip = new RadioButton("Skip");
+            RadioButton radioSkip = new RadioButton("-");
 
             ToggleGroup tg = new ToggleGroup();
             tg.getToggles().addAll(radioYes, radioNo);

@@ -3,7 +3,6 @@
     -bgColorHover: -darkBlue;
     -fgColor: BLACK;
     -fgColorHover: WHITE;
-    /* the following heights are retrieved at runtime parsing this css file to auto resize the height */
     -headerHeight: 40;
     -rowHeight: 35;
 }

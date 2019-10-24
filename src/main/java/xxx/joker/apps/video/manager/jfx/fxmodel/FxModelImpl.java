@@ -5,7 +5,6 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableSet;
 import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
 import javafx.scene.media.Media;
@@ -21,7 +20,7 @@ import xxx.joker.libs.core.datetime.JkDuration;
 import xxx.joker.libs.core.files.JkEncryption;
 import xxx.joker.libs.core.files.JkFiles;
 import xxx.joker.libs.core.lambdas.JkStreams;
-import xxx.joker.libs.core.utils.JkStruct;
+import xxx.joker.libs.core.utils.JkConvert;
 import xxx.joker.libs.datalayer.entities.RepoResource;
 
 import java.nio.file.Path;
@@ -49,7 +48,7 @@ public class FxModelImpl implements FxModel {
         selectedVideos = FXCollections.observableArrayList(new ArrayList<>());
 
         // for some reason, sometimes when a video is added, the length and the formats are not computed, so I check at start
-        JkStreams.filterMap(videos, v -> v.getLength() == null, this::getFxVideo)
+        JkStreams.filterMap(videos, v -> v.getLength() == null, this::toFxVideo)
                 .forEach(this::readVideoLengthWidthHeight);
 
         videos.addListener((ListChangeListener<? super Video>) lc -> {
@@ -70,13 +69,11 @@ public class FxModelImpl implements FxModel {
             });
             List<Video> toDel = JkStreams.filter(selectedVideos, v -> !videos.contains(v));
             selectedVideos.removeAll(toDel);
-//            persistData();
         });
 
         categories.addListener((ListChangeListener<? super Category>) lc -> {
             JkStreams.filter(categories, c -> !repo.getCategories().contains(c)).forEach(repo::add);
             JkStreams.filter(repo.getCategories(), c -> !categories.contains(c)).forEach(repo::remove);
-//            persistData();
         });
     }
 
@@ -101,13 +98,18 @@ public class FxModelImpl implements FxModel {
     }
 
     @Override
-    public FxVideo getFxVideo(Video video) {
-        return new FxVideo(video, getVideoFile(video));
+    public FxVideo toFxVideo(Video video) {
+        Path videoPath = repo.getVideoResource(video).getPath();
+        return new FxVideo(video, videoPath);
     }
 
     @Override
-    public Path getVideoFile(Video video) {
-        return repo.getVideoResource(video).getPath();
+    public List<FxVideo> toFxVideos(Collection<Video> videos) {
+        Map<Video, RepoResource> resList = repo.getVideoResources(videos);
+        return JkStreams.mapSort(resList.entrySet(),
+                e -> new FxVideo(e.getKey(), e.getValue().getPath()),
+                Comparator.comparing(fxv -> fxv.getVideo().getTitle().toLowerCase())
+        );
     }
 
     @Override
@@ -126,13 +128,27 @@ public class FxModelImpl implements FxModel {
     }
 
     @Override
-    public FxSnapshot getSnapshot(Video video, JkDuration snapTime) {
-        RepoResource res = repo.getSnapshotResource(video, snapTime);
-        FxSnapshot snap = new FxSnapshot();
-        snap.setPath(res.getPath());
-        snap.setImage(new Image(JkFiles.toURL(res.getPath())));
-        snap.setTime(snapTime);
-        return snap;
+    public List<FxSnapshot> getSnapshots(Video video) {
+        return getSnapshots(video, -1);
+    }
+
+    @Override
+    public List<FxSnapshot> getSnapshots(Video video, int numSnaps) {
+        List<RepoResource> resList = repo.getSnapshotResources(video);
+        List<FxSnapshot> toRet = JkStreams.mapSort(resList, r -> {
+            FxSnapshot fxSnapshot = new FxSnapshot();
+            fxSnapshot.setPath(r.getPath());
+            fxSnapshot.setImage(new Image(JkFiles.toURL(r.getPath())));
+            fxSnapshot.setTime(JkDuration.of(JkConvert.toLong(r.getName())));
+            return fxSnapshot;
+        });
+
+        if(numSnaps != -1) {
+            int end = Math.min(numSnaps, resList.size());
+            return toRet.subList(0, end);
+        } else {
+            return toRet;
+        }
     }
 
     @Override
@@ -145,6 +161,12 @@ public class FxModelImpl implements FxModel {
     public void removeSnapshot(Video video, JkDuration snapTime) {
         RepoResource res = repo.getSnapshotResource(video, snapTime);
         repo.removeResource(res);
+    }
+
+    @Override
+    public void removeSnapshots(Video video) {
+        List<RepoResource> resList = repo.getSnapshotResources(video);
+        repo.removeAll(resList);
     }
 
     @Override

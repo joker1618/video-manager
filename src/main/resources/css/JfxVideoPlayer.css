@@ -51,6 +51,7 @@
 /* Video Player */
 .mediaViewPane {
     -fx-background-color: -bg-color;
+    -fx-min-height: 100;
 }
 
 /* Media bottom bar */

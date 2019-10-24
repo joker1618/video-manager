@@ -65,7 +65,7 @@
 .paneDetails .jfxGridBox {
     -fx-alignment: BOTTOM-LEFT;
     -fx-hgap: 10;
-    -fx-vgap: 10;
+    -fx-vgap: 5;
 }
 .paneDetails .jfxGridBox .label {
     -fx-font-weight: BOLD;
@@ -82,12 +82,18 @@
 }
 .centerBox .buttonsPane .button {
     -fx-font-weight: BOLD;
-    -fx-font-size: 15;
+    -fx-font-size: 14;
     -fx-min-width: 110;
     -fx-min-height: 40;
     -fx-wrap-text: true;
     -fx-text-alignment: CENTER;
     -fx-padding: 0;
+}
+.centerBox .buttonsPane.smallBtn .button,
+.centerBox .buttonsPane .button.smallBtn {
+    -fx-font-size: 13;
+    -fx-min-width: 90;
+    -fx-min-height: 30;
 }
 .centerBox .table-view {
     -fx-font-size: 14;

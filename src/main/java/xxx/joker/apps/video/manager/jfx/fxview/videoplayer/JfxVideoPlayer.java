@@ -112,6 +112,10 @@ public class JfxVideoPlayer extends BorderPane {
 		}
 	}
 
+	public void seek(long milli) {
+		mediaView.getMediaPlayer().seek(Duration.millis(milli));
+	}
+
 	public void closePlayer() {
 		MediaPlayer mediaPlayer = mediaView.getMediaPlayer();
 		if(mediaPlayer.getStatus() != MediaPlayer.Status.DISPOSED) {

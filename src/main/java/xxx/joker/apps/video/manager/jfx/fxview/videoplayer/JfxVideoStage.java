@@ -1,5 +1,6 @@
 package xxx.joker.apps.video.manager.jfx.fxview.videoplayer;
 
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -16,12 +17,9 @@ public class JfxVideoStage extends Stage {
 
 	private static Logger logger = LoggerFactory.getLogger(JfxVideoStage.class);
 
-	private JfxVideoPlayer videoPlayer;
+	private SimpleObjectProperty<JfxVideoPlayer> videoPlayer = new SimpleObjectProperty<>();
 	private PlayerConfig playerConfig;
 
-//	protected JfxVideoStage(PlayerConfig config) {
-//		this(config, null, null);
-//	}
 	protected JfxVideoStage(PlayerConfig config) {
 		this.playerConfig = config.cloneConfigs();
 
@@ -46,18 +44,22 @@ public class JfxVideoStage extends Stage {
 	}
 
 	public JfxVideoPlayer getVideoPlayer() {
+		return videoPlayer.get();
+	}
+
+	public SimpleObjectProperty<JfxVideoPlayer> videoPlayerProperty() {
 		return videoPlayer;
 	}
 
 	public void playVideo(FxVideo video) {
 		if(isShowing()) {
-			playerConfig = videoPlayer.getPlayerConfig();
-			videoPlayer.closePlayer();
+			playerConfig = getVideoPlayer().getPlayerConfig();
+			getVideoPlayer().closePlayer();
 		}
 
-		videoPlayer = new JfxVideoPlayer(video, playerConfig);
+		JfxVideoPlayer vplayer = new JfxVideoPlayer(video, playerConfig);
 
-		getScene().setRoot(videoPlayer);
+		getScene().setRoot(vplayer);
 		setTitle(video.getVideo().getTitle());
 
 		if(!isShowing()) {
@@ -67,15 +69,18 @@ public class JfxVideoStage extends Stage {
 			}
 		}
 
-		videoPlayer.play();
+		vplayer.play();
+		videoPlayer.set(vplayer);
 	}
 
 	@Override
 	public void close() {
 		if (isShowing()) {
-			videoPlayer.closePlayer();
-			logger.trace("closed video stage");
+			if(getVideoPlayer() != null) {
+				getVideoPlayer().closePlayer();
+			}
 			super.close();
+			logger.trace("closed video stage");
 		}
 	}
 }

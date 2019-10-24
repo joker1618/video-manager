@@ -1,12 +1,14 @@
 package xxx.joker.apps.video.manager.datalayer.entities;
 
 
+import xxx.joker.libs.datalayer.design.EntityPK;
 import xxx.joker.libs.datalayer.design.RepoEntity;
-import xxx.joker.libs.datalayer.design.RepoField;
+import xxx.joker.libs.datalayer.design.EntityField;
 
 public class Category extends RepoEntity {
 
-    @RepoField
+    @EntityPK
+    @EntityField
     private String name;
 
     public Category() {
@@ -24,9 +26,5 @@ public class Category extends RepoEntity {
         this.name = name;
     }
 
-    @Override
-    public String getPrimaryKey() {
-        return name.toLowerCase();
-    }
 
 }

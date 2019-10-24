@@ -6,6 +6,8 @@ import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.libs.core.datetime.JkDuration;
 
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
 
 public interface FxModel {
 
@@ -18,13 +20,16 @@ public interface FxModel {
 
     ObservableList<Video> getSelectedVideos();
 
-    FxVideo getFxVideo(Video video);
-    Path getVideoFile(Video video);
+    FxVideo toFxVideo(Video video);
+    List<FxVideo> toFxVideos(Collection<Video> videos);
     FxVideo addVideoFile(Path videoPath);
 
-    FxSnapshot getSnapshot(Video video, JkDuration snapTime);
+    List<FxSnapshot> getSnapshots(Video video);
+    List<FxSnapshot> getSnapshots(Video video, int numSnaps);
     void addSnapshot(Video video, JkDuration snapTime, Path snapPath);
     void removeSnapshot(Video video, JkDuration snapTime);
+    void removeSnapshots(Video video);
 
     void persistData();
+
 }

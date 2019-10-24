@@ -1,8 +1,9 @@
 package xxx.joker.apps.video.manager.datalayer.entities;
 
 import xxx.joker.libs.core.datetime.JkDuration;
+import xxx.joker.libs.datalayer.design.EntityPK;
 import xxx.joker.libs.datalayer.design.RepoEntity;
-import xxx.joker.libs.datalayer.design.RepoField;
+import xxx.joker.libs.datalayer.design.EntityField;
 
 import java.util.Collection;
 import java.util.Set;
@@ -10,23 +11,24 @@ import java.util.TreeSet;
 
 public class Video extends RepoEntity {
 
-    @RepoField
+    @EntityField
     private String title;
-    @RepoField
+    @EntityPK
+    @EntityField
     private String md5;
-    @RepoField
+    @EntityField
     private long size;
-    @RepoField
+    @EntityField
     private int width;
-    @RepoField
+    @EntityField
     private int height;
-    @RepoField
+    @EntityField
     private JkDuration length;
-    @RepoField
+    @EntityField
     private Set<Category> categories;
-    @RepoField
+    @EntityField
     private Set<JkDuration> snapTimes;
-    @RepoField
+    @EntityField
     private boolean marked;
 
 
@@ -108,11 +110,6 @@ public class Video extends RepoEntity {
 
     public void setMarked(boolean marked) {
         this.marked = marked;
-    }
-
-    @Override
-    public String getPrimaryKey() {
-        return md5;
     }
 
 }

@@ -5,7 +5,7 @@ import xxx.joker.libs.core.datetime.JkDuration;
 
 import java.nio.file.Path;
 
-public class FxSnapshot {
+public class FxSnapshot implements Comparable<FxSnapshot> {
 
     private Path path;
     private Image image;
@@ -36,5 +36,10 @@ public class FxSnapshot {
 
     public void setTime(JkDuration time) {
         this.time = time;
+    }
+
+    @Override
+    public int compareTo(FxSnapshot o) {
+        return time.compareTo(o.time);
     }
 }

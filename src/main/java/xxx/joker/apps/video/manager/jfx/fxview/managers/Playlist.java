@@ -3,6 +3,7 @@ package xxx.joker.apps.video.manager.jfx.fxview.managers;
 import xxx.joker.apps.video.manager.jfx.fxmodel.FxVideo;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 public class Playlist {
 
@@ -15,7 +16,7 @@ public class Playlist {
     public Playlist(List<FxVideo> videoList) {
         this.videoList = videoList;
         this.random = new Random(System.currentTimeMillis());
-        this.toPlay = new ArrayList<>(videoList);
+        this.toPlay = new ArrayList<>();
         this.playHistoryList = new ArrayList<>();
         this.playHistory = new HashMap<>();
     }
@@ -28,6 +29,11 @@ public class Playlist {
         FxVideo fxVideo = toPlay.remove(index);
         playHistoryList.add(fxVideo);
         return fxVideo;
+    }
+
+    public synchronized void removeVideos(Predicate<FxVideo> removeCond) {
+        videoList.removeIf(removeCond);
+        toPlay.removeIf(v -> !videoList.contains(v));
     }
 
     public synchronized FxVideo nextVideo(Integer stageId) {

@@ -50,7 +50,7 @@ public class CutVideoPane extends BorderPane implements Closeable {
     private JfxVideoPlayer videoPlayer;
 
     public CutVideoPane(Video video) {
-        FxVideo fxVideo = model.getFxVideo(video);
+        FxVideo fxVideo = model.toFxVideo(video);
 
         setCenter(createCenterPane(fxVideo));
         setRight(createRightPane());
@@ -125,7 +125,8 @@ public class CutVideoPane extends BorderPane implements Closeable {
         });
 
         btnSplit.disableProperty().bind(Bindings.createBooleanBinding(() -> seekPoints.isEmpty() || (seekPoints.size() % 2 != 0 && !btnStartEnd.isDisable()), seekPoints));
-        String defaultCustomCategory = "splitted";
+        String origSplittedCategory = "splitted";
+        String defaultCustomCategory = "reduced";
         btnSplit.setOnAction(e -> {
             try {
                 if (!seekPoints.isEmpty() && !(seekPoints.size() % 2 != 0 && !btnStartEnd.isDisable())) {
@@ -148,6 +149,13 @@ public class CutVideoPane extends BorderPane implements Closeable {
                     });
 
                     cutVideo(btnStartEnd.isDisable(), seekPoints, cats);
+
+                    Category customCat = JkStreams.findUnique(model.getCategories(), cat -> cat.getName().equals(origSplittedCategory));
+                    if (customCat == null) {
+                        customCat = new Category(origSplittedCategory);
+                        model.getCategories().add(customCat);
+                    }
+                    videoPlayer.getFxVideo().getVideo().getCategories().add(customCat);
                 }
 
             } catch (Throwable t) {

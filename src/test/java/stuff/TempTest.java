@@ -14,7 +14,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.TreeSet;
 
 import static xxx.joker.libs.core.utils.JkConsole.display;
 import static xxx.joker.libs.core.utils.JkStrings.strf;
@@ -69,8 +71,14 @@ public class TempTest {
 
     @Test
     public void test2() throws IOException {
-        Path exePath = Paths.get("lib/ffmpeg.exe");
-        display(Files.exists(exePath));
+        List<Integer> l1 = Arrays.asList(1, 2, 3, 4);
+        List<Integer> l2 = Arrays.asList(1, 2, 3, 4);
+        List<Integer> l3 = Arrays.asList(2, 4, 3, 1);
+        TreeSet<Integer> set1 = new TreeSet<>(l1);
+        TreeSet<Integer> set3 = new TreeSet<>(l3);
+        display("set {}", set1.equals(set3));
+        display("l12 {}", l1.equals(l2));
+        display("l13 {}", l1.equals(l3));
     }
 
 

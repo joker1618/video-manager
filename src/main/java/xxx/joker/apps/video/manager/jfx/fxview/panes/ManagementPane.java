@@ -186,16 +186,15 @@ public class ManagementPane extends BorderPane implements Closeable {
         HBox hboxChangeTitle = createHBox("subBox titleBox", new Label("Video title:"), txtTitle, btnChangeTitle);
 
         Button btnAutoSnap = new Button("AUTOSNAP");
-        btnAutoSnap.setOnAction(e -> manageAutoSnap(Collections.singletonList(showingPlayer.get().getFxVideo().getVideo())));
+        btnAutoSnap.setOnAction(e -> manageAutoSnap(showingPlayer.get().getFxVideo().getVideo()));
         btnAutoSnap.disableProperty().bind(showingPlayer.isNull());
 
         Button btnClearSnaps = new Button("CLEAR SNAPS");
         btnClearSnaps.disableProperty().bind(showingPlayer.isNull());
         btnClearSnaps.setOnAction(e -> {
             Video v = showingPlayer.get().getFxVideo().getVideo();
-            v.getSnapTimes().forEach(st -> model.removeSnapshot(v, st));
+            model.removeSnapshots(v);
             v.getSnapTimes().clear();
-//            model.persistData();
             updateSnapshotsPane();
         });
         Button btnDelete = new Button("DELETE");
@@ -267,11 +266,12 @@ public class ManagementPane extends BorderPane implements Closeable {
             int counter = 0;
             double width = 160;
             double height = width / 1.33;
+            List<FxSnapshot> snaps = model.getSnapshots(video);
             for(int row = 0; counter < obsSnapList.size(); row++) {
                 for(int col = 0; col < numCols && counter < obsSnapList.size(); col++, counter++) {
-                    int index = row * numCols + col;
-                    JkDuration dur = obsSnapList.get(index);
-                    FxSnapshot snap = model.getSnapshot(video, dur);
+//                    int index = row * numCols + col;
+                    JkDuration dur = obsSnapList.get(counter);
+                    FxSnapshot snap = snaps.get(counter);
                     ImageView ivSnap = createImageView(snap.getImage(), width, height);
                     ivSnap.setOnMouseClicked(e -> showingPlayer.get().getMediaView().getMediaPlayer().seek(Duration.millis(dur.toMillis())));
                     HBox ivbox = new HBox(ivSnap);
@@ -329,7 +329,7 @@ public class ManagementPane extends BorderPane implements Closeable {
         }
         if(newIndex >= 0 && newIndex < videos.size()) {
             Video video = JkStreams.filter(model.getVideos(), v -> videos.get(newIndex).getTitle().equals(v.getTitle())).get(0);
-            FxVideo FxVideo = model.getFxVideo(video);
+            FxVideo FxVideo = model.toFxVideo(video);
             JfxVideoPlayer vp = vpBuilder.createPane(FxVideo);
             vp.play();
             showingPlayer.setValue(vp);
@@ -412,7 +412,7 @@ public class ManagementPane extends BorderPane implements Closeable {
         }
     }
     
-    private void manageAutoSnap(Collection<Video> videos) {
+    private void manageAutoSnap(Video video) {
         AtomicBoolean doPlay = new AtomicBoolean(false);
         SimpleObjectProperty<MediaPlayer> mp = new SimpleObjectProperty<>();
         if(showingPlayer.get() != null) {
@@ -420,7 +420,7 @@ public class ManagementPane extends BorderPane implements Closeable {
             doPlay.set(mp.get().getStatus() == MediaPlayer.Status.PLAYING);
         }
         if(doPlay.get())  mp.get().pause();
-        SimpleBooleanProperty finished = new SnapshotManager().runAutoSnap(videos);
+        SimpleBooleanProperty finished = new SnapshotManager().runAutoSnap(Collections.singletonList(video));
         if(finished != null) {
             finished.addListener((obs,o,n) -> {
                 if(n) {
