@@ -1,6 +1,7 @@
 package xxx.joker.apps.video.manager.datalayer;
 
 import xxx.joker.apps.video.manager.datalayer.entities.Category;
+import xxx.joker.apps.video.manager.datalayer.entities.AddedFile;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.libs.core.datetime.JkDuration;
 import xxx.joker.libs.datalayer.JkRepo;
@@ -20,6 +21,7 @@ public interface VideoRepo extends JkRepo {
 
     Set<Video> getVideos();
     Set<Category> getCategories();
+    Set<AddedFile> getAddedFiles();
 
     RepoResource getVideoResource(Video video);
     Map<Video, RepoResource> getVideoResources(Collection<Video> videos);

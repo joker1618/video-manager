@@ -587,17 +587,24 @@ public class HomePane extends BorderPane implements Closeable {
     }
 
     private void addNewVideos(List<Path> pathList) {
-        Dialog dlg = new Dialog();
-        dlg.getDialogPane().getButtonTypes().clear();
-        dlg.setTitle(null);
-        dlg.setHeaderText(null);
-        dlg.setContentText(strf("Analyzing {} files", pathList.size()));
-        dlg.show();
+        Dialog<ButtonType> dlgForceAdd = new Dialog<>();
+        dlgForceAdd.getDialogPane().getButtonTypes().add(ButtonType.YES);
+        dlgForceAdd.getDialogPane().getButtonTypes().add(ButtonType.NO);
+        dlgForceAdd.setHeaderText("Add files previously deleted?");
+        Optional<ButtonType> bt = dlgForceAdd.showAndWait();
+        boolean forceAdd = bt.isPresent() && bt.get() == ButtonType.YES;
 
-        pathList.forEach(model::addVideoFile);
+        Dialog dlgWait = new Dialog();
+        dlgWait.getDialogPane().getButtonTypes().clear();
+        dlgWait.setTitle(null);
+        dlgWait.setHeaderText(null);
+        dlgWait.setContentText(strf("Analyzing {} files", pathList.size()));
+        dlgWait.show();
 
-        dlg.getDialogPane().getButtonTypes().add(ButtonType.OK);
-        dlg.close();
+        pathList.forEach(p -> model.addVideoFile(p, !forceAdd));
+
+        dlgWait.getDialogPane().getButtonTypes().add(ButtonType.OK);
+        dlgWait.close();
     }
 
     @Override

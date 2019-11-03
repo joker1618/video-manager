@@ -194,7 +194,7 @@ public class CutVideoPane extends BorderPane implements Closeable {
             } else {
                 finalPath = cutList.get(0);
             }
-            FxVideo added = model.addVideoFile(finalPath);
+            FxVideo added = model.addVideoFile(finalPath, false);
             if(added != null) {
                 added.getVideo().setTitle(fxVideo.getVideo().getTitle()+"_cut");
                 added.getVideo().getCategories().addAll(cats);
@@ -216,7 +216,7 @@ public class CutVideoPane extends BorderPane implements Closeable {
             }
             AtomicInteger index = new AtomicInteger(0);
             finalPaths.forEach(fp -> {
-                FxVideo added = model.addVideoFile(fp);
+                FxVideo added = model.addVideoFile(fp, false);
                 if(added != null) {
                     added.getVideo().setTitle(strf("%s.%02d_cut", fxVideo.getVideo().getTitle(), index.getAndIncrement()));
                     added.getVideo().getCategories().addAll(cats);

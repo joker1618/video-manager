@@ -14,7 +14,6 @@ public class Video extends RepoEntity {
     @EntityField
     private String title;
     @EntityPK
-    @EntityField
     private String md5;
     @EntityField
     private long size;

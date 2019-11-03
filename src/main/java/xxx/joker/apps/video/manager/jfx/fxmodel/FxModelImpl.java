@@ -13,6 +13,7 @@ import javafx.scene.media.MediaView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.datalayer.VideoRepo;
+import xxx.joker.apps.video.manager.datalayer.entities.AddedFile;
 import xxx.joker.apps.video.manager.datalayer.entities.Category;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.apps.video.manager.jfx.fxview.PanesSelector;
@@ -113,18 +114,28 @@ public class FxModelImpl implements FxModel {
     }
 
     @Override
-    public FxVideo addVideoFile(Path videoPath) {
+    public FxVideo addVideoFile(Path videoPath, boolean skipIfPreviouslyAdded) {
         Video video = createFromPath(videoPath);
         if(videos.contains(video)) {
             LOG.info("Skip add for video {}: already exists", videoPath);
             return null;
         }
+
+        Set<AddedFile> addedFiles = repo.getAddedFiles();
+        AddedFile af = new AddedFile(video.getMd5());
+        if(skipIfPreviouslyAdded && addedFiles.contains(af)) {
+            LOG.info("Skip add for video {}: previously added and deleted", videoPath);
+            return null;
+        }
+
         FxVideo fxVideo = new FxVideo(video, videoPath);
         repo.addVideoResource(video, videoPath);
+        addedFiles.add(af);
         SimpleBooleanProperty finished = readVideoLengthWidthHeight(fxVideo);
         videos.add(video);
         finished.addListener((obs,o,n) -> LOG.info("New video added {}", videoPath));
         return fxVideo;
+
     }
 
     @Override

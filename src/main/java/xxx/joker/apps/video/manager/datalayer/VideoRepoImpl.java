@@ -1,6 +1,7 @@
 package xxx.joker.apps.video.manager.datalayer;
 
 import xxx.joker.apps.video.manager.common.Config;
+import xxx.joker.apps.video.manager.datalayer.entities.AddedFile;
 import xxx.joker.apps.video.manager.datalayer.entities.Category;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.libs.core.datetime.JkDuration;
@@ -34,6 +35,11 @@ public class VideoRepoImpl extends JkRepoFile implements VideoRepo {
     @Override
     public Set<Category> getCategories() {
         return getDataSet(Category.class);
+    }
+
+    @Override
+    public Set<AddedFile> getAddedFiles() {
+        return getDataSet(AddedFile.class);
     }
 
     @Override
