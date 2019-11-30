@@ -1,6 +1,5 @@
-package xxx.joker.apps.video.manager.jfx.fxview.panes;
+package xxx.joker.apps.video.manager.jfx.view.panes;
 
-import javafx.beans.InvalidationListener;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.Button;
@@ -12,17 +11,14 @@ import javafx.util.Duration;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xxx.joker.apps.video.manager.jfx.fxmodel.FxVideo;
-import xxx.joker.apps.video.manager.jfx.fxview.PanesSelector;
-import xxx.joker.apps.video.manager.jfx.fxview.managers.Playlist;
-import xxx.joker.apps.video.manager.jfx.fxview.videoplayer.JfxVideoBuilder;
-import xxx.joker.apps.video.manager.jfx.fxview.videoplayer.JfxVideoPlayer;
-import xxx.joker.apps.video.manager.jfx.fxview.videoplayer.JfxVideoStage;
+import xxx.joker.apps.video.manager.jfx.model.FxVideo;
+import xxx.joker.apps.video.manager.jfx.view.PanesSelector;
+import xxx.joker.apps.video.manager.jfx.view.managers.Playlist;
+import xxx.joker.apps.video.manager.jfx.view.videoplayer.JfxVideoBuilder;
+import xxx.joker.apps.video.manager.jfx.view.videoplayer.JfxVideoPlayer;
+import xxx.joker.apps.video.manager.jfx.view.videoplayer.JfxVideoStage;
 import xxx.joker.apps.video.manager.provider.VideoStagesPosition;
-import xxx.joker.libs.core.datetime.JkDuration;
-import xxx.joker.libs.core.datetime.JkTimer;
-import xxx.joker.libs.core.lambdas.JkStreams;
-import xxx.joker.libs.core.tests.JkTests;
+import xxx.joker.libs.core.lambda.JkStreams;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package xxx.joker.apps.video.manager.jfx.fxview.panes;
+package xxx.joker.apps.video.manager.jfx.view.panes;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -24,22 +24,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.datalayer.entities.Category;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
-import xxx.joker.apps.video.manager.jfx.fxmodel.FxModel;
-import xxx.joker.apps.video.manager.jfx.fxmodel.FxSnapshot;
-import xxx.joker.apps.video.manager.jfx.fxmodel.FxVideo;
-import xxx.joker.apps.video.manager.jfx.fxview.gridpane.GridPaneBuilder;
-import xxx.joker.apps.video.manager.jfx.fxview.managers.SnapshotManager;
-import xxx.joker.apps.video.manager.jfx.fxview.provider.IconProvider;
-import xxx.joker.apps.video.manager.jfx.fxview.videoplayer.JfxVideoBuilder;
-import xxx.joker.apps.video.manager.jfx.fxview.videoplayer.JfxVideoPlayer;
+import xxx.joker.apps.video.manager.jfx.model.FxModel;
+import xxx.joker.apps.video.manager.jfx.model.FxSnapshot;
+import xxx.joker.apps.video.manager.jfx.model.FxVideo;
+import xxx.joker.apps.video.manager.jfx.view.gridpane.GridPaneBuilder;
+import xxx.joker.apps.video.manager.jfx.view.managers.SnapshotManager;
+import xxx.joker.apps.video.manager.jfx.view.provider.IconProvider;
+import xxx.joker.apps.video.manager.jfx.view.videoplayer.JfxVideoBuilder;
+import xxx.joker.apps.video.manager.jfx.view.videoplayer.JfxVideoPlayer;
 import xxx.joker.libs.core.datetime.JkDuration;
-import xxx.joker.libs.core.lambdas.JkStreams;
+import xxx.joker.libs.core.lambda.JkStreams;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static xxx.joker.libs.core.javafx.JfxControls.*;
-import static xxx.joker.libs.core.utils.JkStrings.strf;
+import static xxx.joker.libs.core.util.JkStrings.strf;
 
 public class ManagementPane extends BorderPane implements Closeable {
 
@@ -182,7 +182,10 @@ public class ManagementPane extends BorderPane implements Closeable {
                 () -> StringUtils.isBlank(txtTitle.getText()) || txtTitle.getText().trim().equals(showingPlayer.get() == null ? "" : showingPlayer.get().getFxVideo().getVideo().getTitle()),
                 txtTitle.textProperty()
         ));
-        btnChangeTitle.setOnAction(e -> changeVideoTitle(txtTitle.getText().trim()));
+        btnChangeTitle.setOnAction(e -> {
+            String newTitle = changeVideoTitle(txtTitle.getText().trim());
+            txtTitle.setText(newTitle);
+        });
         HBox hboxChangeTitle = createHBox("subBox titleBox", new Label("Video title:"), txtTitle, btnChangeTitle);
 
         Button btnAutoSnap = new Button("AUTOSNAP");
@@ -231,15 +234,18 @@ public class ManagementPane extends BorderPane implements Closeable {
 
         return bp;
     }
-    private void changeVideoTitle(String newVideoTitle) {
+    private String changeVideoTitle(String newVideoTitle) {
         JfxVideoPlayer vp = showingPlayer.get();
         String oldTitle = vp.getFxVideo().getVideo().getTitle();
         if(!newVideoTitle.equals(oldTitle)) {
-            vp.getFxVideo().getVideo().setTitle(newVideoTitle);
+            String finalTitle = model.computeSafeTitle(newVideoTitle);
+            vp.getFxVideo().getVideo().setTitle(finalTitle);
             vp.setPlayerCaption(newVideoTitle);
             videoListView.refresh();
             LOG.info("Changed title from [{}] to [{}]", oldTitle, newVideoTitle);
+            return finalTitle;
         }
+        return oldTitle;
     }
 
     private void updateSnapshotsPane() {

@@ -7,15 +7,15 @@ import xxx.joker.apps.video.manager.common.Config;
 import xxx.joker.libs.core.adapter.JkProcess;
 import xxx.joker.libs.core.datetime.JkDuration;
 import xxx.joker.libs.core.exception.JkRuntimeException;
-import xxx.joker.libs.core.files.JkFiles;
-import xxx.joker.libs.core.lambdas.JkStreams;
+import xxx.joker.libs.core.file.JkFiles;
+import xxx.joker.libs.core.lambda.JkStreams;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import static xxx.joker.libs.core.utils.JkStrings.strf;
+import static xxx.joker.libs.core.util.JkStrings.strf;
 
 public class FFMPEGAdapter {
 
@@ -38,8 +38,8 @@ public class FFMPEGAdapter {
 
     public static Path cutVideo(Path videoPath, double startMilli, double lengthMilli) {
         Path outPath = JkFiles.safePath(videoPath);
-        String ss = JkDuration.toStringElapsed((long)startMilli, ChronoUnit.HOURS);
-        String tt = JkDuration.toStringElapsed((long)lengthMilli, ChronoUnit.HOURS);
+        String ss = JkDuration.strElapsed((long)startMilli, ChronoUnit.HOURS);
+        String tt = JkDuration.strElapsed((long)lengthMilli, ChronoUnit.HOURS);
         String cmd = strf("{} -ss {} -t {} -i {} -acodec copy -vcodec copy {}",
                 Config.FFMPEG_EXE_PATH,
                 ss, tt,

@@ -1,13 +1,13 @@
-package xxx.joker.apps.video.manager.jfx.fxview;
+package xxx.joker.apps.video.manager.jfx.view;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
-import xxx.joker.apps.video.manager.jfx.fxmodel.FxModel;
-import xxx.joker.apps.video.manager.jfx.fxmodel.FxVideo;
-import xxx.joker.apps.video.manager.jfx.fxview.panes.*;
+import xxx.joker.apps.video.manager.jfx.model.FxModel;
+import xxx.joker.apps.video.manager.jfx.model.FxVideo;
+import xxx.joker.apps.video.manager.jfx.view.panes.*;
 import xxx.joker.apps.video.manager.provider.VideoStagesPosition;
 
 import java.util.List;

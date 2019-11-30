@@ -2,22 +2,22 @@ package xxx.joker.apps.video.manager.common;
 
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.libs.core.datetime.JkDuration;
-import xxx.joker.libs.core.runtimes.JkEnvironment;
-import xxx.joker.libs.core.runtimes.JkRuntime;
+import xxx.joker.libs.core.runtime.JkEnvironment;
+import xxx.joker.libs.core.runtime.JkRuntime;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static xxx.joker.libs.core.utils.JkStrings.strf;
+import static xxx.joker.libs.core.util.JkStrings.strf;
 
 public class Config {
 
-    public static final Path BASE_FOLDER;
-    static {
-        String baseFolderName = JkRuntime.isRunFromJar(Config.class) ? "video-manager" : "video-manager-IDE";
-        BASE_FOLDER = JkEnvironment.getAppsFolder().resolve(baseFolderName);
-    }
-//    public static final Path BASE_FOLDER = JkEnvironment.getAppsFolder().resolve("video-manager");
+//    public static final Path BASE_FOLDER;
+//    static {
+//        String baseFolderName = JkRuntime.isRunFromJar(Config.class) ? "video-manager-v3" : "video-manager-v3-IDE";
+//        BASE_FOLDER = JkEnvironment.getAppsFolder().resolve(baseFolderName);
+//    }
+    public static final Path BASE_FOLDER = JkEnvironment.getAppsFolder().resolve("video-manager-v3");
 
     public static final Path REPO_FOLDER = BASE_FOLDER.resolve("repo");
     public static final String DB_NAME = "vm";

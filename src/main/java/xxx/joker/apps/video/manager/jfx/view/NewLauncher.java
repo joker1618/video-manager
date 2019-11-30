@@ -1,4 +1,4 @@
-package xxx.joker.apps.video.manager.jfx.fxview;
+package xxx.joker.apps.video.manager.jfx.view;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -9,8 +9,8 @@ import org.scenicview.ScenicView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.common.Config;
-import xxx.joker.apps.video.manager.jfx.fxmodel.FxModel;
-import xxx.joker.libs.core.files.JkFiles;
+import xxx.joker.apps.video.manager.jfx.model.FxModel;
+import xxx.joker.libs.core.file.JkFiles;
 
 public class NewLauncher extends Application {
 
@@ -32,7 +32,6 @@ public class NewLauncher extends Application {
         panesSel.setScene(scene);
         panesSel.displayHomePane();
 
-        // Show stage
         primaryStage.setScene(scene);
         primaryStage.setMaximized(true);
         primaryStage.show();
@@ -52,6 +51,7 @@ public class NewLauncher extends Application {
         });
     }
 
+        // Show stage
     @Override
     public void stop() throws Exception {
         panesSel.getHomePane().closePane();

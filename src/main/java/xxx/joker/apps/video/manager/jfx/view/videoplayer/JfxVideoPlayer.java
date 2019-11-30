@@ -1,9 +1,8 @@
-package xxx.joker.apps.video.manager.jfx.fxview.videoplayer;
+package xxx.joker.apps.video.manager.jfx.view.videoplayer;
 
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -27,11 +26,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.common.Config;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
-import xxx.joker.apps.video.manager.jfx.fxmodel.FxVideo;
-import xxx.joker.apps.video.manager.jfx.fxview.managers.SnapshotManager;
-import xxx.joker.apps.video.manager.jfx.fxview.provider.IconProvider;
+import xxx.joker.apps.video.manager.jfx.model.FxVideo;
+import xxx.joker.apps.video.manager.jfx.view.managers.SnapshotManager;
+import xxx.joker.apps.video.manager.jfx.view.provider.IconProvider;
 import xxx.joker.libs.core.datetime.JkDuration;
-import xxx.joker.libs.core.files.JkFiles;
+import xxx.joker.libs.core.file.JkFiles;
 import xxx.joker.libs.core.javafx.JfxUtil;
 
 import java.nio.file.Path;
@@ -232,7 +231,7 @@ public class JfxVideoPlayer extends BorderPane {
 		JfxUtil.takeSnapshot(mediaView, snapPath);
 		mediaView.setFitWidth(fw);
 		mediaView.setFitHeight(fh);
-		logger.info("Snapshot taken at {} for {}", snapTime.toStringElapsed(true), fxVideo.getVideo().getTitle());
+		logger.info("Snapshot taken at {} for {}", snapTime.strElapsed(true), fxVideo.getVideo().getTitle());
 		if(playing) {
 			mediaView.getMediaPlayer().play();
 		}
@@ -345,13 +344,13 @@ public class JfxVideoPlayer extends BorderPane {
 		lblTotalTime.getStyleClass().add("center-left");
 		Video video = fxVideo.getVideo();
 		if(video.getLength() != null) {
-			lblTotalTime.setText(video.getLength().toStringElapsed(false, ChronoUnit.MINUTES));
+			lblTotalTime.setText(video.getLength().strElapsed(false, ChronoUnit.MINUTES));
 		} else {
 			ReadOnlyObjectProperty<Duration> totTimeProp = mediaView.getMediaPlayer().totalDurationProperty();
 			ChangeListener<Duration> totEvent = (obs, o, n) -> {
 				if(n != null && n.toMillis() > 0 && video.getLength() == null) {
 					video.setLength(JkDuration.of(n));
-					lblTotalTime.setText(video.getLength().toStringElapsed(false, ChronoUnit.MINUTES));
+					lblTotalTime.setText(video.getLength().strElapsed(false, ChronoUnit.MINUTES));
 				}
 			};
 			totTimeProp.addListener(totEvent);
@@ -562,7 +561,7 @@ public class JfxVideoPlayer extends BorderPane {
 					Duration currentTime = mediaPlayer.getCurrentTime();
 					Duration totTime = mediaPlayer.getTotalDuration();
                     JkDuration of = JkDuration.of((long) currentTime.toMillis());
-                    lblActualTime.setText(of.toStringElapsed(false, ChronoUnit.MINUTES));
+                    lblActualTime.setText(of.strElapsed(false, ChronoUnit.MINUTES));
                     if (!sliderTime.isValueChanging()) {
                         Duration divided = currentTime.divide(totTime.toMillis());
                         sliderTime.setValue(divided.toMillis() * 100.0);

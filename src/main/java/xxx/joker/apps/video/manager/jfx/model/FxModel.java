@@ -1,4 +1,4 @@
-package xxx.joker.apps.video.manager.jfx.fxmodel;
+package xxx.joker.apps.video.manager.jfx.model;
 
 import javafx.collections.ObservableList;
 import xxx.joker.apps.video.manager.datalayer.entities.Category;
@@ -6,7 +6,6 @@ import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.libs.core.datetime.JkDuration;
 
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.List;
 
@@ -24,6 +23,8 @@ public interface FxModel {
     FxVideo toFxVideo(Video video);
     List<FxVideo> toFxVideos(Collection<Video> videos);
     FxVideo addVideoFile(Path videoPath, boolean skipIfPreviouslyAdded);
+
+    String computeSafeTitle(String title);
 
     List<FxSnapshot> getSnapshots(Video video);
     List<FxSnapshot> getSnapshots(Video video, int numSnaps);

@@ -1,4 +1,4 @@
-package xxx.joker.apps.video.manager.jfx.fxview.videoplayer;
+package xxx.joker.apps.video.manager.jfx.view.videoplayer;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Group;
@@ -7,9 +7,9 @@ import javafx.stage.Stage;
 import org.scenicview.ScenicView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xxx.joker.apps.video.manager.jfx.fxmodel.FxVideo;
-import xxx.joker.apps.video.manager.jfx.fxview.NewLauncher;
-import xxx.joker.apps.video.manager.jfx.fxview.videoplayer.JfxVideoPlayer.PlayerConfig;
+import xxx.joker.apps.video.manager.jfx.model.FxVideo;
+import xxx.joker.apps.video.manager.jfx.view.NewLauncher;
+import xxx.joker.apps.video.manager.jfx.view.videoplayer.JfxVideoPlayer.PlayerConfig;
 
 import java.util.function.Supplier;
 

@@ -4,19 +4,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>xxx.joker.apps</groupId>
-    <artifactId>video-manager</artifactId>
-    <version>2.0</version>
-
     <parent>
         <groupId>xxx.joker.parent</groupId>
         <artifactId>java-8-base-parent</artifactId>
-        <version>1.0</version>
+        <version>3.0</version>
     </parent>
 
-    <properties>
-        <java.libs.version>2.0</java.libs.version>
-    </properties>
+    <groupId>xxx.joker.apps</groupId>
+    <artifactId>video-manager</artifactId>
+    <version>3.0</version>
 
     <dependencies>
         <!-- java-libs -->
@@ -35,17 +31,6 @@
             <artifactId>scenicview</artifactId>
             <version>8.7.0</version>
         </dependency>
-        <!-- Logback -->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>1.2.3</version>
-        </dependency>
     </dependencies>
 
     <build>
@@ -58,7 +43,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>xxx.joker.apps.video.manager.jfx.fxview.NewLauncher</mainClass>
+                            <mainClass>xxx.joker.apps.video.manager.jfx.view.NewLauncher</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

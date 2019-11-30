@@ -4,9 +4,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.junit.Test;
 import xxx.joker.libs.core.adapter.JkProcess;
-import xxx.joker.libs.core.files.JkFiles;
-import xxx.joker.libs.core.lambdas.JkStreams;
-import xxx.joker.libs.core.runtimes.JkEnvironment;
+import xxx.joker.libs.core.file.JkFiles;
+import xxx.joker.libs.core.lambda.JkStreams;
+import xxx.joker.libs.core.runtime.JkEnvironment;
 import xxx.joker.libs.core.web.JkWeb;
 
 import java.io.IOException;
@@ -18,8 +18,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.TreeSet;
 
-import static xxx.joker.libs.core.utils.JkConsole.display;
-import static xxx.joker.libs.core.utils.JkStrings.strf;
+import static xxx.joker.libs.core.util.JkConsole.display;
+import static xxx.joker.libs.core.util.JkStrings.strf;
 
 public class TempTest {
 
@@ -79,6 +79,7 @@ public class TempTest {
         display("set {}", set1.equals(set3));
         display("l12 {}", l1.equals(l2));
         display("l13 {}", l1.equals(l3));
+
     }
 
 

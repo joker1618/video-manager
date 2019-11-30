@@ -1,15 +1,15 @@
 package xxx.joker.apps.video.manager.datalayer.entities;
 
 import xxx.joker.libs.core.datetime.JkDuration;
-import xxx.joker.libs.datalayer.design.EntityPK;
-import xxx.joker.libs.datalayer.design.RepoEntity;
-import xxx.joker.libs.datalayer.design.EntityField;
+import xxx.joker.libs.repo.design.SimpleRepoEntity;
+import xxx.joker.libs.repo.design.annotation.marker.EntityField;
+import xxx.joker.libs.repo.design.annotation.marker.EntityPK;
 
 import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class Video extends RepoEntity {
+public class Video extends SimpleRepoEntity {
 
     @EntityField
     private String title;

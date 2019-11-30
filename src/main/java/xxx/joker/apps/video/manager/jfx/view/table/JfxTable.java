@@ -1,8 +1,8 @@
-package xxx.joker.apps.video.manager.jfx.fxview.table;
+package xxx.joker.apps.video.manager.jfx.view.table;
 
 import javafx.scene.control.TableView;
 import javafx.scene.text.Text;
-import xxx.joker.libs.core.utils.JkStrings;
+import xxx.joker.libs.core.util.JkStrings;
 
 import java.util.Arrays;
 
@@ -20,7 +20,7 @@ public class JfxTable<T> extends TableView<T> {
         getStylesheets().add(getClass().getResource(CSS_FILEPATH).toExternalForm());
     }
 
-    public void add(JfxTableCol... cols) {
+    public void addColumn(JfxTableCol... cols) {
         Arrays.stream(cols).forEach(c -> {
             getColumns().add(c);
         });

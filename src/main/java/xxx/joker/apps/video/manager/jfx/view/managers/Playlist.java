@@ -1,6 +1,6 @@
-package xxx.joker.apps.video.manager.jfx.fxview.managers;
+package xxx.joker.apps.video.manager.jfx.view.managers;
 
-import xxx.joker.apps.video.manager.jfx.fxmodel.FxVideo;
+import xxx.joker.apps.video.manager.jfx.model.FxVideo;
 
 import java.util.*;
 import java.util.function.Predicate;

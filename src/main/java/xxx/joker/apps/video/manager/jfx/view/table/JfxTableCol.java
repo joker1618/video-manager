@@ -1,11 +1,11 @@
-package xxx.joker.apps.video.manager.jfx.fxview.table;
+package xxx.joker.apps.video.manager.jfx.view.table;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.apache.commons.lang3.StringUtils;
-import xxx.joker.libs.core.utils.JkStrings;
+import xxx.joker.libs.core.util.JkStrings;
 
 import java.util.function.Function;
 

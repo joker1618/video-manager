@@ -1,4 +1,4 @@
-package xxx.joker.apps.video.manager.jfx.fxview.panes;
+package xxx.joker.apps.video.manager.jfx.view.panes;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -13,7 +13,6 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
@@ -22,28 +21,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.datalayer.entities.Category;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
-import xxx.joker.apps.video.manager.jfx.fxmodel.FxModel;
-import xxx.joker.apps.video.manager.jfx.fxmodel.FxSnapshot;
-import xxx.joker.apps.video.manager.jfx.fxmodel.FxVideo;
-import xxx.joker.apps.video.manager.jfx.fxview.PanesSelector;
-import xxx.joker.apps.video.manager.jfx.fxview.bindings.SortFilter;
-import xxx.joker.apps.video.manager.jfx.fxview.gridpane.GridPaneBuilder;
-import xxx.joker.apps.video.manager.jfx.fxview.managers.SnapshotManager;
-import xxx.joker.apps.video.manager.jfx.fxview.provider.IconProvider;
-import xxx.joker.apps.video.manager.jfx.fxview.table.JfxTable;
-import xxx.joker.apps.video.manager.jfx.fxview.table.JfxTableCol;
-import xxx.joker.apps.video.manager.jfx.fxview.videoplayer.JfxVideoBuilder;
-import xxx.joker.apps.video.manager.jfx.fxview.videoplayer.JfxVideoStage;
+import xxx.joker.apps.video.manager.jfx.model.FxModel;
+import xxx.joker.apps.video.manager.jfx.model.FxSnapshot;
+import xxx.joker.apps.video.manager.jfx.model.FxVideo;
+import xxx.joker.apps.video.manager.jfx.view.PanesSelector;
+import xxx.joker.apps.video.manager.jfx.view.bindings.SortFilter;
+import xxx.joker.apps.video.manager.jfx.view.gridpane.GridPaneBuilder;
+import xxx.joker.apps.video.manager.jfx.view.managers.SnapshotManager;
+import xxx.joker.apps.video.manager.jfx.view.provider.IconProvider;
+import xxx.joker.apps.video.manager.jfx.view.table.JfxTable;
+import xxx.joker.apps.video.manager.jfx.view.table.JfxTableCol;
+import xxx.joker.apps.video.manager.jfx.view.videoplayer.JfxVideoBuilder;
+import xxx.joker.apps.video.manager.jfx.view.videoplayer.JfxVideoStage;
 import xxx.joker.apps.video.manager.provider.StagePosProvider;
 import xxx.joker.apps.video.manager.provider.VideoStagesPosition;
 import xxx.joker.libs.core.datetime.JkDateTime;
 import xxx.joker.libs.core.datetime.JkDuration;
-import xxx.joker.libs.core.datetime.JkTimer;
-import xxx.joker.libs.core.enums.JkSizeUnit;
 import xxx.joker.libs.core.format.JkOutput;
 import xxx.joker.libs.core.javafx.JfxUtil;
-import xxx.joker.libs.core.lambdas.JkStreams;
-import xxx.joker.libs.core.utils.JkStruct;
+import xxx.joker.libs.core.lambda.JkStreams;
+import xxx.joker.libs.core.util.JkStruct;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -51,7 +48,7 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import static xxx.joker.libs.core.javafx.JfxControls.*;
-import static xxx.joker.libs.core.utils.JkStrings.strf;
+import static xxx.joker.libs.core.util.JkStrings.strf;
 
 public class HomePane extends BorderPane implements Closeable {
 
@@ -145,9 +142,9 @@ public class HomePane extends BorderPane implements Closeable {
         rowNum++;
 
         Label fixedLength = new Label("");
-        fixedLength.textProperty().bind(Bindings.createStringBinding(() -> JkDuration.of(model.getVideos().stream().mapToLong(v -> v.getLength() == null ? 0L : v.getLength().toMillis()).sum()).toStringElapsed(false), model.getVideos()));
+        fixedLength.textProperty().bind(Bindings.createStringBinding(() -> JkDuration.of(model.getVideos().stream().mapToLong(v -> v.getLength() == null ? 0L : v.getLength().toMillis()).sum()).strElapsed(false), model.getVideos()));
         Label selLength = new Label("");
-        selLength.textProperty().bind(Bindings.createStringBinding(() -> JkDuration.of(model.getSelectedVideos().stream().filter(Objects::nonNull).mapToLong(v -> v.getLength() == null ? 0L : v.getLength().toMillis()).sum()).toStringElapsed(false), model.getSelectedVideos()));
+        selLength.textProperty().bind(Bindings.createStringBinding(() -> JkDuration.of(model.getSelectedVideos().stream().filter(Objects::nonNull).mapToLong(v -> v.getLength() == null ? 0L : v.getLength().toMillis()).sum()).strElapsed(false), model.getSelectedVideos()));
         addDetailsLine(gbDet, rowNum, "Total length:", fixedLength, selLength);
         rowNum++;
 
@@ -184,7 +181,7 @@ public class HomePane extends BorderPane implements Closeable {
 //        tableVideos.getColumns().add(tcolResolution);
 //        tcolResolution.setFixedPrefWidth(65);
 
-        JfxTableCol<Video, JkDuration> tcolLength = JfxTableCol.createCol("LENGTH", "length", d -> d == null ? "" : d.toStringElapsed(false));
+        JfxTableCol<Video, JkDuration> tcolLength = JfxTableCol.createCol("LENGTH", "length", d -> d == null ? "" : d.strElapsed(false));
         tableVideos.getColumns().add(tcolLength);
         tcolLength.setFixedPrefWidth(75);
 

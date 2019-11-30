@@ -1,4 +1,4 @@
-package xxx.joker.apps.video.manager.jfx.fxview.panes;
+package xxx.joker.apps.video.manager.jfx.view.panes;
 
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
@@ -21,25 +21,25 @@ import xxx.joker.apps.video.manager.common.Config;
 import xxx.joker.apps.video.manager.datalayer.entities.Category;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.apps.video.manager.ffmpeg.FFMPEGAdapter;
-import xxx.joker.apps.video.manager.jfx.fxmodel.FxModel;
-import xxx.joker.apps.video.manager.jfx.fxmodel.FxVideo;
-import xxx.joker.apps.video.manager.jfx.fxview.PanesSelector;
-import xxx.joker.apps.video.manager.jfx.fxview.gridpane.GridPaneBuilder;
-import xxx.joker.apps.video.manager.jfx.fxview.provider.IconProvider;
-import xxx.joker.apps.video.manager.jfx.fxview.videoplayer.JfxVideoBuilder;
-import xxx.joker.apps.video.manager.jfx.fxview.videoplayer.JfxVideoPlayer;
+import xxx.joker.apps.video.manager.jfx.model.FxModel;
+import xxx.joker.apps.video.manager.jfx.model.FxVideo;
+import xxx.joker.apps.video.manager.jfx.view.PanesSelector;
+import xxx.joker.apps.video.manager.jfx.view.gridpane.GridPaneBuilder;
+import xxx.joker.apps.video.manager.jfx.view.provider.IconProvider;
+import xxx.joker.apps.video.manager.jfx.view.videoplayer.JfxVideoBuilder;
+import xxx.joker.apps.video.manager.jfx.view.videoplayer.JfxVideoPlayer;
 import xxx.joker.libs.core.datetime.JkDuration;
-import xxx.joker.libs.core.files.JkFiles;
-import xxx.joker.libs.core.lambdas.JkStreams;
-import xxx.joker.libs.core.utils.JkConvert;
-import xxx.joker.libs.core.utils.JkStrings;
+import xxx.joker.libs.core.file.JkFiles;
+import xxx.joker.libs.core.lambda.JkStreams;
+import xxx.joker.libs.core.util.JkConvert;
+import xxx.joker.libs.core.util.JkStrings;
 
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static xxx.joker.libs.core.javafx.JfxControls.*;
-import static xxx.joker.libs.core.utils.JkStrings.strf;
+import static xxx.joker.libs.core.util.JkStrings.strf;
 
 public class CutVideoPane extends BorderPane implements Closeable {
 
@@ -101,7 +101,7 @@ public class CutVideoPane extends BorderPane implements Closeable {
                     gpBuilder.add(row, 0, row%2==0 ? "S" : "E");
                 }
                 int col = !btnStartEnd.isDisable() ? 1 : 0;
-                gpBuilder.add(row, col++, JkDuration.of(sp).toStringElapsed());
+                gpBuilder.add(row, col++, JkDuration.of(sp).strElapsed());
                 Button btnSeek = new Button("SEEK");
                 gpBuilder.add(row, col++, btnSeek);
                 btnSeek.setOnAction(e -> mp.seek(sp));

@@ -1,13 +1,14 @@
 package xxx.joker.apps.video.manager.datalayer;
 
 import xxx.joker.apps.video.manager.common.Config;
-import xxx.joker.apps.video.manager.datalayer.entities.AddedFile;
+import xxx.joker.apps.video.manager.datalayer.entities.VideoTracingAdded;
 import xxx.joker.apps.video.manager.datalayer.entities.Category;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.libs.core.datetime.JkDuration;
-import xxx.joker.libs.core.lambdas.JkStreams;
-import xxx.joker.libs.datalayer.JkRepoFile;
-import xxx.joker.libs.datalayer.entities.RepoResource;
+import xxx.joker.libs.core.lambda.JkStreams;
+import xxx.joker.libs.repo.JkRepoFile;
+import xxx.joker.libs.repo.design.entities.RepoResource;
+import xxx.joker.libs.repo.design.entities.RepoTags;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -38,8 +39,8 @@ public class VideoRepoImpl extends JkRepoFile implements VideoRepo {
     }
 
     @Override
-    public Set<AddedFile> getAddedFiles() {
-        return getDataSet(AddedFile.class);
+    public Set<VideoTracingAdded> getAddedVideoHistory() {
+        return getDataSet(VideoTracingAdded.class);
     }
 
     @Override
@@ -56,7 +57,7 @@ public class VideoRepoImpl extends JkRepoFile implements VideoRepo {
 
     @Override
     public RepoResource addVideoResource(Video video, Path filePath) {
-        return addResource(filePath, video.getMd5(), "videoz");
+        return addResource(filePath, video.getMd5(), RepoTags.of("videoz"));
     }
 
     @Override
@@ -72,6 +73,6 @@ public class VideoRepoImpl extends JkRepoFile implements VideoRepo {
 
     @Override
     public RepoResource addSnapshotResource(Video video, JkDuration snapTime, Path snapPath) {
-        return addResource(snapPath, String.valueOf(snapTime.toMillis()), "snapshot " + video.getMd5());
+        return addResource(snapPath, String.valueOf(snapTime.toMillis()), RepoTags.of("snapshot", video.getMd5()));
     }
 }

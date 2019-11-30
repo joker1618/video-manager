@@ -1,4 +1,4 @@
-package xxx.joker.apps.video.manager.jfx.fxview.managers;
+package xxx.joker.apps.video.manager.jfx.view.managers;
 
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.control.*;
@@ -9,21 +9,21 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
-import xxx.joker.apps.video.manager.jfx.fxmodel.FxModel;
-import xxx.joker.apps.video.manager.jfx.fxmodel.FxVideo;
-import xxx.joker.apps.video.manager.jfx.fxview.gridpane.GridPaneBuilder;
-import xxx.joker.apps.video.manager.jfx.fxview.videoplayer.JfxVideoBuilder;
-import xxx.joker.apps.video.manager.jfx.fxview.videoplayer.JfxVideoPlayer;
-import xxx.joker.apps.video.manager.jfx.fxview.videoplayer.JfxVideoStage;
+import xxx.joker.apps.video.manager.jfx.model.FxModel;
+import xxx.joker.apps.video.manager.jfx.model.FxVideo;
+import xxx.joker.apps.video.manager.jfx.view.gridpane.GridPaneBuilder;
+import xxx.joker.apps.video.manager.jfx.view.videoplayer.JfxVideoBuilder;
+import xxx.joker.apps.video.manager.jfx.view.videoplayer.JfxVideoPlayer;
+import xxx.joker.apps.video.manager.jfx.view.videoplayer.JfxVideoStage;
 import xxx.joker.libs.core.datetime.JkDuration;
-import xxx.joker.libs.core.lambdas.JkStreams;
-import xxx.joker.libs.core.utils.JkConvert;
+import xxx.joker.libs.core.lambda.JkStreams;
+import xxx.joker.libs.core.util.JkConvert;
 
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static xxx.joker.libs.core.utils.JkStrings.strf;
+import static xxx.joker.libs.core.util.JkStrings.strf;
 
 public class SnapshotManager {
 

@@ -1,11 +1,11 @@
-package xxx.joker.apps.video.manager.jfx.fxview.provider;
+package xxx.joker.apps.video.manager.jfx.view.provider;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 import java.net.URL;
 
-import static xxx.joker.libs.core.utils.JkStrings.strf;
+import static xxx.joker.libs.core.util.JkStrings.strf;
 
 public class IconProvider {
 

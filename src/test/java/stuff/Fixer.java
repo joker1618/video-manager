@@ -3,15 +3,14 @@ package stuff;
 import org.junit.Test;
 import xxx.joker.apps.video.manager.datalayer.VideoRepo;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
-import xxx.joker.libs.core.files.JkFiles;
-import xxx.joker.libs.core.lambdas.JkStreams;
-import xxx.joker.libs.datalayer.entities.RepoResource;
+import xxx.joker.libs.core.file.JkFiles;
+import xxx.joker.libs.core.lambda.JkStreams;
 
 import java.nio.file.Path;
 import java.util.List;
 
-import static xxx.joker.libs.core.utils.JkConsole.display;
-import static xxx.joker.libs.core.utils.JkConsole.displayColl;
+import static xxx.joker.libs.core.util.JkConsole.display;
+import static xxx.joker.libs.core.util.JkConsole.displayColl;
 
 public class Fixer {
 
@@ -34,11 +33,9 @@ public class Fixer {
 //        existingPaths.forEach(JkFiles::delete);
 //    }
     @Test
-    public void deleteVideoWithoutFile() {
+    public void cleanRepoAction() {
         VideoRepo repo = VideoRepo.getRepo();
-        List<Video> toRemove = JkStreams.filter(repo.getVideos(), v -> repo.getVideoResource(v) == null);
-        toRemove.forEach(repo::remove);
-        repo.commit();
+        repo.cleanRepo();
         display("END");
     }
 }

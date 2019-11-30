@@ -4,10 +4,10 @@ import org.junit.Test;
 import xxx.joker.apps.video.manager.datalayer.VideoRepo;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.libs.core.datetime.JkDuration;
-import xxx.joker.libs.core.files.JkFiles;
+import xxx.joker.libs.core.file.JkFiles;
 import xxx.joker.libs.core.format.JkOutput;
-import xxx.joker.libs.core.lambdas.JkStreams;
-import xxx.joker.libs.datalayer.entities.RepoResource;
+import xxx.joker.libs.core.lambda.JkStreams;
+import xxx.joker.libs.repo.design.entities.RepoResource;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,9 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static xxx.joker.libs.core.utils.JkConsole.display;
-import static xxx.joker.libs.core.utils.JkConsole.displayColl;
-import static xxx.joker.libs.core.utils.JkStrings.strf;
+import static xxx.joker.libs.core.util.JkConsole.display;
+import static xxx.joker.libs.core.util.JkConsole.displayColl;
+import static xxx.joker.libs.core.util.JkStrings.strf;
 
 public class Displayer {
 

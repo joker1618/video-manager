@@ -1,4 +1,4 @@
-package xxx.joker.apps.video.manager.jfx.fxmodel;
+package xxx.joker.apps.video.manager.jfx.model;
 
 import javafx.scene.image.Image;
 import xxx.joker.libs.core.datetime.JkDuration;

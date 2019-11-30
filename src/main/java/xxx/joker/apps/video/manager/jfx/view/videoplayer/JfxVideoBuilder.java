@@ -1,4 +1,4 @@
-package xxx.joker.apps.video.manager.jfx.fxview.videoplayer;
+package xxx.joker.apps.video.manager.jfx.view.videoplayer;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -6,8 +6,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.StageStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xxx.joker.apps.video.manager.jfx.fxmodel.FxVideo;
-import xxx.joker.apps.video.manager.jfx.fxview.videoplayer.JfxVideoPlayer.PlayerConfig;
+import xxx.joker.apps.video.manager.jfx.model.FxVideo;
+import xxx.joker.apps.video.manager.jfx.view.videoplayer.JfxVideoPlayer.PlayerConfig;
 import xxx.joker.libs.core.javafx.JfxUtil;
 
 import java.util.ArrayList;

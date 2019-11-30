@@ -1,4 +1,4 @@
-package xxx.joker.apps.video.manager.jfx.fxview.gridpane;
+package xxx.joker.apps.video.manager.jfx.view.gridpane;
 
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static xxx.joker.libs.core.utils.JkStrings.strf;
+import static xxx.joker.libs.core.util.JkStrings.strf;
 
 public class GridPaneBuilder {
 

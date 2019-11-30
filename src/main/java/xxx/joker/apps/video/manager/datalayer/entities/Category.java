@@ -1,14 +1,12 @@
 package xxx.joker.apps.video.manager.datalayer.entities;
 
 
-import xxx.joker.libs.datalayer.design.EntityPK;
-import xxx.joker.libs.datalayer.design.RepoEntity;
-import xxx.joker.libs.datalayer.design.EntityField;
+import xxx.joker.libs.repo.design.SimpleRepoEntity;
+import xxx.joker.libs.repo.design.annotation.marker.EntityPK;
 
-public class Category extends RepoEntity {
+public class Category extends SimpleRepoEntity {
 
     @EntityPK
-    @EntityField
     private String name;
 
     public Category() {

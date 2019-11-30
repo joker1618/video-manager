@@ -1,4 +1,4 @@
-package xxx.joker.apps.video.manager.jfx.fxview.bindings;
+package xxx.joker.apps.video.manager.jfx.view.bindings;
 
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -9,7 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import xxx.joker.apps.video.manager.datalayer.VideoRepo;
 import xxx.joker.apps.video.manager.datalayer.entities.Category;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
-import xxx.joker.libs.core.utils.JkStrings;
+import xxx.joker.libs.core.util.JkStrings;
 
 import java.util.HashMap;
 import java.util.List;

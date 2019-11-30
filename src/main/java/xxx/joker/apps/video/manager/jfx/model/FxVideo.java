@@ -1,4 +1,4 @@
-package xxx.joker.apps.video.manager.jfx.fxmodel;
+package xxx.joker.apps.video.manager.jfx.model;
 
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
 

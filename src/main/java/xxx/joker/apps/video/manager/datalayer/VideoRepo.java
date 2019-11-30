@@ -1,11 +1,11 @@
 package xxx.joker.apps.video.manager.datalayer;
 
 import xxx.joker.apps.video.manager.datalayer.entities.Category;
-import xxx.joker.apps.video.manager.datalayer.entities.AddedFile;
+import xxx.joker.apps.video.manager.datalayer.entities.VideoTracingAdded;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.libs.core.datetime.JkDuration;
-import xxx.joker.libs.datalayer.JkRepo;
-import xxx.joker.libs.datalayer.entities.RepoResource;
+import xxx.joker.libs.repo.JkRepo;
+import xxx.joker.libs.repo.design.entities.RepoResource;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -21,7 +21,7 @@ public interface VideoRepo extends JkRepo {
 
     Set<Video> getVideos();
     Set<Category> getCategories();
-    Set<AddedFile> getAddedFiles();
+    Set<VideoTracingAdded> getAddedVideoHistory();
 
     RepoResource getVideoResource(Video video);
     Map<Video, RepoResource> getVideoResources(Collection<Video> videos);
