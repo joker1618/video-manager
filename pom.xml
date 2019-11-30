@@ -88,7 +88,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${joker.apps.folder}/video-manager</outputDirectory>
+                            <outputDirectory>${joker.apps.folder}/video-manager/v${project.version}</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>${project.build.directory}</directory>
@@ -107,7 +107,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${joker.apps.folder}/video-manager/exe</outputDirectory>
+                            <outputDirectory>${joker.apps.folder}/video-manager/v${project.version}/exe</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>exe</directory>
