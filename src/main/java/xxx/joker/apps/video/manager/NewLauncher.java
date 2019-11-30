@@ -1,4 +1,4 @@
-package xxx.joker.apps.video.manager.jfx.view;
+package xxx.joker.apps.video.manager;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -9,7 +9,9 @@ import org.scenicview.ScenicView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.common.Config;
+import xxx.joker.apps.video.manager.datalayer.VideoRepo;
 import xxx.joker.apps.video.manager.jfx.model.FxModel;
+import xxx.joker.apps.video.manager.jfx.view.PanesSelector;
 import xxx.joker.libs.core.file.JkFiles;
 
 public class NewLauncher extends Application {
@@ -62,9 +64,14 @@ public class NewLauncher extends Application {
     }
 
     public static void main(String[] args) {
-        scenicView = args.length == 1 && "-sv".equals(args[0]);
-//		scenicView = true;
-        launch(args);
+        boolean cleanRepo = args.length == 1 && "--clean".equals(args[0]);
+        if(cleanRepo) {
+            VideoRepo.getRepo().cleanRepo();
+            Platform.exit();
+        } else {
+            scenicView = args.length == 1 && "-sv".equals(args[0]);
+            launch(args);
+        }
     }
 
 }

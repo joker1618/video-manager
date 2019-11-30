@@ -8,7 +8,7 @@ import org.scenicview.ScenicView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.jfx.model.FxVideo;
-import xxx.joker.apps.video.manager.jfx.view.NewLauncher;
+import xxx.joker.apps.video.manager.NewLauncher;
 import xxx.joker.apps.video.manager.jfx.view.videoplayer.JfxVideoPlayer.PlayerConfig;
 
 import java.util.function.Supplier;
