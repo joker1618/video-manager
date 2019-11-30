@@ -37,9 +37,11 @@ import xxx.joker.apps.video.manager.provider.StagePosProvider;
 import xxx.joker.apps.video.manager.provider.VideoStagesPosition;
 import xxx.joker.libs.core.datetime.JkDateTime;
 import xxx.joker.libs.core.datetime.JkDuration;
+import xxx.joker.libs.core.file.JkFiles;
 import xxx.joker.libs.core.format.JkOutput;
 import xxx.joker.libs.core.javafx.JfxUtil;
 import xxx.joker.libs.core.lambda.JkStreams;
+import xxx.joker.libs.core.runtime.JkEnvironment;
 import xxx.joker.libs.core.util.JkStruct;
 
 import java.io.File;
@@ -573,13 +575,17 @@ public class HomePane extends BorderPane implements Closeable {
         sortFilter.triggerSort();
     }
 
+    private File lastAddFolder;
     private void actionAddVideos(ActionEvent event) {
         FileChooser fc = new FileChooser();
+        fc.setInitialDirectory(lastAddFolder == null ? JkEnvironment.getHomeFolder().resolve("Desktop").toFile() : lastAddFolder);
         fc.setTitle("Select videos");
         fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("MP4", "*.mp4"));
         List<File> files = fc.showOpenMultipleDialog(JfxUtil.getWindow(event));
         if(files != null && !files.isEmpty()) {
-            addNewVideos(JkStreams.map(files, File::toPath));
+            List<Path> paths = JkStreams.map(files, File::toPath);
+            lastAddFolder = JkFiles.getParent(paths.get(0)).toFile();
+            addNewVideos(paths);
         }
     }
 
