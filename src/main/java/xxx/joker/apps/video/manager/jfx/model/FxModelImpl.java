@@ -18,6 +18,7 @@ import xxx.joker.apps.video.manager.datalayer.entities.Category;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.apps.video.manager.jfx.view.PanesSelector;
 import xxx.joker.libs.core.datetime.JkDuration;
+import xxx.joker.libs.core.exception.JkThrowable;
 import xxx.joker.libs.core.file.JkEncryption;
 import xxx.joker.libs.core.file.JkFiles;
 import xxx.joker.libs.core.lambda.JkStreams;
@@ -67,7 +68,7 @@ public class FxModelImpl implements FxModel {
                     alert.setHeaderText(strf("Unable to delete video {}", v));
                     alert.setContentText(JkStreams.joinLines(Arrays.asList(ex.getStackTrace()), StackTraceElement::toString));
                     alert.showAndWait();
-                    LOG.error(strf("Unable to delete video {}", v), ex);
+                    LOG.error("Unable to delete video {}\n{}", v, JkThrowable.toString(ex));
                     PanesSelector.getInstance().displayHomePane();
                 }
             });
@@ -226,6 +227,7 @@ public class FxModelImpl implements FxModel {
         SimpleBooleanProperty finished = new SimpleBooleanProperty(false);
         iprop.addListener((obs,o,n) -> { if(n.intValue() == 3) { mediaPlayer.stop(); mediaPlayer.dispose(); finished.setValue(true); }});
         mediaPlayer.play();
+        finished.addListener((obs,o,n) -> LOG.debug("Set length, width and height for video {}", video.getTitle()));
         return finished;
     }
 }
