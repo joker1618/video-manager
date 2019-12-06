@@ -8,7 +8,7 @@ import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.apps.video.manager.jfx.model.FxModel;
 import xxx.joker.apps.video.manager.jfx.model.FxVideo;
 import xxx.joker.apps.video.manager.jfx.view.panes.*;
-import xxx.joker.apps.video.manager.provider.VideoStagesPosition;
+import xxx.joker.apps.video.manager.jfx.view.provider.VideoStagesPosition;
 
 import java.util.List;
 

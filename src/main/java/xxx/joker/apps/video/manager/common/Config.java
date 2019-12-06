@@ -23,6 +23,7 @@ public class Config {
     public static final String DB_NAME = "vm";
 
     public static final String CSV_STAGE_FILEPATH = "/data/MultiStagePositions.txt";
+    public static final String REGEXP_TITLE_FILEPATH = "/data/RegexpVideoTitle.csv";
 
     public static final Path FOLDER_TEMP_SNAPS = BASE_FOLDER.resolve("tempSnaps");
     public static final Path FOLDER_TEMP_CUT = BASE_FOLDER.resolve("tempCut");

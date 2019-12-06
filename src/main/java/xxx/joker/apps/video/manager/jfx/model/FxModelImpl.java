@@ -59,14 +59,15 @@ public class FxModelImpl implements FxModel {
             JkStreams.filter(repo.getVideos(), v -> !videos.contains(v)).forEach(v -> {
                 try {
                     repo.remove(repo.getVideoResource(v));
-                    repo.remove(v);
                     v.getSnapTimes().forEach(st -> repo.remove(repo.getSnapshotResource(v, st)));
+                    repo.remove(v);
                 } catch (Exception ex) {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setTitle("Error");
                     alert.setHeaderText(strf("Unable to delete video {}", v));
                     alert.setContentText(JkStreams.joinLines(Arrays.asList(ex.getStackTrace()), StackTraceElement::toString));
                     alert.showAndWait();
+                    LOG.error(strf("Unable to delete video {}", v), ex);
                     PanesSelector.getInstance().displayHomePane();
                 }
             });

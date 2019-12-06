@@ -33,8 +33,8 @@ import xxx.joker.apps.video.manager.jfx.view.table.JfxTable;
 import xxx.joker.apps.video.manager.jfx.view.table.JfxTableCol;
 import xxx.joker.apps.video.manager.jfx.view.videoplayer.JfxVideoBuilder;
 import xxx.joker.apps.video.manager.jfx.view.videoplayer.JfxVideoStage;
-import xxx.joker.apps.video.manager.provider.StagePosProvider;
-import xxx.joker.apps.video.manager.provider.VideoStagesPosition;
+import xxx.joker.apps.video.manager.jfx.view.provider.StagePosProvider;
+import xxx.joker.apps.video.manager.jfx.view.provider.VideoStagesPosition;
 import xxx.joker.libs.core.datetime.JkDateTime;
 import xxx.joker.libs.core.datetime.JkDuration;
 import xxx.joker.libs.core.file.JkFiles;
@@ -578,7 +578,8 @@ public class HomePane extends BorderPane implements Closeable {
     private File lastAddFolder;
     private void actionAddVideos(ActionEvent event) {
         FileChooser fc = new FileChooser();
-        fc.setInitialDirectory(lastAddFolder == null ? JkEnvironment.getHomeFolder().resolve("Desktop").toFile() : lastAddFolder);
+        File initial = lastAddFolder != null && lastAddFolder.isDirectory() ? lastAddFolder : JkEnvironment.getHomeFolder().resolve("Desktop").toFile();
+        fc.setInitialDirectory(initial);
         fc.setTitle("Select videos");
         fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("MP4", "*.mp4"));
         List<File> files = fc.showOpenMultipleDialog(JfxUtil.getWindow(event));

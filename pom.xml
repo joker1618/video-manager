@@ -16,16 +16,16 @@
 
     <dependencies>
         <!-- java-libs -->
-        <dependency>
-            <groupId>xxx.joker.libs</groupId>
-            <artifactId>java-core</artifactId>
-            <version>${java.libs.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>xxx.joker.libs</groupId>
-            <artifactId>java-repo</artifactId>
-            <version>${java.libs.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>xxx.joker.libs</groupId>-->
+<!--            <artifactId>java-core</artifactId>-->
+<!--            <version>${java.libs.version}</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>xxx.joker.libs</groupId>-->
+<!--            <artifactId>java-repo</artifactId>-->
+<!--            <version>${java.libs.version}</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>3rdParty.org</groupId>
             <artifactId>scenicview</artifactId>

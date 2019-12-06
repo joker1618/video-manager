@@ -1,4 +1,4 @@
-package xxx.joker.apps.video.manager.provider;
+package xxx.joker.apps.video.manager.jfx.view.provider;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

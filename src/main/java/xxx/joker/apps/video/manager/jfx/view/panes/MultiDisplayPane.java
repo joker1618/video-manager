@@ -17,7 +17,7 @@ import xxx.joker.apps.video.manager.jfx.view.managers.Playlist;
 import xxx.joker.apps.video.manager.jfx.view.videoplayer.JfxVideoBuilder;
 import xxx.joker.apps.video.manager.jfx.view.videoplayer.JfxVideoPlayer;
 import xxx.joker.apps.video.manager.jfx.view.videoplayer.JfxVideoStage;
-import xxx.joker.apps.video.manager.provider.VideoStagesPosition;
+import xxx.joker.apps.video.manager.jfx.view.provider.VideoStagesPosition;
 import xxx.joker.libs.core.lambda.JkStreams;
 
 import java.util.List;

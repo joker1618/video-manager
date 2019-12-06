@@ -1,4 +1,4 @@
-package xxx.joker.apps.video.manager.provider;
+package xxx.joker.apps.video.manager.jfx.view.provider;
 
 import javafx.stage.Screen;
 import javafx.stage.Stage;

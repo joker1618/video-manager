@@ -1,0 +1,10 @@
+TO_DELETE|TO_INSERT|DUMMY (empty)
+-[0-9]{3}-YouPorn.*||
+-[0-9]{3}-XHamster.*||
+-[0-9]{3}-PornHub.*||
+-[0-9]{3}-RedTube.*||
+_| |
+ +| |
+^ +||
+ +$||
+([.]\d+)+$||

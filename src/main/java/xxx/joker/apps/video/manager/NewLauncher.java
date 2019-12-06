@@ -8,6 +8,7 @@ import javafx.stage.Stage;
 import org.scenicview.ScenicView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xxx.joker.apps.video.manager.action.AdjustVideoTitleAction;
 import xxx.joker.apps.video.manager.common.Config;
 import xxx.joker.apps.video.manager.datalayer.VideoRepo;
 import xxx.joker.apps.video.manager.datalayer.entities.VideoTracingAdded;
@@ -76,20 +77,14 @@ public class NewLauncher extends Application {
 
     public static void main(String[] args) {
         boolean cleanRepo = args.length == 1 && "--clean".equals(args[0]);
-        boolean moveAddedVideos = args.length == 2 && "--moveAdded".equals(args[0]);
+        boolean fixTitles = args.length == 1 && "--fixTitles".equals(args[0]);
         if(cleanRepo) {
             VideoRepo.getRepo().cleanRepo();
             Platform.exit();
-        } else if(moveAddedVideos) {
+        } else if(fixTitles) {
             VideoRepo repo = VideoRepo.getRepo();
-            Path folder = Paths.get(JkConvert.unixToWinPath(args[1]));
-            List<Path> files = JkFiles.findFiles(folder, false);
-            Map<String, Path> md5Map = toMapSingle(files, JkEncryption::getMD5);
-            List<String> md5List = map(repo.getAddedVideoHistory(), VideoTracingAdded::getMd5);
-            List<Path> pathList = filterMap(md5List, md5Map::containsKey, md5Map::get);
-            Path subf = folder.resolve("alreadyAdded");
-            pathList.forEach(f -> JkFiles.moveInFolder(f, subf));
-            LOG.info("Moved {} files in {}", files.size(), subf);
+            AdjustVideoTitleAction.adjustTitles(repo.getVideos());
+            repo.commit();
             Platform.exit();
         } else {
             scenicView = args.length == 1 && "-sv".equals(args[0]);
