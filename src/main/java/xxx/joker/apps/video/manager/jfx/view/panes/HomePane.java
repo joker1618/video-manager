@@ -462,7 +462,7 @@ public class HomePane extends BorderPane implements Closeable {
         if(videos.size() == 1) {
             Video video = videos.get(0);
             snapshots.addAll(model.getSnapshots(video));
-        } else if(videos.size() <= 10){
+        } else if(videos.size() <= 20){
             videos.forEach(v -> {
                 List<FxSnapshot> stList = model.getSnapshots(v, ncols);
                 snapshots.addAll(stList);
