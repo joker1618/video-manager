@@ -3,9 +3,9 @@ TO_DELETE|TO_INSERT|DUMMY (empty)
 -[0-9]{3}-XHamster.*||
 -[0-9]{3}-PornHub.*||
 -[0-9]{3}-RedTube.*||
+_cut[.\d]*$||
 _| |
  +| |
 ^ +||
  +$||
 ([.]\d+)+$||
-_cut[([.]{1}\d+)]*$||

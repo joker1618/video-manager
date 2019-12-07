@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Set;
 
 import static xxx.joker.libs.core.util.JkConsole.display;
-import static xxx.joker.libs.core.util.JkConsole.displayColl;
 import static xxx.joker.libs.core.util.JkStrings.strf;
 
 public class Displayer {

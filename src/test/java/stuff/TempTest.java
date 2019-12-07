@@ -1,7 +1,5 @@
 package stuff;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.junit.Test;
 import xxx.joker.libs.core.adapter.JkProcess;
 import xxx.joker.libs.core.file.JkFiles;
@@ -10,10 +8,8 @@ import xxx.joker.libs.core.runtime.JkEnvironment;
 import xxx.joker.libs.core.web.JkWeb;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.TreeSet;
