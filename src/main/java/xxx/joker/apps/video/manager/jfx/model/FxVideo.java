@@ -7,29 +7,20 @@ import java.nio.file.Path;
 public class FxVideo {
 
     private Video video;
-    private Path path;
 
     public FxVideo() {
     }
 
-    public FxVideo(Video video, Path path) {
+    public FxVideo(Video video) {
         this.video = video;
-        this.path = path;
     }
 
     public Video getVideo() {
         return video;
     }
 
-    public void setVideo(Video video) {
-        this.video = video;
-    }
-
     public Path getPath() {
-        return path;
+        return video.getVideoResource().getPath();
     }
 
-    public void setPath(Path path) {
-        this.path = path;
-    }
 }

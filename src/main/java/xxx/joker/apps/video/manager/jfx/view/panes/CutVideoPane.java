@@ -148,7 +148,9 @@ public class CutVideoPane extends BorderPane implements Closeable {
                         cats.add(customCat);
                     });
 
-                    cutVideo(btnStartEnd.isDisable(), seekPoints, cats);
+                    new Alert(Alert.AlertType.CONFIRMATION);
+
+                    List<Video> addedList = cutVideo(btnStartEnd.isDisable(), seekPoints, cats);
 
                     Category customCat = JkStreams.findUnique(model.getCategories(), cat -> cat.getName().equals(origSplittedCategory));
                     if (customCat == null) {
@@ -171,7 +173,9 @@ public class CutVideoPane extends BorderPane implements Closeable {
         return box;
     }
 
-    private void cutVideo(boolean splitByPoints, Collection<Duration> seekPoints, Set<Category> customCats) {
+    private List<Video> cutVideo(boolean splitByPoints, Collection<Duration> seekPoints, Set<Category> customCats) {
+        List<Video> addedList = new ArrayList<>();
+
         FxVideo fxVideo = videoPlayer.getFxVideo();
         Path sourcePath = JkFiles.copyInFolder(fxVideo.getPath(), Config.FOLDER_TEMP_CUT);
         Video video = fxVideo.getVideo();
@@ -198,7 +202,9 @@ public class CutVideoPane extends BorderPane implements Closeable {
             if(added != null) {
                 added.getVideo().setTitle(fxVideo.getVideo().getTitle()+"_cut");
                 added.getVideo().getCategories().addAll(cats);
+                addedList.add(added.getVideo());
             }
+
         } else {
             List<Path> finalPaths = new ArrayList<>();
             for(int i = 0; i < spList.size(); i++) {
@@ -220,9 +226,12 @@ public class CutVideoPane extends BorderPane implements Closeable {
                 if(added != null) {
                     added.getVideo().setTitle(strf("%s.%02d_cut", fxVideo.getVideo().getTitle(), index.getAndIncrement()));
                     added.getVideo().getCategories().addAll(cats);
+                    addedList.add(added.getVideo());
                 }
             });
         }
+
+        return addedList;
     }
 
     @Override

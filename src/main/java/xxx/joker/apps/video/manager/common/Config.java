@@ -18,7 +18,7 @@ public class Config {
 //        BASE_FOLDER = JkEnvironment.getAppsFolder().resolve(baseFolderName);
 //    }
 
-//    public static final Path BASE_FOLDER = JkEnvironment.getAppsFolder().resolve("vm-v3-tmp");
+//    public static final Path BASE_FOLDER = JkEnvironment.getAppsFolder().resolve("vmBkp");
     public static final Path BASE_FOLDER = JkEnvironment.getAppsFolder().resolve("video-manager");
 
     public static final Path REPO_FOLDER = BASE_FOLDER.resolve("repo");

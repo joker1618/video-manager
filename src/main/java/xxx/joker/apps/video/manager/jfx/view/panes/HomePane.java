@@ -50,6 +50,7 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import static xxx.joker.libs.core.javafx.JfxControls.*;
+import static xxx.joker.libs.core.lambda.JkStreams.*;
 import static xxx.joker.libs.core.util.JkStrings.strf;
 
 public class HomePane extends BorderPane implements Closeable {
@@ -120,14 +121,16 @@ public class HomePane extends BorderPane implements Closeable {
 
         nameFilter.prefWidthProperty().bind(scrollPane.widthProperty());
 
-        Button button = new Button("CLEAR");
-        button.setOnAction(e -> {
+        Button btnClearSearch = new Button("CLEAR");
+        btnClearSearch.setOnAction(e -> {
             nameFilter.setText("");
             toggleMap.values().forEach(
                     tg -> tg.getValue().selectToggle(JkStruct.getLastElem(tg.getValue().getToggles()))
             );
         });
-        box.getChildren().add(createHBox("centered boxClearOpt", button));
+        Button btnTriggerSearch = new Button("TRIGGER");
+        btnTriggerSearch.setOnAction(e -> sortFilter.triggerSort());
+        box.getChildren().add(createHBox("centered boxSearchBtn", btnTriggerSearch, btnClearSearch));
 
         BorderPane bp = new BorderPane();
         bp.getStyleClass().add("leftPane");
@@ -340,7 +343,14 @@ public class HomePane extends BorderPane implements Closeable {
         alert.setHeaderText(strf("Delete {} videos?", videos.size()));
         Optional<ButtonType> res = alert.showAndWait();
         if(res != null && res.isPresent() && res.get().getButtonData() == ButtonBar.ButtonData.OK_DONE) {
+            Alert dlgWait = new Alert(Alert.AlertType.INFORMATION);
+            dlgWait.getDialogPane().getButtonTypes().clear();
+            dlgWait.setHeaderText(strf("Deleting {} videos", videos.size()));
+            dlgWait.show();
             model.getVideos().removeAll(model.getSelectedVideos());
+            dlgWait.getDialogPane().getButtonTypes().add(ButtonType.OK);
+            dlgWait.close();
+            JfxUtil.alertInfo("Deleted {} videos", videos.size());
         }
     }
 
@@ -473,7 +483,7 @@ public class HomePane extends BorderPane implements Closeable {
 
         double ivWidth = totWidth / ncols;
         double ivHeight = ivWidth / 1.33;
-        List<HBox> ivBoxList = JkStreams.map(snapshots, sn -> {
+        List<HBox> ivBoxList = map(snapshots, sn -> {
             if(sn == null)  return null;
             ImageView iv = createImageView(sn.getImage());
             HBox ivbox = new HBox(iv);
@@ -584,7 +594,7 @@ public class HomePane extends BorderPane implements Closeable {
         fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("MP4", "*.mp4"));
         List<File> files = fc.showOpenMultipleDialog(JfxUtil.getWindow(event));
         if(files != null && !files.isEmpty()) {
-            List<Path> paths = JkStreams.map(files, File::toPath);
+            List<Path> paths = map(files, File::toPath);
             lastAddFolder = JkFiles.getParent(paths.get(0)).toFile();
             addNewVideos(paths);
         }
@@ -598,17 +608,31 @@ public class HomePane extends BorderPane implements Closeable {
         Optional<ButtonType> bt = dlgForceAdd.showAndWait();
         boolean forceAdd = bt.isPresent() && bt.get() == ButtonType.YES;
 
-        Dialog dlgWait = new Dialog();
+//        Dialog dlgWait = new Dialog();
+//        dlgWait.getDialogPane().getButtonTypes().clear();
+//        dlgWait.setTitle(null);
+//        dlgWait.setHeaderText(null);
+//        dlgWait.setContentText(strf("Analyzing {} files", pathList.size()));
+//        dlgWait.show();
+//
+//        pathList.forEach(p -> model.addVideoFile(p, !forceAdd));
+//
+//        dlgWait.getDialogPane().getButtonTypes().add(ButtonType.OK);
+//        dlgWait.close();
+
+        Alert dlgWait = new Alert(Alert.AlertType.INFORMATION);
         dlgWait.getDialogPane().getButtonTypes().clear();
-        dlgWait.setTitle(null);
-        dlgWait.setHeaderText(null);
-        dlgWait.setContentText(strf("Analyzing {} files", pathList.size()));
+        dlgWait.setHeaderText(strf("Analyzing {} files", pathList.size()));
         dlgWait.show();
 
-        pathList.forEach(p -> model.addVideoFile(p, !forceAdd));
+//        pathList.forEach(p -> model.addVideoFile(p, !forceAdd));
+        List<FxVideo> addedList = map(pathList, p -> model.addVideoFile(p, !forceAdd));
+        addedList.removeIf(Objects::isNull);
 
         dlgWait.getDialogPane().getButtonTypes().add(ButtonType.OK);
         dlgWait.close();
+
+        JfxUtil.alertInfo("Added {}/{} videos", addedList.size(), pathList.size());
     }
 
     @Override

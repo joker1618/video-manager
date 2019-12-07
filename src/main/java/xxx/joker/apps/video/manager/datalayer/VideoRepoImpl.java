@@ -43,12 +43,13 @@ public class VideoRepoImpl extends JkRepoFile implements VideoRepo {
         return getDataSet(VideoTracingAdded.class);
     }
 
-    @Override
-    public RepoResource getVideoResource(Video video) {
-        return getResource(video.getMd5(), "videoz");
-    }
+//    @Override
+//    public RepoResource getVideoResource(Video video) {
+//        return getResource(video.getMd5(), "videoz");
+//    }
+//
 
-    @Override
+    @Deprecated
     public Map<Video, RepoResource> getVideoResources(Collection<Video> videos) {
         List<RepoResource> resList = findResources("videoz");
         List<RepoResource> resFilter = JkStreams.filter(resList, res -> JkStreams.count(videos, v -> v.getMd5().equals(res.getMd5())) == 1);

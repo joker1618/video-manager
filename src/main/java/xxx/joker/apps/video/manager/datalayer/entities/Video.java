@@ -2,10 +2,13 @@ package xxx.joker.apps.video.manager.datalayer.entities;
 
 import xxx.joker.libs.core.datetime.JkDuration;
 import xxx.joker.libs.repo.design.SimpleRepoEntity;
+import xxx.joker.libs.repo.design.annotation.directive.CascadeDelete;
 import xxx.joker.libs.repo.design.annotation.marker.EntityField;
 import xxx.joker.libs.repo.design.annotation.marker.EntityPK;
+import xxx.joker.libs.repo.design.entities.RepoResource;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -29,10 +32,17 @@ public class Video extends SimpleRepoEntity {
     private Set<JkDuration> snapTimes;
     @EntityField
     private boolean marked;
+    @EntityField
+    @CascadeDelete
+    private RepoResource videoResource;
 
 
     public Video() {
 //        this.categories = new TreeSet<>();
+    }
+
+    public static Comparator<Video> titleComparator() {
+        return Comparator.comparing(v -> v.getTitle().toLowerCase());
     }
 
     public String getTitle() {
@@ -111,4 +121,11 @@ public class Video extends SimpleRepoEntity {
         this.marked = marked;
     }
 
+    public RepoResource getVideoResource() {
+        return videoResource;
+    }
+
+    public void setVideoResource(RepoResource videoResource) {
+        this.videoResource = videoResource;
+    }
 }

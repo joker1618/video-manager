@@ -23,8 +23,6 @@ public interface VideoRepo extends JkRepo {
     Set<Category> getCategories();
     Set<VideoTracingAdded> getAddedVideoHistory();
 
-    RepoResource getVideoResource(Video video);
-    Map<Video, RepoResource> getVideoResources(Collection<Video> videos);
     RepoResource addVideoResource(Video video, Path filePath);
 
     RepoResource getSnapshotResource(Video video, JkDuration snapTime);

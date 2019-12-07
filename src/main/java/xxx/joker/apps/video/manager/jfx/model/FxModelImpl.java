@@ -31,6 +31,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static xxx.joker.libs.core.lambda.JkStreams.map;
+import static xxx.joker.libs.core.lambda.JkStreams.sorted;
 import static xxx.joker.libs.core.util.JkStrings.strf;
 
 public class FxModelImpl implements FxModel {
@@ -47,7 +48,7 @@ public class FxModelImpl implements FxModel {
 
     private FxModelImpl() {
         videos = FXCollections.observableArrayList(repo.getVideos());
-        videos.sort(Comparator.comparing(v -> v.getTitle().toLowerCase()));
+        videos.sort(Video.titleComparator());
         categories = FXCollections.observableArrayList(repo.getCategories());
         selectedVideos = FXCollections.observableArrayList(new ArrayList<>());
 
@@ -59,7 +60,7 @@ public class FxModelImpl implements FxModel {
             JkStreams.filter(videos, v -> !repo.getVideos().contains(v)).forEach(repo::add);
             JkStreams.filter(repo.getVideos(), v -> !videos.contains(v)).forEach(v -> {
                 try {
-                    repo.remove(repo.getVideoResource(v));
+//                    repo.remove(repo.getVideoResource(v));
                     v.getSnapTimes().forEach(st -> repo.remove(repo.getSnapshotResource(v, st)));
                     repo.remove(v);
                 } catch (Exception ex) {
@@ -104,17 +105,12 @@ public class FxModelImpl implements FxModel {
 
     @Override
     public FxVideo toFxVideo(Video video) {
-        Path videoPath = repo.getVideoResource(video).getPath();
-        return new FxVideo(video, videoPath);
+        return new FxVideo(video);
     }
 
     @Override
     public List<FxVideo> toFxVideos(Collection<Video> videos) {
-        Map<Video, RepoResource> resList = repo.getVideoResources(videos);
-        return JkStreams.mapSort(resList.entrySet(),
-                e -> new FxVideo(e.getKey(), e.getValue().getPath()),
-                Comparator.comparing(fxv -> fxv.getVideo().getTitle().toLowerCase())
-        );
+        return map(sorted(videos, Video.titleComparator()), FxVideo::new);
     }
 
     @Override
@@ -135,14 +131,14 @@ public class FxModelImpl implements FxModel {
             return null;
         }
 
-        FxVideo fxVideo = new FxVideo(video, videoPath);
-        repo.addVideoResource(video, videoPath);
-        addedFiles.add(af);
-        SimpleBooleanProperty finished = readVideoLengthWidthHeight(fxVideo);
+        RepoResource vres = repo.addVideoResource(video, videoPath);
+        video.setVideoResource(vres);
         videos.add(video);
+        addedFiles.add(af);
+        FxVideo fxVideo = new FxVideo(video);
+        SimpleBooleanProperty finished = readVideoLengthWidthHeight(fxVideo);
         finished.addListener((obs,o,n) -> LOG.info("New video added {}", videoPath));
         return fxVideo;
-
     }
 
     @Override

@@ -8,10 +8,7 @@ import xxx.joker.libs.core.file.JkFiles;
 import xxx.joker.libs.core.test.JkTests;
 import xxx.joker.libs.core.util.JkStrings;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 import static xxx.joker.libs.core.lambda.JkStreams.*;
@@ -21,14 +18,14 @@ public class AdjustVideoTitleAction {
 
     public static void adjustTitles(Collection<Video> videos) {
         List<String[]> regexps = readRexExpPairsFromFile();
-        List<Video> sorted = sorted(videos);
+        List<Video> sorted = sorted(videos, Video.titleComparator());
         Map<Video, String> changesMap = toMapSingle(sorted, Function.identity(), v -> applyRegExps(v.getTitle(), regexps));
         List<Video> unchanged = filter(sorted, v -> v.getTitle().equals(changesMap.get(v)));
         List<String> newTitles = map(unchanged, Video::getTitle);
         List<Video> videosToChange = filter(sorted, v -> !unchanged.contains(v));
         for (Video video : videosToChange) {
             String changedTitle = changesMap.get(video);
-            String finalTitle = changedTitle;
+            String finalTitle = StringUtils.capitalize(changedTitle.toLowerCase());
             int counter = 1;
             while (JkTests.containsIgnoreCase(newTitles, finalTitle)) {
                 finalTitle = strf("{}.{}", changedTitle, counter++);
