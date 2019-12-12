@@ -13,7 +13,7 @@ import javafx.scene.media.MediaView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.datalayer.VideoRepo;
-import xxx.joker.apps.video.manager.datalayer.entities.VideoTracingAdded;
+import xxx.joker.apps.video.manager.datalayer.entities.HistoricalFileHash;
 import xxx.joker.apps.video.manager.datalayer.entities.Category;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.apps.video.manager.jfx.view.PanesSelector;
@@ -124,8 +124,8 @@ public class FxModelImpl implements FxModel {
         String finalTitle = computeSafeTitle(video.getTitle());
         video.setTitle(finalTitle);
 
-        Set<VideoTracingAdded> addedFiles = repo.getAddedVideoHistory();
-        VideoTracingAdded af = new VideoTracingAdded(video);
+        Set<HistoricalFileHash> addedFiles = repo.getAddedVideoHistory();
+        HistoricalFileHash af = new HistoricalFileHash(video);
         if(skipIfPreviouslyAdded && addedFiles.contains(af)) {
             LOG.info("Skip add for video {}: previously added and deleted", videoPath);
             return null;

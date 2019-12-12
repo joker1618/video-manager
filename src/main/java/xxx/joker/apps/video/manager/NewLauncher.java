@@ -11,20 +11,9 @@ import org.slf4j.LoggerFactory;
 import xxx.joker.apps.video.manager.action.AdjustVideoTitleAction;
 import xxx.joker.apps.video.manager.common.Config;
 import xxx.joker.apps.video.manager.datalayer.VideoRepo;
-import xxx.joker.apps.video.manager.datalayer.entities.VideoTracingAdded;
 import xxx.joker.apps.video.manager.jfx.model.FxModel;
 import xxx.joker.apps.video.manager.jfx.view.PanesSelector;
-import xxx.joker.libs.core.file.JkEncryption;
 import xxx.joker.libs.core.file.JkFiles;
-import xxx.joker.libs.core.util.JkConvert;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-
-import static xxx.joker.libs.core.lambda.JkStreams.*;
 
 public class NewLauncher extends Application {
 

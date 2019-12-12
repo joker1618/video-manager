@@ -1,7 +1,7 @@
 package xxx.joker.apps.video.manager.datalayer;
 
 import xxx.joker.apps.video.manager.common.Config;
-import xxx.joker.apps.video.manager.datalayer.entities.VideoTracingAdded;
+import xxx.joker.apps.video.manager.datalayer.entities.HistoricalFileHash;
 import xxx.joker.apps.video.manager.datalayer.entities.Category;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.libs.core.datetime.JkDuration;
@@ -39,8 +39,8 @@ public class VideoRepoImpl extends JkRepoFile implements VideoRepo {
     }
 
     @Override
-    public Set<VideoTracingAdded> getAddedVideoHistory() {
-        return getDataSet(VideoTracingAdded.class);
+    public Set<HistoricalFileHash> getAddedVideoHistory() {
+        return getDataSet(HistoricalFileHash.class);
     }
 
 //    @Override
