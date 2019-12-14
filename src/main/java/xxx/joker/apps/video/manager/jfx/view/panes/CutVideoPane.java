@@ -62,10 +62,10 @@ public class CutVideoPane extends BorderPane implements Closeable {
         JfxVideoBuilder vbuilder = new JfxVideoBuilder();
         vbuilder.setShowBorder(true);
         vbuilder.setShowClose(false);
-        vbuilder.setBackward5Milli(1000L);
-        vbuilder.setBackward10Milli(5 * 1000L);
-        vbuilder.setForward5Milli(1000L);
-        vbuilder.setForward10Milli(5 * 1000L);
+        vbuilder.setBackward5Milli(3 * 1000L);
+        vbuilder.setBackward10Milli(10 * 1000L);
+        vbuilder.setForward5Milli(3 * 1000L);
+        vbuilder.setForward10Milli(10 * 1000L);
         videoPlayer = vbuilder.createPane(fxVideo);
 //        return createVBox("centerBox", videoPlayer);
         return videoPlayer;
