@@ -50,7 +50,7 @@ public class AdjustVideoTitleAction {
         for (String[] regexp : regexps) {
             toRet = toRet.replaceAll(regexp[0], regexp[1]);
         }
-        return StringUtils.capitalize(toRet);
+        return StringUtils.capitalize(toRet.toLowerCase());
     }
 
 }

@@ -345,12 +345,13 @@ public class HomePane extends BorderPane implements Closeable {
         if(res != null && res.isPresent() && res.get().getButtonData() == ButtonBar.ButtonData.OK_DONE) {
             Alert dlgWait = new Alert(Alert.AlertType.INFORMATION);
             dlgWait.getDialogPane().getButtonTypes().clear();
-            dlgWait.setHeaderText(strf("Deleting {} videos", videos.size()));
+            int sizeToDel = videos.size();
+            dlgWait.setHeaderText(strf("Deleting {} videos", sizeToDel));
             dlgWait.show();
-            model.getVideos().removeAll(model.getSelectedVideos());
+            model.getVideos().removeAll(videos);
             dlgWait.getDialogPane().getButtonTypes().add(ButtonType.OK);
             dlgWait.close();
-            JfxUtil.alertInfo("Deleted {} videos", videos.size());
+            JfxUtil.alertInfo("Deleted {} videos", sizeToDel);
         }
     }
 

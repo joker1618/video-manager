@@ -20,7 +20,7 @@ public class Actions {
     @Test
     public void cleanRepoAction() {
         VideoRepo repo = VideoRepo.getRepo();
-        List<Path> pathList = repo.cleanRepo();
+        List<Path> pathList = repo.cleanResources();
         display("{} files removed", pathList.size());
         display("END");
     }

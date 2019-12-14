@@ -35,6 +35,9 @@ public class Video extends SimpleRepoEntity {
     @EntityField
     @CascadeDelete
     private RepoResource videoResource;
+    @CascadeDelete
+    @EntityField
+    private Set<VideoSnap> snapshots;
 
 
     public Video() {
@@ -127,5 +130,13 @@ public class Video extends SimpleRepoEntity {
 
     public void setVideoResource(RepoResource videoResource) {
         this.videoResource = videoResource;
+    }
+
+    public Set<VideoSnap> getSnapshots() {
+        return snapshots;
+    }
+
+    public void setSnapshots(Set<VideoSnap> snapshots) {
+        this.snapshots = snapshots;
     }
 }

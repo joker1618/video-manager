@@ -12,14 +12,14 @@ import static xxx.joker.libs.core.util.JkStrings.strf;
 
 public class Config {
 
-//    public static final Path BASE_FOLDER;
-//    static {
-//        String baseFolderName = JkRuntime.isRunFromJar(Config.class) ? "video-manager-v3" : "video-manager-v3-IDE";
-//        BASE_FOLDER = JkEnvironment.getAppsFolder().resolve(baseFolderName);
-//    }
+    public static final Path BASE_FOLDER;
+    static {
+        String baseFolderName = !JkRuntime.isRunFromJar(Config.class) ? "vmBkp" : "video-manager";
+        BASE_FOLDER = JkEnvironment.getAppsFolder().resolve(baseFolderName);
+    }
 
 //    public static final Path BASE_FOLDER = JkEnvironment.getAppsFolder().resolve("vmBkp");
-    public static final Path BASE_FOLDER = JkEnvironment.getAppsFolder().resolve("video-manager");
+//    public static final Path BASE_FOLDER = JkEnvironment.getAppsFolder().resolve("video-manager");
 
     public static final Path REPO_FOLDER = BASE_FOLDER.resolve("repo");
     public static final String DB_NAME = "vm";

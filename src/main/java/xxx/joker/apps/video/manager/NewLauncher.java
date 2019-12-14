@@ -68,7 +68,7 @@ public class NewLauncher extends Application {
         boolean cleanRepo = args.length == 1 && "--clean".equals(args[0]);
         boolean fixTitles = args.length == 1 && "--fixTitles".equals(args[0]);
         if(cleanRepo) {
-            VideoRepo.getRepo().cleanRepo();
+            VideoRepo.getRepo().cleanResources();
             Platform.exit();
         } else if(fixTitles) {
             VideoRepo repo = VideoRepo.getRepo();
