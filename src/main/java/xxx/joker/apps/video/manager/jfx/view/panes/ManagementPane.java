@@ -204,10 +204,10 @@ public class ManagementPane extends BorderPane implements Closeable {
         btnDelete.disableProperty().bind(showingPlayer.isNull());
         btnDelete.setOnAction(e -> {
             Video video = showingPlayer.get().getFxVideo().getVideo();
-            updateShowingVideo(videoIndex.get() + 1);
-            model.getVideos().remove(video);
             obsSnapList.clear();
             videoListView.getItems().remove(video);
+            model.getVideos().remove(video);
+            updateShowingVideo(videoIndex.get());
         });
         HBox snapSubBox = createHBox("subBox", btnAutoSnap, btnClearSnaps);
 

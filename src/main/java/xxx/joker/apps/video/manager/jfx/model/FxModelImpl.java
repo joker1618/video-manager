@@ -79,7 +79,9 @@ public class FxModelImpl implements FxModel {
 
         categories.addListener((ListChangeListener<? super Category>) lc -> {
             JkStreams.filter(categories, c -> !repo.getCategories().contains(c)).forEach(repo::add);
-            JkStreams.filter(repo.getCategories(), c -> !categories.contains(c)).forEach(repo::remove);
+            List<Category> removed = JkStreams.filter(repo.getCategories(), c -> !categories.contains(c));
+            removed.forEach(cat -> repo.removeFromDependencies(cat, videos));
+            repo.removeAll(removed);
         });
     }
 

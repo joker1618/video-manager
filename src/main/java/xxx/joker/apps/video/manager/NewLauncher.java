@@ -13,6 +13,7 @@ import xxx.joker.apps.video.manager.common.Config;
 import xxx.joker.apps.video.manager.datalayer.VideoRepo;
 import xxx.joker.apps.video.manager.jfx.model.FxModel;
 import xxx.joker.apps.video.manager.jfx.view.PanesSelector;
+import xxx.joker.libs.core.debug.JkDebug;
 import xxx.joker.libs.core.file.JkFiles;
 
 public class NewLauncher extends Application {
@@ -22,6 +23,12 @@ public class NewLauncher extends Application {
     public static boolean scenicView;
 
     private PanesSelector panesSel = PanesSelector.getInstance();
+
+    @Override
+    public void init() throws Exception {
+        JkDebug.start("main");
+    }
+
 
     @Override
     public void start(Stage primaryStage) {
@@ -62,6 +69,8 @@ public class NewLauncher extends Application {
         JkFiles.delete(Config.FOLDER_TEMP_CUT);
         FxModel.getModel().persistData();
         LOG.info("Closing app");
+        JkDebug.stop("main");
+//        JkDebug.displayTimes();
     }
 
     public static void main(String[] args) {

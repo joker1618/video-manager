@@ -171,6 +171,7 @@ public class HomePane extends BorderPane implements Closeable {
         tableVideos.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         JfxTableCol<Video, String> tcolTitle = JfxTableCol.createCol("VIDEO", "title");
+        tcolTitle.setComparator(String::compareToIgnoreCase);
         tableVideos.getColumns().add(tcolTitle);
         tcolTitle.setFixedPrefWidth(500);
 
