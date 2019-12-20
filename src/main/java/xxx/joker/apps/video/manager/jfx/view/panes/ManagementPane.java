@@ -4,9 +4,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
+import javafx.collections.*;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -17,10 +15,13 @@ import javafx.scene.layout.*;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xxx.joker.apps.video.manager.common.Config;
 import xxx.joker.apps.video.manager.datalayer.entities.Category;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
+import xxx.joker.apps.video.manager.ffmpeg.FFMPEGAdapter;
 import xxx.joker.apps.video.manager.jfx.model.FxModel;
 import xxx.joker.apps.video.manager.jfx.model.FxSnapshot;
 import xxx.joker.apps.video.manager.jfx.model.FxVideo;
@@ -29,13 +30,20 @@ import xxx.joker.apps.video.manager.jfx.view.managers.SnapshotManager;
 import xxx.joker.apps.video.manager.jfx.view.provider.IconProvider;
 import xxx.joker.apps.video.manager.jfx.view.videoplayer.JfxVideoBuilder;
 import xxx.joker.apps.video.manager.jfx.view.videoplayer.JfxVideoPlayer;
+import xxx.joker.libs.core.cache.JkCache;
 import xxx.joker.libs.core.datetime.JkDuration;
+import xxx.joker.libs.core.file.JkFiles;
+import xxx.joker.libs.core.javafx.JfxUtil;
 import xxx.joker.libs.core.lambda.JkStreams;
+import xxx.joker.libs.core.util.JkConvert;
 
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static xxx.joker.libs.core.javafx.JfxControls.*;
+import static xxx.joker.libs.core.lambda.JkStreams.*;
 import static xxx.joker.libs.core.util.JkStrings.strf;
 
 public class ManagementPane extends BorderPane implements Closeable {
@@ -56,7 +64,9 @@ public class ManagementPane extends BorderPane implements Closeable {
     private final JfxVideoBuilder vpBuilder;
 
     private ObservableList<JkDuration> obsSnapList = FXCollections.observableArrayList(new ArrayList<>());
+    private List<Runnable> closeActions = new ArrayList<>();
 
+    private final Image imgDelete;
 
     public ManagementPane(ObservableList<Video> videos) {
         this.videos = FXCollections.observableArrayList(videos);
@@ -71,12 +81,19 @@ public class ManagementPane extends BorderPane implements Closeable {
         vpBuilder.setBtnCameraRunnable(this::updateSnapshotsPane);
         vpBuilder.setNextAction(e -> updateShowingVideo(videoIndex.get() + 1));
         vpBuilder.setPreviousAction(e -> updateShowingVideo(videoIndex.get() - 1));
+        vpBuilder.setBackward5Milli(3 * 1000L);
+        vpBuilder.setBackward10Milli(10 * 1000L);
+        vpBuilder.setForward5Milli(3 * 1000L);
+        vpBuilder.setForward10Milli(10 * 1000L);
 
         setLeft(createVideoListViewPane());
         setCenter(createPlayerPane());
-        setRight(createSnapshotsPane());
+        setRight(createRightPane());
 
         getStylesheets().add(getClass().getResource("/css/ManagementPane.css").toExternalForm());
+
+        imgDelete = new IconProvider().getIconImage(IconProvider.DELETE_RED);
+
 
     }
 
@@ -253,14 +270,126 @@ public class ManagementPane extends BorderPane implements Closeable {
         }
         obsSnapList.setAll(snapTimes);
     }
-    private Node createSnapshotsPane() {
+    private Node createRightPane() {
+        BorderPane snapPane = createSnapshotsPane();
+        VBox rightBox = createVBox("rightBox", snapPane);
+        JkCache<Video, Pane> cacheCutPointsPane = new JkCache<>();
+        Map<Video, MutablePair<CutType, ObservableSet<Duration>>> cutPointsMap = new HashMap<>();
+        showingPlayer.addListener((obs,o,n) -> {
+            ObservableList<Node> children = rightBox.getChildren();
+            if(children.size() == 2)
+                children.remove(0);
+            if(n != null) {
+                Video selVideo = n.getFxVideo().getVideo();
+                Pane cutPPane = cacheCutPointsPane.get(selVideo, () -> {
+                    MutablePair<CutType, ObservableSet<Duration>> pair = MutablePair.of(CutType.NONE, FXCollections.observableSet());
+                    cutPointsMap.put(selVideo, pair);
+                    return createCutPointsPane(pair);
+                });
+                children.add(0, cutPPane);
+            }
+        });
+        closeActions.add(() -> manageCut(cutPointsMap));
+        return rightBox;
+    }
+    private void manageCut(Map<Video, MutablePair<CutType, ObservableSet<Duration>>> map) {
+        List<Video> toCutVideos = filterMap(map.entrySet(), e -> !e.getValue().getRight().isEmpty(), Map.Entry::getKey);
+        if(toCutVideos.isEmpty())
+            return;
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setHeaderText(strf("Cut {} videos?", toCutVideos.size()));
+        Optional<ButtonType> res = alert.showAndWait();
+        if(res != null && res.isPresent() && res.get().getButtonData() == ButtonBar.ButtonData.OK_DONE) {
+            Alert dlgWait = new Alert(Alert.AlertType.INFORMATION);
+            dlgWait.getDialogPane().getButtonTypes().clear();
+            dlgWait.setHeaderText(strf("Start cutting {} videos", toCutVideos.size()));
+            dlgWait.show();
+
+            AtomicInteger cutted = new AtomicInteger(0);
+            toCutVideos.forEach(video -> {
+                MutablePair<CutType, ObservableSet<Duration>> pair = map.get(video);
+                if(!pair.right.isEmpty() && (pair.left != CutType.START_END || pair.right.size() % 2 == 0)) {
+                    List<Video> cutPieces = cutVideo(video, pair.left, pair.right);
+                    if(!cutPieces.isEmpty()) {
+                        cutted.getAndIncrement();
+                        video.getCategories().add(model.getCategoryOrAdd("cutted"));
+                    }
+                }
+            });
+
+            dlgWait.getDialogPane().getButtonTypes().add(ButtonType.OK);
+            dlgWait.close();
+            JfxUtil.alertInfo("Cut {}/{} videos", cutted.get(), toCutVideos.size());
+            map.clear();
+        }
+    }
+    private List<Video> cutVideo(Video video, CutType cutType, Collection<Duration> seekPoints) {
+        List<Video> addedList = new ArrayList<>();
+
+        FxVideo fxVideo = model.toFxVideo(video);
+        Path sourcePath = JkFiles.copyInFolder(fxVideo.getPath(), Config.FOLDER_TEMP_CUT);
+
+        Set<Category> cats = new TreeSet<>(video.getCategories());
+        cats.add(model.getCategoryOrAdd("cutPiece"));
+
+        List<Duration> spList = JkConvert.toList(seekPoints);
+        if(cutType == CutType.START_END) {
+            List<Path> cutList = new ArrayList<>();
+            for(int i = 0; i < spList.size(); i += 2) {
+                double startMs = spList.get(i).toMillis();
+                double endMs = spList.get(i + 1).toMillis();
+                Path cut = FFMPEGAdapter.cutVideo(sourcePath, startMs, endMs - startMs);
+                cutList.add(cut);
+            }
+            Path finalPath;
+            if(cutList.size() > 1) {
+                finalPath = FFMPEGAdapter.concat(cutList);
+            } else {
+                finalPath = cutList.get(0);
+            }
+            FxVideo added = model.addVideoFile(finalPath, false);
+            if(added != null) {
+                added.getVideo().setTitle(fxVideo.getVideo().getTitle()+"_cut");
+                added.getVideo().getCategories().addAll(cats);
+                addedList.add(added.getVideo());
+            }
+
+        } else if(cutType == CutType.POINTS ){
+            List<Path> finalPaths = new ArrayList<>();
+            for(int i = 0; i < spList.size(); i++) {
+                long msDur = (long) spList.get(i).toMillis();
+                if(i == 0 && msDur > 0) {
+                    finalPaths.add(FFMPEGAdapter.cutVideo(sourcePath, 0, msDur));
+                }
+                if(i == spList.size() - 1) {
+                    if(msDur < fxVideo.getVideo().getLength().toMillis()) {
+                        finalPaths.add(FFMPEGAdapter.cutVideo(sourcePath, msDur, (fxVideo.getVideo().getLength().toMillis()) - msDur));
+                    }
+                } else {
+                    finalPaths.add(FFMPEGAdapter.cutVideo(sourcePath, msDur, ((long) spList.get(i + 1).toMillis()) - msDur));
+                }
+            }
+            AtomicInteger index = new AtomicInteger(0);
+            finalPaths.forEach(fp -> {
+                FxVideo added = model.addVideoFile(fp, false);
+                if(added != null) {
+                    added.getVideo().setTitle(strf("%s.%02d_cut", fxVideo.getVideo().getTitle(), index.getAndIncrement()));
+                    added.getVideo().getCategories().addAll(cats);
+                    addedList.add(added.getVideo());
+                }
+            });
+        }
+
+        return addedList;
+    }
+    private BorderPane createSnapshotsPane() {
         BorderPane toRet = new BorderPane();
-        toRet.getStyleClass().add("rightBox");
+        toRet.getStyleClass().add("snapPane");
 
         Label lblTitle = new Label();
         toRet.setTop(createHBox("btop", lblTitle));
 
-        Image imgDelete = new IconProvider().getIconImage(IconProvider.DELETE_RED);
         obsSnapList.addListener((ListChangeListener<JkDuration>)c -> {
             lblTitle.setText(strf("Snapshots ({})", obsSnapList.size()));
 
@@ -310,7 +439,7 @@ public class ManagementPane extends BorderPane implements Closeable {
         Optional<String> opt = dlg.showAndWait();
         if(opt.isPresent()) {
             String trimmed = StringUtils.trim(opt.get());
-            if(StringUtils.isNotBlank(trimmed) && JkStreams.filter(model.getCategories(), cat -> cat.getName().equalsIgnoreCase(trimmed)).isEmpty()) {
+            if(StringUtils.isNotBlank(trimmed) && filter(model.getCategories(), cat -> cat.getName().equalsIgnoreCase(trimmed)).isEmpty()) {
                 Category cat = new Category(trimmed);
                 model.getCategories().add(cat);
                 updateCategoriesCheckBoxes();
@@ -332,7 +461,7 @@ public class ManagementPane extends BorderPane implements Closeable {
             videoPlayer.closePlayer();
         }
         if(newIndex >= 0 && newIndex < videos.size()) {
-            Video video = JkStreams.filter(model.getVideos(), v -> videos.get(newIndex).getTitle().equals(v.getTitle())).get(0);
+            Video video = filter(model.getVideos(), v -> videos.get(newIndex).getTitle().equals(v.getTitle())).get(0);
             FxVideo FxVideo = model.toFxVideo(video);
             JfxVideoPlayer vp = vpBuilder.createPane(FxVideo);
             vp.play();
@@ -342,7 +471,7 @@ public class ManagementPane extends BorderPane implements Closeable {
         }
         videoListView.refresh();
     }
-    
+
     private void updateCategoriesCheckBoxes() {
         checkBoxCategoryMap.entrySet().removeIf(e -> !model.getCategories().contains(e.getKey()));
         for(Category cat : model.getCategories()) {
@@ -386,7 +515,7 @@ public class ManagementPane extends BorderPane implements Closeable {
         for (Category cat : model.getCategories()) {
             checkBoxCategoryMapMulti.get(cat).setIndeterminate(false);
             checkBoxCategoryMapMulti.get(cat).setSelected(false);
-            int num = JkStreams.filter(sel, Objects::nonNull, v -> v.getCategories().contains(cat)).size();
+            int num = filter(sel, Objects::nonNull, v -> v.getCategories().contains(cat)).size();
             if(sel.isEmpty()) {
                 checkBoxCategoryMapMulti.get(cat).setSelected(false);
             } else if(num == sel.size()) {
@@ -415,7 +544,7 @@ public class ManagementPane extends BorderPane implements Closeable {
             video.getCategories().remove(category);
         }
     }
-    
+
     private void manageAutoSnap(Video video) {
         AtomicBoolean doPlay = new AtomicBoolean(false);
         SimpleObjectProperty<MediaPlayer> mp = new SimpleObjectProperty<>();
@@ -441,6 +570,69 @@ public class ManagementPane extends BorderPane implements Closeable {
         if (videoPlayer != null) {
             videoPlayer.closePlayer();
         }
+        closeActions.forEach(Runnable::run);
         LOG.debug("Closed management pane");
     }
-}
+
+    private Pane createCutPointsPane(MutablePair<CutType, ObservableSet<Duration>> pair) {
+        ObservableSet<Duration> seekPoints = pair.getRight();
+
+        VBox toRet = new VBox();
+        toRet.getStyleClass().add("cutPointsPane");
+
+        Label lblTitle = new Label("CUT POINTS");
+
+        Button btnStartEnd = new Button("SET START");
+        Button btnCutPoint = new Button("SET POINT");
+
+        HBox topBox = createHBox("btop", lblTitle);
+        HBox btnBox = createHBox("buttonsBox", btnStartEnd, btnCutPoint);
+        HBox spBox = createHBox("seekPointsBox");
+        toRet.getChildren().addAll(topBox, btnBox, spBox);
+
+        Image imgDel = new IconProvider().getIconImage(IconProvider.DELETE_RED);
+
+        seekPoints.addListener((SetChangeListener<Duration>) c -> {
+            if(seekPoints.isEmpty()) {
+                btnStartEnd.setDisable(false);
+                btnCutPoint.setDisable(false);
+                pair.setLeft(CutType.NONE);
+            }
+            if(!btnStartEnd.isDisable()) {
+                btnStartEnd.setText("SET " + (seekPoints.size()%2==0 ? "START" : "END"));
+            }
+            GridPaneBuilder gpBuilder = new GridPaneBuilder();
+            int row = 0;
+            for (Duration sp : sorted(seekPoints)) {
+                if(!btnStartEnd.isDisable()) {
+                    gpBuilder.add(row, 0, row%2==0 ? "S" : "E");
+                }
+                int col = !btnStartEnd.isDisable() ? 1 : 0;
+                gpBuilder.add(row, col++, JkDuration.of(sp).strElapsed());
+                Button btnSeek = new Button("SEEK");
+                gpBuilder.add(row, col++, btnSeek);
+                btnSeek.setOnAction(e -> showingPlayer.get().getMediaView().getMediaPlayer().seek(sp));
+                Button btnDel = new Button();
+                btnDel.getStyleClass().add("btnDel");
+                btnDel.setGraphic(createImageView(imgDel, 30, 30));
+                btnDel.setOnAction(e -> seekPoints.remove(sp));
+                gpBuilder.add(row, col++, btnDel);
+                row++;
+            }
+            spBox.getChildren().setAll(gpBuilder.createGridPane());
+        });
+
+        btnStartEnd.setOnAction(e -> {
+            btnCutPoint.setDisable(true);
+            pair.setLeft(CutType.START_END);
+            seekPoints.add(showingPlayer.get().getMediaView().getMediaPlayer().getCurrentTime());
+        });
+
+        btnCutPoint.setOnAction(e -> {
+            btnStartEnd.setDisable(true);
+            pair.setLeft(CutType.POINTS);
+            seekPoints.add(showingPlayer.get().getMediaView().getMediaPlayer().getCurrentTime());
+        });
+
+        return toRet;
+    }}

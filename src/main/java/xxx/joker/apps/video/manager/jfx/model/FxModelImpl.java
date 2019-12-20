@@ -96,6 +96,16 @@ public class FxModelImpl implements FxModel {
     }
 
     @Override
+    public Category getCategoryOrAdd(String catName) {
+        Category category = repo.get(Category.class, c -> c.getName().equals(catName));
+        if(category == null) {
+            category = new Category(catName);
+            getCategories().add(category);
+        }
+        return category;
+    }
+
+    @Override
     public ObservableList<Category> getCategories() {
         return categories;
     }

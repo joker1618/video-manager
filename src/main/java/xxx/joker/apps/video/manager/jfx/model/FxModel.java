@@ -16,6 +16,7 @@ public interface FxModel {
     }
 
     ObservableList<Video> getVideos();
+    Category getCategoryOrAdd(String catName);
     ObservableList<Category> getCategories();
 
     ObservableList<Video> getSelectedVideos();

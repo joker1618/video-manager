@@ -86,26 +86,51 @@
 
 /* RIGHT */
 .rightBox {
-    -fx-background-color: -container-bg-color;
+    -fx-alignment: TOP-CENTER;
     -fx-padding: 10;
+    -fx-spacing: 10;
+    -fx-background-color: -container-bg-color;
     -fx-border-width: 0 0 0 1;
     -fx-border-color: -container-border-color;
 }
 .rightBox .btop {
     -fx-alignment: CENTER;
-    -fx-padding: 0 0 15 0;
     -fx-font-weight: BOLD;
     -fx-font-size: 16;
 }
-
-.rightBox .jfxGridBox {
+.rightBox .snapPane .btop {
+    -fx-padding: 0 0 15 0;
+}
+.rightBox .cutPointsPane {
+   -fx-padding: 0 0 15 0;
+   -fx-border-color: -container-border-color;
+   -fx-border-width: 0 0 1 0;
+}
+.rightBox .cutPointsPane .buttonsBox {
+    -fx-padding: 5 0 10 0;
+    -fx-alignment: CENTER;
+    -fx-spacing: 20;
+}
+.rightBox .cutPointsPane .seekPointsBox {
+    -fx-alignment: CENTER;
+}
+.rightBox .snapPane .jfxGridBox {
     -fx-hgap: 5;
     -fx-vgap: 5;
 }
-.rightBox .scroll-pane {
+.rightBox .snapPane .scroll-pane {
     -fx-border-width: 0;
     -fx-pref-width: 510;
 }
-.rightBox .scroll-pane .viewport {
+.rightBox .snapPane .scroll-pane .viewport {
     -fx-background-color: -container-bg-color;
+}
+.rightBox .cutPointsPane .jfxGridBox .cellBox {
+    -fx-alignment: CENTER;
+    -fx-padding: 5 3 5 3;
+}
+.rightBox .cutPointsPane .jfxGridBox .btnDel {
+    -fx-padding: 0;
+    -fx-pref-height: 25;
+    -fx-pref-width: 25;
 }
