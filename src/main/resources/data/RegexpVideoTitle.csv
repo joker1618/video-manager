@@ -1,16 +1,30 @@
 TO_DELETE|TO_INSERT|DUMMY (empty)
--[0-9]{3}-(?i)YouPorn.*||
--[0-9]{3}-(?i)XHamster.*||
--[0-9]{3}-(?i)PornHub.*||
--[0-9]{3}-(?i)RedTube.*||
--[0-9]{3}-(?i)Tube8.*||
-Free(?!.*Free).*Porn.*||
--.*viptubecom$||
--.*(?i)XVIDEOSCOM.*||
--.*(?i)- XNXXCOM.*||
+
+(-[0-9]{3}-)?(?i)YouPorn.*||
+(-[0-9]{3}-)?(?i)XHamster.*||
+(-[0-9]{3}-)?(?i)PornHub.*||
+(-[0-9]{3}-)?(?i)RedTube.*||
+(-[0-9]{3}-)?(?i)Tube8.*||
+
+(?i)Free Porn( [a-z]{1,2})?$||
+(?i)XNXXCOM.*||
+(?i)XVIDEOSCOM.*||
+(?i)Pornhub.*||
+
+(?i)CheapAsianTeens.*||
+(?i)BKKNightguide.*||
+(?i)Porn Video f it.*||
+(?i)Free Amateur .*Porn Video it.*||
+(?i)Free Asian .*Porn Video it.*||
+-[^-]*(?i)porn tube free sex videos.*||
+
+(?i)Porn f?$||
+
 _cut[.\d]*$||
+
 _| |
 \s+| |
 ^\s+||
 \s+$||
+
 ([.]\d+)+$||

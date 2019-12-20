@@ -1,23 +1,7 @@
-package operations;
+package modelChanges;
 
 import org.junit.Test;
-import xxx.joker.apps.video.manager.datalayer.VideoRepo;
-import xxx.joker.apps.video.manager.datalayer.VideoRepoImpl;
-import xxx.joker.apps.video.manager.datalayer.entities.Video;
-import xxx.joker.apps.video.manager.datalayer.entities.VideoSnap;
-import xxx.joker.apps.video.manager.jfx.model.FxModel;
-import xxx.joker.apps.video.manager.jfx.model.FxSnapshot;
-import xxx.joker.libs.core.datetime.JkDuration;
-import xxx.joker.libs.core.util.JkConvert;
-import xxx.joker.libs.repo.design.entities.RepoResource;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static xxx.joker.libs.core.lambda.JkStreams.map;
 import static xxx.joker.libs.core.util.JkConsole.display;
 
 public class PutSnapshotsInVideo {

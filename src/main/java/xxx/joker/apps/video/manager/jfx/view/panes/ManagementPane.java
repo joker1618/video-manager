@@ -13,10 +13,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
 import org.apache.commons.lang3.StringUtils;
@@ -187,6 +184,7 @@ public class ManagementPane extends BorderPane implements Closeable {
             txtTitle.setText(newTitle);
         });
         HBox hboxChangeTitle = createHBox("subBox titleBox", new Label("Video title:"), txtTitle, btnChangeTitle);
+        HBox.setHgrow(txtTitle, Priority.SOMETIMES);
 
         Button btnAutoSnap = new Button("AUTOSNAP");
         btnAutoSnap.setOnAction(e -> manageAutoSnap(showingPlayer.get().getFxVideo().getVideo()));

@@ -1,4 +1,4 @@
-package stuff;
+package actions;
 
 import org.junit.Test;
 import xxx.joker.apps.video.manager.datalayer.VideoRepo;
@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static xxx.joker.libs.core.util.JkConsole.display;
 
-public class ExportVideos {
+public class ExportVideosAction {
 
     @Test
     public void doExportVideos() {

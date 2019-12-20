@@ -3,6 +3,7 @@ package stuff;
 import org.junit.Test;
 import xxx.joker.libs.core.adapter.JkProcess;
 import xxx.joker.libs.core.file.JkFiles;
+import xxx.joker.libs.core.format.JkViewBuilder;
 import xxx.joker.libs.core.lambda.JkStreams;
 import xxx.joker.libs.core.runtime.JkEnvironment;
 import xxx.joker.libs.core.web.JkWeb;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.TreeSet;
 
 import static xxx.joker.libs.core.util.JkConsole.display;
+import static xxx.joker.libs.core.util.JkConsole.displayColl;
 import static xxx.joker.libs.core.util.JkStrings.strf;
 
 public class TempTest {
@@ -26,6 +28,24 @@ public class TempTest {
         Path outPath = JkEnvironment.getHomeFolder().resolve("Desktop/dwweb").resolve(url.replaceAll("\\?.*", "").replaceAll("^.*/", ""));
         JkWeb.downloadResource(url, outPath);
         display("END");
+    }
+    @Test
+    public void strRegex() throws IOException {
+        String[] strings = {
+                "African Girl Gives Amazing Blowjob Free Porn a",
+                "Amateur Bigg Tits Black Teen Bj Free Porn",
+                "Amateur Bigg Tits Black Teen Bj Free Porn aa",
+                "Amateur Bigg Tits Black Teen Bj Free Porn A"
+        };
+        String pattern = "(?i)Free Porn( a)?$";
+        String replacement = "";
+
+        JkViewBuilder vb = new JkViewBuilder();
+        for (String str : strings) {
+            String newStr = str.replaceAll(pattern, replacement);
+            vb.addLines("{}|{}|{}", str, str.equals(newStr)?"":"<>", newStr);
+        }
+        displayColl(vb.toLines("|", 2));
     }
     @Test
     public void dwhtml() throws IOException {

@@ -1,10 +1,9 @@
-package operations;
+package modelChanges;
 
 import org.junit.Test;
 import xxx.joker.apps.video.manager.datalayer.VideoRepo;
 import xxx.joker.apps.video.manager.datalayer.VideoRepoImpl;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
-import xxx.joker.apps.video.manager.jfx.model.FxModel;
 import xxx.joker.libs.repo.design.entities.RepoResource;
 
 import java.util.Map;

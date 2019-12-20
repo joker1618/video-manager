@@ -1,14 +1,10 @@
-package stuff;
+package actions;
 
-import javafx.scene.control.Alert;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import xxx.joker.apps.video.manager.action.AdjustVideoTitleAction;
 import xxx.joker.apps.video.manager.datalayer.VideoRepo;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.libs.core.format.JkOutput;
-import xxx.joker.libs.core.javafx.JfxUtil;
-import xxx.joker.libs.core.util.JkConsole;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -19,18 +15,10 @@ import static xxx.joker.libs.core.lambda.JkStreams.*;
 import static xxx.joker.libs.core.util.JkConsole.display;
 import static xxx.joker.libs.core.util.JkStrings.strf;
 
-public class Actions {
+public class TitleNormalizationAction {
 
     @Test
-    public void cleanRepoAction() {
-        VideoRepo repo = VideoRepo.getRepo();
-        List<Path> pathList = repo.cleanResources();
-        display("{} files removed", pathList.size());
-        display("END");
-    }
-
-    @Test
-    public void changeVideoTitlesAction() {
+    public void doTitleNormalization() {
         VideoRepo repo = VideoRepo.getRepo();
         Map<Video, String> map = toMapSingle(repo.getVideos(), Function.identity(), Video::getTitle);
         AdjustVideoTitleAction.adjustTitles(repo.getVideos());
@@ -44,4 +32,5 @@ public class Actions {
 
         display("END");
     }
+
 }

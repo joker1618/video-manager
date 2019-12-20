@@ -70,7 +70,6 @@
 }
 .centerBox .topBox .subBox.titleBox { -fx-padding: 0 0 10 0 }
 .centerBox .topBox .subBox .text-field {
-    -fx-pref-width: 300;
     -fx-font-size: 14;
 }
 .centerBox .topBox .button {

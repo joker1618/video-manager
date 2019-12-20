@@ -1,4 +1,4 @@
-package stuff;
+package actions;
 
 import org.junit.Test;
 import xxx.joker.apps.video.manager.datalayer.VideoRepo;
@@ -19,16 +19,16 @@ import java.util.Set;
 import static xxx.joker.libs.core.util.JkConsole.display;
 import static xxx.joker.libs.core.util.JkStrings.strf;
 
-public class Displayer {
+public class DisplayRepoAction {
 
     @Test
-    public void checkSnapshots() throws IOException {
+    public void doDisplayResourcesDetails() throws IOException {
         VideoRepo repo = VideoRepo.getRepo();
         Set<Video> videos = repo.getVideos();
         List<RepoResource> resVideos = repo.findResources("snapshot");
         List<JkDuration> allSnaps = JkStreams.flatMap(videos, Video::getSnapTimes);
         List<String> lines = new ArrayList<>();
-        lines.add(strf("Resources:|{}", resVideos.size()));
+        lines.add(strf("Videos:|{}", resVideos.size()));
         lines.add(strf("Snap times:|{}", allSnaps.size()));
         List<Path> folders = JkFiles.findFolders(repo.getRepoCtx().getResourcesFolder(), false);
         for (Path folder : folders) {

@@ -106,6 +106,7 @@ public class HomePane extends BorderPane implements Closeable {
         ObservableList<Toggle> toggles = toggleMap.get("Search type:").getValue().getToggles();
         ((RadioButton)toggles.get(0)).setText("AND");
         ((RadioButton)toggles.get(1)).setText("OR");
+        ((RadioButton)toggles.get(1)).setSelected(true);
         addRadioLine(gb, "Cataloged:", 1, sortFilter::setCataloged, true, false, true);
         addRadioLine(gb, "Marked:", 2, sortFilter::setMarked, true, false, true);
         box.getChildren().add(gb.createGridPane());
@@ -585,8 +586,8 @@ public class HomePane extends BorderPane implements Closeable {
 
     public void refreshView() {
         fillGpCategFilter();
-        tableVideos.refresh();
         sortFilter.triggerSort();
+        tableVideos.refresh();
     }
 
     private File lastAddFolder;
