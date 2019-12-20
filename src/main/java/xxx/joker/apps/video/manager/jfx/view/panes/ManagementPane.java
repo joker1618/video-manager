@@ -580,7 +580,7 @@ public class ManagementPane extends BorderPane implements Closeable {
         VBox toRet = new VBox();
         toRet.getStyleClass().add("cutPointsPane");
 
-        Label lblTitle = new Label("CUT POINTS");
+        Label lblTitle = new Label("Cut points");
 
         Button btnStartEnd = new Button("SET START");
         Button btnCutPoint = new Button("SET POINT");
