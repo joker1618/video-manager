@@ -1,10 +1,14 @@
 package stuff;
 
+import javafx.scene.control.Alert;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import xxx.joker.apps.video.manager.action.AdjustVideoTitleAction;
 import xxx.joker.apps.video.manager.datalayer.VideoRepo;
 import xxx.joker.apps.video.manager.datalayer.entities.Video;
 import xxx.joker.libs.core.format.JkOutput;
+import xxx.joker.libs.core.javafx.JfxUtil;
+import xxx.joker.libs.core.util.JkConsole;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -30,12 +34,13 @@ public class Actions {
         VideoRepo repo = VideoRepo.getRepo();
         Map<Video, String> map = toMapSingle(repo.getVideos(), Function.identity(), Video::getTitle);
         AdjustVideoTitleAction.adjustTitles(repo.getVideos());
-        repo.commit();
 
         List<Video> diffs = filterSort(map.keySet(), v -> !v.getTitle().equals(map.get(v)), Video.titleComparator());
         List<String> lines = map(diffs, v -> strf("{}|{}", map.get(v), v.getTitle()));
         display(JkOutput.columnsView(lines));
         display("{} titles modified", diffs.size());
+
+//        repo.commit();
 
         display("END");
     }

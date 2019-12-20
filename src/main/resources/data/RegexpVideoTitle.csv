@@ -1,11 +1,16 @@
 TO_DELETE|TO_INSERT|DUMMY (empty)
--[0-9]{3}-YouPorn.*||
--[0-9]{3}-XHamster.*||
--[0-9]{3}-PornHub.*||
--[0-9]{3}-RedTube.*||
+-[0-9]{3}-(?i)YouPorn.*||
+-[0-9]{3}-(?i)XHamster.*||
+-[0-9]{3}-(?i)PornHub.*||
+-[0-9]{3}-(?i)RedTube.*||
+-[0-9]{3}-(?i)Tube8.*||
+Free(?!.*Free).*Porn.*||
+-.*viptubecom$||
+-.*(?i)XVIDEOSCOM.*||
+-.*(?i)- XNXXCOM.*||
 _cut[.\d]*$||
 _| |
- +| |
-^ +||
- +$||
+\s+| |
+^\s+||
+\s+$||
 ([.]\d+)+$||

@@ -128,9 +128,10 @@ public class HomePane extends BorderPane implements Closeable {
                     tg -> tg.getValue().selectToggle(JkStruct.getLastElem(tg.getValue().getToggles()))
             );
         });
-        Button btnTriggerSearch = new Button("TRIGGER");
-        btnTriggerSearch.setOnAction(e -> sortFilter.triggerSort());
-        box.getChildren().add(createHBox("centered boxSearchBtn", btnTriggerSearch, btnClearSearch));
+//        Button btnTriggerSearch = new Button("TRIGGER");
+//        btnTriggerSearch.setOnAction(e -> sortFilter.triggerSort());
+//        box.getChildren().add(createHBox("centered boxSearchBtn", btnTriggerSearch, btnClearSearch));
+        box.getChildren().add(createHBox("centered boxSearchBtn", btnClearSearch));
 
         BorderPane bp = new BorderPane();
         bp.getStyleClass().add("leftPane");
@@ -281,7 +282,7 @@ public class HomePane extends BorderPane implements Closeable {
                         holdVideos.removeAll(model.getSelectedVideos());
                         btnHold.setText(lblHold);
                     }
-                    sortFilter.triggerSort();
+//                    sortFilter.triggerSort();
                 }
             }
         });
@@ -291,14 +292,15 @@ public class HomePane extends BorderPane implements Closeable {
         btnMark.setOnAction(e -> {
             synchronized (model.getSelectedVideos()) {
                 if(!model.getSelectedVideos().isEmpty()) {
+                    List<Video> selVideos = new ArrayList<>(model.getSelectedVideos());
                     if(lblMark.equals(btnMark.getText())) {
-                        model.getSelectedVideos().forEach(v -> v.setMarked(true));
+                        selVideos.forEach(v -> v.setMarked(true));
                         btnMark.setText(lblUnmark);
                     } else {
-                        model.getSelectedVideos().forEach(v -> v.setMarked(false));
+                        selVideos.forEach(v -> v.setMarked(false));
                         btnMark.setText(lblMark);
                     }
-                    sortFilter.triggerSort();
+//                    sortFilter.triggerSort();
                 }
             }
         });

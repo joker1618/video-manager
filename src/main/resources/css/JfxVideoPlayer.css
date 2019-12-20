@@ -77,7 +77,7 @@
 
 /* sliders style */
 .mediaBarPane .slider .thumb {
-    -fx-padding: 7 2 7 2;
+    -fx-padding: 7 3 7 3;
     -fx-background-color: -text-color;
 }
 
