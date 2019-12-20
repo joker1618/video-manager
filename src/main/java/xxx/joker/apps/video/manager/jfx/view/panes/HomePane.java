@@ -263,12 +263,9 @@ public class HomePane extends BorderPane implements Closeable {
 
         Button btnManageVideos = new Button("MANAGE");
         btnManageVideos.setOnAction(e -> PanesSelector.getInstance().displayManagementPane());
-        Button btnCutVideo = new Button("CUT VIDEO");
-        btnCutVideo.setOnAction(e -> PanesSelector.getInstance().displayCutVideoPane(model.getSelectedVideos().get(0)));
-        btnCutVideo.disableProperty().bind(Bindings.createBooleanBinding(() -> model.getSelectedVideos().size() != 1, model.getSelectedVideos()));
         Button btnAddVideos = new Button("ADD VIDEOS");
         btnAddVideos.setOnAction(this::actionAddVideos);
-        bpTop.setLeft(createHBox("spacing10", btnManageVideos, btnCutVideo, btnAddVideos));
+        bpTop.setLeft(createHBox("spacing10", btnManageVideos, btnAddVideos));
 
         String lblHold = "HOLD";
         String lblUnhold = "UNHOLD";
@@ -447,6 +444,7 @@ public class HomePane extends BorderPane implements Closeable {
                 children.remove(scrollPaneSnaps);
             }
         });
+        showSnapshots.set(true);
 
         model.getSelectedVideos().addListener((ListChangeListener<Video>)c -> updateRightPane());
 

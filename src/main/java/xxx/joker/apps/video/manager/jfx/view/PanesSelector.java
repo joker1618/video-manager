@@ -62,13 +62,6 @@ public class PanesSelector {
 		LOG.debug("Set scene to MANAGEMENT");
 	}
 
-	public void displayCutVideoPane(Video video) {
-		CutVideoPane pane = new CutVideoPane(video);
-		scene.setRoot(pane);
-		actualPane.set(pane);
-		LOG.debug("Set scene to CUT VIDEO");
-	}
-
 	public void displayMultiVideoPane(VideoStagesPosition stagesPosition, List<FxVideo> fxVideos) {
 		MultiDisplayPane pane = new MultiDisplayPane(stagesPosition, fxVideos);
 		scene.setRoot(pane);
