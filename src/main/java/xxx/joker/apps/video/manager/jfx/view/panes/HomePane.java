@@ -47,6 +47,7 @@ import xxx.joker.libs.core.util.JkStruct;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import static xxx.joker.libs.core.javafx.JfxControls.*;
@@ -470,21 +471,25 @@ public class HomePane extends BorderPane implements Closeable {
         List<FxSnapshot> snapshots = new ArrayList<>();
 
         final double totWidth = 400d;
-        final int ncols = 3;
+        final int ncolsSingle = 3;
+        final int ncolsMulti = 4;
+        final AtomicInteger ncols = new AtomicInteger();
 
         if(videos.size() == 1) {
             Video video = videos.get(0);
             snapshots.addAll(model.getSnapshots(video));
+            ncols.set(ncolsSingle);
         } else if(videos.size() <= 20){
             videos.forEach(v -> {
-                List<FxSnapshot> stList = model.getSnapshots(v, ncols);
+                ncols.set(videos.size() <= 5 ? ncolsSingle : ncolsMulti);
+                List<FxSnapshot> stList = model.getSnapshots(v, ncols.get());
                 snapshots.addAll(stList);
-                int rem = ncols - stList.size();
+                int rem = ncols.get() - stList.size();
                 for(int i = 0; i < rem; i++)    snapshots.add(null);
             });
         }
 
-        double ivWidth = totWidth / ncols;
+        double ivWidth = totWidth / ncols.get();
         double ivHeight = ivWidth / 1.33;
         List<HBox> ivBoxList = map(snapshots, sn -> {
             if(sn == null)  return null;
@@ -500,7 +505,7 @@ public class HomePane extends BorderPane implements Closeable {
 
         GridPaneBuilder gpBuilder = new GridPaneBuilder();
         for(int row = 0, index = 0; index < ivBoxList.size(); row++) {
-            for(int col = 0; col < ncols && index < ivBoxList.size(); col++, index++) {
+            for(int col = 0; col < ncols.get() && index < ivBoxList.size(); col++, index++) {
                 if(ivBoxList.get(index) != null) {
                     gpBuilder.add(row, col, ivBoxList.get(index));
                 }
