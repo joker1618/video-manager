@@ -339,7 +339,8 @@ public class ManagementPane extends BorderPane implements Closeable {
             for(int i = 0; i < spList.size(); i += 2) {
                 double startMs = spList.get(i).toMillis();
                 double endMs = spList.get(i + 1).toMillis();
-                Path cut = FFMPEGAdapter.cutVideo(sourcePath, startMs, endMs - startMs);
+                double length = Math.max(2000d, endMs - startMs);
+                Path cut = FFMPEGAdapter.cutVideo(sourcePath, startMs, length);
                 cutList.add(cut);
             }
             Path finalPath;
@@ -358,7 +359,7 @@ public class ManagementPane extends BorderPane implements Closeable {
         } else if(cutType == CutType.POINTS ){
             List<Path> finalPaths = new ArrayList<>();
             for(int i = 0; i < spList.size(); i++) {
-                long msDur = (long) spList.get(i).toMillis();
+                long msDur = Math.max(2000L, (long) spList.get(i).toMillis());
                 if(i == 0 && msDur > 0) {
                     finalPaths.add(FFMPEGAdapter.cutVideo(sourcePath, 0, msDur));
                 }
