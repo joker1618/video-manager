@@ -32,13 +32,10 @@ public class TempTest {
     @Test
     public void strRegex() throws IOException {
         String[] strings = {
-                "African Girl Gives Amazing Blowjob Free Porn a",
-                "Amateur Bigg Tits Black Teen Bj Free Porn",
-                "Amateur Bigg Tits Black Teen Bj Free Porn aa",
-                "Amateur Bigg Tits Black Teen Bj Free Porn A"
+                "Ciao da fede e da giorgio by paolo inzuppato"
         };
-        String pattern = "(?i)Free Porn( a)?$";
-        String replacement = "";
+        String pattern = "(?s)da(.*?)pao";
+        String replacement = "_";
 
         JkViewBuilder vb = new JkViewBuilder();
         for (String str : strings) {

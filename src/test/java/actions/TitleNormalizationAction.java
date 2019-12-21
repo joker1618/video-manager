@@ -24,7 +24,13 @@ public class TitleNormalizationAction {
         AdjustVideoTitleAction.adjustTitles(repo.getVideos());
 
         List<Video> diffs = filterSort(map.keySet(), v -> !v.getTitle().equals(map.get(v)), Video.titleComparator());
-        List<String> lines = map(diffs, v -> strf("{}|{}", map.get(v), v.getTitle()));
+        List<Video> equals = filterSort(map.keySet(), v -> !diffs.contains(v), Video.titleComparator());
+
+        List<String> lines1 = map(equals, v -> strf("{}|eq|{}", map.get(v), v.getTitle()));
+        display(JkOutput.columnsView(lines1));
+        display("{} titles unchanged\n\n", equals.size());
+
+        List<String> lines = map(diffs, v -> strf("{}|diff|{}", map.get(v), v.getTitle()));
         display(JkOutput.columnsView(lines));
         display("{} titles modified", diffs.size());
 

@@ -17,7 +17,7 @@ public class Config {
         String baseFolderName = !JkRuntime.isRunFromJar(Config.class) ? "vm-bkp" : "video-manager";
         BASE_FOLDER = JkEnvironment.getAppsFolder().resolve(baseFolderName);
     }
-
+//
 //    public static final Path BASE_FOLDER = JkEnvironment.getAppsFolder().resolve("vm-bkp");
 //    public static final Path BASE_FOLDER = JkEnvironment.getAppsFolder().resolve("video-manager");
 
