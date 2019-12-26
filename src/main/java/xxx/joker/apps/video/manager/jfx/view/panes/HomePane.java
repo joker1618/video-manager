@@ -14,8 +14,10 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +34,7 @@ import xxx.joker.apps.video.manager.jfx.view.provider.IconProvider;
 import xxx.joker.apps.video.manager.jfx.view.table.JfxTable;
 import xxx.joker.apps.video.manager.jfx.view.table.JfxTableCol;
 import xxx.joker.apps.video.manager.jfx.view.videoplayer.JfxVideoBuilder;
+import xxx.joker.apps.video.manager.jfx.view.videoplayer.JfxVideoPlayer;
 import xxx.joker.apps.video.manager.jfx.view.videoplayer.JfxVideoStage;
 import xxx.joker.apps.video.manager.jfx.view.provider.StagePosProvider;
 import xxx.joker.apps.video.manager.jfx.view.provider.VideoStagesPosition;
@@ -42,16 +45,20 @@ import xxx.joker.libs.core.format.JkOutput;
 import xxx.joker.libs.core.javafx.JfxUtil;
 import xxx.joker.libs.core.lambda.JkStreams;
 import xxx.joker.libs.core.runtime.JkEnvironment;
+import xxx.joker.libs.core.runtime.JkReflection;
 import xxx.joker.libs.core.util.JkStruct;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import static xxx.joker.libs.core.javafx.JfxControls.*;
+import static xxx.joker.libs.core.javafx.JfxUtil.getWindow;
 import static xxx.joker.libs.core.lambda.JkStreams.*;
+import static xxx.joker.libs.core.util.JkConvert.toLong;
 import static xxx.joker.libs.core.util.JkStrings.strf;
 
 public class HomePane extends BorderPane implements Closeable {
@@ -266,7 +273,11 @@ public class HomePane extends BorderPane implements Closeable {
         btnManageVideos.setOnAction(e -> PanesSelector.getInstance().displayManagementPane());
         Button btnAddVideos = new Button("ADD VIDEOS");
         btnAddVideos.setOnAction(this::actionAddVideos);
-        bpTop.setLeft(createHBox("spacing10", btnManageVideos, btnAddVideos));
+        Button btnExportVideos = new Button("EXPORT");
+        btnExportVideos.setOnAction(this::actionExportVideos);
+        Button btnChangeCutVideos = new Button("ADD CUT");
+        btnChangeCutVideos.setOnAction(this::actionChangeCutVideos);
+        bpTop.setLeft(createHBox("spacing10", btnManageVideos, btnAddVideos, btnExportVideos, btnChangeCutVideos));
 
         String lblHold = "HOLD";
         String lblUnhold = "UNHOLD";
@@ -340,6 +351,67 @@ public class HomePane extends BorderPane implements Closeable {
 
         return vbox;
     }
+
+    private void actionChangeCutVideos(ActionEvent actionEvent) {
+        FileChooser fc = new FileChooser();
+        fc.setInitialDirectory(JkEnvironment.getDesktopFolder().toFile());
+        List<File> files = fc.showOpenMultipleDialog(getWindow(actionEvent));
+        if(files != null && !files.isEmpty()) {
+            Alert dlgWait = new Alert(Alert.AlertType.INFORMATION);
+            dlgWait.getDialogPane().getButtonTypes().clear();
+            dlgWait.setHeaderText(strf("Adding {} cut pieces", files.size()));
+            dlgWait.show();
+
+            Map<Long, Video> byIdMap = toMapSingle(model.getVideos(), Video::getEntityId);
+            Category cutOrig = model.getCategoryOrAdd("cutOrig");
+            Category cutPiece = model.getCategoryOrAdd("cutPiece");
+            Category cutAlone = model.getCategoryOrAdd("cutAlone");
+            int numAdd = 0;
+            for (File file : files) {
+                String strId = StringUtils.substringBetween(file.getName(), "-eid_", ".");
+                if(strId != null) {
+                    FxVideo fxVideo = model.addVideoFile(file.toPath(), false);
+                    Video vadd = fxVideo.getVideo();
+                    Video origVideo = byIdMap.get(toLong(strId));
+                    if(origVideo == null) {
+                        vadd.setTitle(model.computeSafeTitle(file.getName().replaceAll("-eid_.*", "")));
+                        vadd.getCategories().add(cutAlone);
+                    } else {
+                        origVideo.getCategories().add(cutOrig);
+                        vadd.setTitle(model.computeSafeTitle(origVideo.getTitle()));
+                        vadd.getCategories().addAll(origVideo.getCategories());
+                        vadd.setMarked(origVideo.isMarked());
+                    }
+                    vadd.getCategories().add(cutPiece);
+                    numAdd++;
+                }
+            }
+
+            dlgWait.getDialogPane().getButtonTypes().add(ButtonType.OK);
+            dlgWait.close();
+            JfxUtil.alertInfo("Added {}/{} cut pieces", numAdd, files.size());
+            tableVideos.refresh();
+        }
+    }
+
+    private void actionExportVideos(ActionEvent actionEvent) {
+        DirectoryChooser dc = new DirectoryChooser();
+        dc.setInitialDirectory(JkEnvironment.getDesktopFolder().toFile());
+        File outFolder = dc.showDialog(getWindow(actionEvent));
+        if(outFolder != null) {
+            boolean insId = JfxUtil.alertConfirm("Insert ID in filename?");
+            Alert dlgWait = new Alert(Alert.AlertType.INFORMATION);
+            dlgWait.getDialogPane().getButtonTypes().clear();
+            int numsel = model.getSelectedVideos().size();
+            dlgWait.setHeaderText(strf("Exporting {} videos to {}", numsel, outFolder));
+            dlgWait.show();
+            model.exportVideos(outFolder.toPath(), insId, model.getSelectedVideos());
+            dlgWait.getDialogPane().getButtonTypes().add(ButtonType.OK);
+            dlgWait.close();
+            JfxUtil.alertInfo("Exported {} videos to {}", numsel, outFolder);
+        }
+    }
+
     private void manageDelete(List<Video> videos) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setHeaderText(strf("Delete {} videos?", videos.size()));
@@ -600,7 +672,7 @@ public class HomePane extends BorderPane implements Closeable {
         fc.setInitialDirectory(initial);
         fc.setTitle("Select videos");
         fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("MP4", "*.mp4"));
-        List<File> files = fc.showOpenMultipleDialog(JfxUtil.getWindow(event));
+        List<File> files = fc.showOpenMultipleDialog(getWindow(event));
         if(files != null && !files.isEmpty()) {
             List<Path> paths = map(files, File::toPath);
             lastAddFolder = JkFiles.getParent(paths.get(0)).toFile();
@@ -648,4 +720,5 @@ public class HomePane extends BorderPane implements Closeable {
         new ArrayList<>(showedVideoStages).forEach(JfxVideoStage::close);
         showedVideoStages.clear();
     }
+
 }

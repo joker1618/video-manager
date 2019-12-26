@@ -207,6 +207,17 @@ public class FxModelImpl implements FxModel {
     }
 
     @Override
+    public void exportVideos(Path outFolder, boolean insId, Collection<Video> videos) {
+        for (Video video : videos) {
+            Path sourcePath = video.getVideoResource().getPath();
+            String outName = video.getTitle();
+            if(insId)   outName += "-eid_" + video.getEntityId();
+            outName += "." + JkFiles.getExtension(sourcePath);
+            JkFiles.copy(sourcePath, outFolder.resolve(outName));
+        }
+    }
+
+    @Override
     public void persistData() {
         repo.commit();
     }

@@ -33,6 +33,8 @@ public interface FxModel {
     void removeSnapshot(Video video, JkDuration snapTime);
     void removeSnapshots(Video video);
 
+    void exportVideos(Path outFolder, boolean insId, Collection<Video> videos);
+
     void persistData();
 
 }
