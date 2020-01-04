@@ -33,7 +33,7 @@ import xxx.joker.apps.video.manager.jfx.view.videoplayer.JfxVideoPlayer;
 import xxx.joker.libs.core.cache.JkCache;
 import xxx.joker.libs.core.datetime.JkDuration;
 import xxx.joker.libs.core.file.JkFiles;
-import xxx.joker.libs.core.javafx.JfxUtil;
+import xxx.joker.libs.javafx.JfxUtil;
 import xxx.joker.libs.core.lambda.JkStreams;
 import xxx.joker.libs.core.util.JkConvert;
 
