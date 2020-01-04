@@ -31,7 +31,7 @@ import xxx.joker.apps.video.manager.jfx.view.managers.SnapshotManager;
 import xxx.joker.apps.video.manager.jfx.view.provider.IconProvider;
 import xxx.joker.libs.core.datetime.JkDuration;
 import xxx.joker.libs.core.file.JkFiles;
-import xxx.joker.libs.core.javafx.JfxUtil;
+import xxx.joker.libs.javafx.util.JfxUtil;
 
 import java.nio.file.Path;
 import java.time.temporal.ChronoUnit;
@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import static xxx.joker.libs.core.javafx.JfxControls.createHBox;
+import static xxx.joker.libs.javafx.util.JfxControls.createHBox;
 
 public class JfxVideoPlayer extends BorderPane {
 

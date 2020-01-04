@@ -22,7 +22,7 @@ import xxx.joker.libs.core.lambda.JkStreams;
 
 import java.util.List;
 
-import static xxx.joker.libs.core.javafx.JfxControls.createVBox;
+import static xxx.joker.libs.javafx.util.JfxControls.createVBox;
 
 public class MultiDisplayPane extends BorderPane implements Closeable {
 

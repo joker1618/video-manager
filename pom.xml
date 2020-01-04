@@ -26,6 +26,11 @@
             <artifactId>java-repo</artifactId>
             <version>${java.libs.version}</version>
         </dependency>
+        <dependency>
+            <groupId>xxx.joker.libs</groupId>
+            <artifactId>java-fx</artifactId>
+            <version>${java.libs.version}</version>
+        </dependency>
 <!--        <dependency>-->
 <!--            <groupId>org.apache.commons</groupId>-->
 <!--            <artifactId>commons-lang3</artifactId>-->

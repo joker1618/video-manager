@@ -38,7 +38,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static xxx.joker.libs.core.javafx.JfxControls.*;
+import static xxx.joker.libs.javafx.util.JfxControls.*;
 import static xxx.joker.libs.core.util.JkStrings.strf;
 
 public class CutVideoPane extends BorderPane implements Closeable {
