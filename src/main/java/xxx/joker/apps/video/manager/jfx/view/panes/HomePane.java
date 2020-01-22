@@ -368,13 +368,13 @@ public class HomePane extends BorderPane implements Closeable {
             Category cutAlone = model.getCategoryOrAdd("_cutAlone");
             int numAdd = 0;
             for (File file : files) {
-                String strId = StringUtils.substringBetween(file.getName(), "-eid_", ".");
+                String strId = StringUtils.substringBetween(file.getName(), "-eid", "_");
                 if(strId != null) {
                     FxVideo fxVideo = model.addVideoFile(file.toPath(), false);
                     Video vadd = fxVideo.getVideo();
                     Video origVideo = byIdMap.get(toLong(strId));
                     if(origVideo == null) {
-                        vadd.setTitle(model.computeSafeTitle(file.getName().replaceAll("-eid_.*", "")));
+                        vadd.setTitle(model.computeSafeTitle(file.getName().replaceAll("-eid.*", "")));
                         vadd.getCategories().add(cutAlone);
                     } else {
                         origVideo.getCategories().add(cutOrig);

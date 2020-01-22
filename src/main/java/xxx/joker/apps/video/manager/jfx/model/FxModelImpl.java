@@ -211,7 +211,7 @@ public class FxModelImpl implements FxModel {
         for (Video video : videos) {
             Path sourcePath = video.getVideoResource().getPath();
             String outName = video.getTitle();
-            if(insId)   outName += "-eid_" + video.getEntityId();
+            if(insId)   outName += strf("-eid{}_", video.getEntityId());
             outName += "." + JkFiles.getExtension(sourcePath);
             JkFiles.copy(sourcePath, outFolder.resolve(outName));
         }
