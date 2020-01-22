@@ -377,10 +377,10 @@ public class HomePane extends BorderPane implements Closeable {
                         vadd.setTitle(model.computeSafeTitle(file.getName().replaceAll("-eid.*", "")));
                         vadd.getCategories().add(cutAlone);
                     } else {
-                        origVideo.getCategories().add(cutOrig);
                         vadd.setTitle(model.computeSafeTitle(origVideo.getTitle()));
                         vadd.getCategories().addAll(origVideo.getCategories());
                         vadd.setMarked(origVideo.isMarked());
+                        origVideo.getCategories().add(cutOrig);
                     }
                     vadd.getCategories().add(cutPart);
                     numAdd++;
