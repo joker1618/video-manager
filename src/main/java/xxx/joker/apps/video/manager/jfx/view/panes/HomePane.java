@@ -464,7 +464,9 @@ public class HomePane extends BorderPane implements Closeable {
         Button btnDisplay = new Button("DISPLAY");
         btnDisplay.setOnAction(e -> {
             List<FxVideo> fxVideos = model.toFxVideos(model.getSelectedVideos());
-            PanesSelector.getInstance().displayMultiVideoPane(combo.getValue(), fxVideos);
+            if(!fxVideos.isEmpty()) {
+                PanesSelector.getInstance().displayMultiVideoPane(combo.getValue(), fxVideos);
+            }
         });
         HBox hboxDisplay = createHBox("centered spacing10", combo, btnDisplay);
 
