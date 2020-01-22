@@ -313,14 +313,14 @@ public class ManagementPane extends BorderPane implements Closeable {
                     List<Video> cutPieces = cutVideo(video, pair.left, pair.right);
                     if(!cutPieces.isEmpty()) {
                         cutted.getAndIncrement();
-                        video.getCategories().add(model.getCategoryOrAdd("cutted"));
+                        video.getCategories().add(model.getCategoryOrAdd("__origCut"));
                     }
                 }
             });
 
             dlgWait.getDialogPane().getButtonTypes().add(ButtonType.OK);
             dlgWait.close();
-            JfxUtil.alertInfo("Cut {}/{} videos", cutted.get(), toCutVideos.size());
+            JfxUtil.alertInfo("Cut done on {}/{} videos", cutted.get(), toCutVideos.size());
             map.clear();
         }
     }
@@ -331,7 +331,7 @@ public class ManagementPane extends BorderPane implements Closeable {
         Path sourcePath = JkFiles.copyInFolder(fxVideo.getPath(), Config.FOLDER_TEMP_CUT);
 
         Set<Category> cats = new TreeSet<>(video.getCategories());
-        cats.add(model.getCategoryOrAdd("cutPiece"));
+        cats.add(model.getCategoryOrAdd("__partCut"));
 
         List<Duration> spList = JkConvert.toList(seekPoints);
         if(cutType == CutType.START_END) {

@@ -363,9 +363,9 @@ public class HomePane extends BorderPane implements Closeable {
             dlgWait.show();
 
             Map<Long, Video> byIdMap = toMapSingle(model.getVideos(), Video::getEntityId);
-            Category cutOrig = model.getCategoryOrAdd("cutOrig");
-            Category cutPiece = model.getCategoryOrAdd("cutPiece");
-            Category cutAlone = model.getCategoryOrAdd("cutAlone");
+            Category cutOrig = model.getCategoryOrAdd("_cutOrig");
+            Category cutPart = model.getCategoryOrAdd("_cutPart");
+            Category cutAlone = model.getCategoryOrAdd("_cutAlone");
             int numAdd = 0;
             for (File file : files) {
                 String strId = StringUtils.substringBetween(file.getName(), "-eid_", ".");
@@ -382,7 +382,7 @@ public class HomePane extends BorderPane implements Closeable {
                         vadd.getCategories().addAll(origVideo.getCategories());
                         vadd.setMarked(origVideo.isMarked());
                     }
-                    vadd.getCategories().add(cutPiece);
+                    vadd.getCategories().add(cutPart);
                     numAdd++;
                 }
             }
